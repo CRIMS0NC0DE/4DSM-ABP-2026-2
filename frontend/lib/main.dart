@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
-import 'views/user/login_view.dart';
+import 'views/user/menu_view.dart';
+import 'views/admin/admin_menu_view.dart';
 
 void main() {
   runApp(const PasseApp());
@@ -17,11 +18,15 @@ class PasseApp extends StatelessWidget {
       title: 'Passe',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      // Textos dos componentes do Flutter (datas, "Voltar", copiar/colar) em português.
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: const LoginView(),
+      // CORREÇÃO AQUI: Lista explícita dos delegados de localização
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: AdminMenuView(),
     );
   }
 }
