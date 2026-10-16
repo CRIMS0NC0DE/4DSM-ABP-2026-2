@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
-import 'views/user/menu_view.dart';
-import 'views/admin/admin_menu_view.dart';
+import 'views/user/login_view.dart';
 
 void main() {
   runApp(const PasseApp());
@@ -26,7 +25,7 @@ class PasseApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: AdminMenuView(),
+      home: LoginView(),
     );
   }
 }

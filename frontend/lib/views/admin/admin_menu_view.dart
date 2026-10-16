@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../controllers/admin_menu_controller.dart';
 import '../../models/opcao_menu.dart';
+import '../user/login_view.dart';
 import '../widgets/menu_grade.dart';
 
 class AdminMenuView extends StatelessWidget {
@@ -20,6 +21,15 @@ class AdminMenuView extends StatelessWidget {
       );
   }
 
+  void _sair(BuildContext context) {
+    controller.sair();
+    // Volta para o login e limpa o histórico, para o Voltar não reabrir o menu.
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => LoginView()),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +39,7 @@ class AdminMenuView extends StatelessWidget {
           iconePerfil: Icons.admin_panel_settings_outlined,
           secoes: controller.secoes,
           onSelecionar: (opcao) => _abrir(context, opcao),
-          onSair: controller.sair,
+          onSair: () => _sair(context),
         ),
       ),
     );
