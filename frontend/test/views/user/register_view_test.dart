@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/register_controller.dart';
+import 'package:public/services/auth_service.dart';
+import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/register_view.dart';
 
@@ -9,13 +11,14 @@ class _ControllerEspiao extends RegisterController {
   Map<String, String>? dados;
 
   @override
-  void registrar({
+  String? registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
   }) {
     dados = {'nome': nome, 'cpf': cpf, 'email': email, 'senha': senha};
+    return null;
   }
 }
 
@@ -26,11 +29,12 @@ Finder _campo(String rotulo) => find.descendant(
 
 Future<void> _preencher(
   WidgetTester tester, {
+  String email = 'maria@email.com',
   String confirmacao = 'segredo123',
 }) async {
   await tester.enterText(_campo('Nome completo'), 'Maria Souza');
   await tester.enterText(_campo('CPF'), '123.456.789-09');
-  await tester.enterText(_campo('E-mail'), 'maria@email.com');
+  await tester.enterText(_campo('E-mail'), email);
   await tester.enterText(_campo('Senha'), 'segredo123');
   await tester.enterText(_campo('Confirmar senha'), confirmacao);
 }
@@ -126,6 +130,41 @@ void main() {
       expect(find.byType(RegisterView), findsNothing);
       expect(find.byType(LoginView), findsOneWidget);
       expect(find.text('maria@email.com'), findsOneWidget);
+
+      // A conta nova já entra, e quem se cadastra pelo app é morador.
+      await tester.enterText(_campo('Senha'), 'segredo123');
+      await tester.tap(
+        find.ancestor(
+          of: find.text('Entrar'),
+          matching: find.bySubtype<FilledButton>(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ResidentMenuView), findsOneWidget);
     },
   );
+
+  testWidgets('E-mail que já tem conta avisa e não cria outra', (
+    WidgetTester tester,
+  ) async {
+    final auth = AuthService();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RegisterView(controller: RegisterController(auth: auth)),
+      ),
+    );
+
+    await _preencher(tester, email: 'morador@passe.com');
+    await _tocarRegistrar(tester);
+
+    expect(
+      find.text('Já existe uma conta com esse e-mail ou CPF.'),
+      findsOneWidget,
+    );
+    expect(find.text('Conta criada. Agora é só entrar.'), findsNothing);
+    // A senha da conta original continua valendo.
+    expect(auth.entrar('morador@passe.com', 'segredo123'), isNull);
+    expect(auth.entrar('morador@passe.com', AuthService.senhaDemo), isNotNull);
+  });
 }

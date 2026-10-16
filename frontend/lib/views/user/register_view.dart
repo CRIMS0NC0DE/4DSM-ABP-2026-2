@@ -43,19 +43,25 @@ class _RegisterViewState extends State<RegisterView> {
       return;
     }
     final email = _email.text.trim();
-    controller.registrar(
+    final erro = controller.registrar(
       nome: _nome.text.trim(),
       cpf: _cpf.text.trim(),
       email: email,
       senha: _senha.text,
     );
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Conta criada. Agora é só entrar.')),
-      );
+    if (erro != null) {
+      _avisar(erro);
+      return;
+    }
+    _avisar('Conta criada. Agora é só entrar.');
     // Volta para o login com o e-mail já preenchido.
     Navigator.of(context).maybePop(email);
+  }
+
+  void _avisar(String mensagem) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   @override

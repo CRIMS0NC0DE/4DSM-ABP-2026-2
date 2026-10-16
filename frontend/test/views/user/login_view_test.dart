@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/login_controller.dart';
+import 'package:public/models/usuario.dart';
+import 'package:public/services/auth_service.dart';
+import 'package:public/views/access_controller/access_controller_menu_view.dart';
 import 'package:public/views/admin/admin_menu_view.dart';
+import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/register_view.dart';
 
@@ -11,11 +15,19 @@ class _ControllerEspiao extends LoginController {
   String? senha;
 
   @override
-  void entrar(String usuario, String senha) {
+  Usuario? entrar(String usuario, String senha) {
     this.usuario = usuario;
     this.senha = senha;
+    return super.entrar(usuario, senha);
   }
 }
+
+/// Menu que cada perfil deve abrir depois do login.
+const _menuDoPerfil = {
+  Perfil.admin: AdminMenuView,
+  Perfil.controladorAcesso: AccessControllerMenuView,
+  Perfil.morador: ResidentMenuView,
+};
 
 /// O texto "Entrar" aparece no título e no botão; aqui só o botão.
 final _botaoEntrar = find.ancestor(
@@ -27,6 +39,17 @@ Finder _campo(String rotulo) => find.descendant(
   of: find.ancestor(of: find.text(rotulo), matching: find.byType(Column)).first,
   matching: find.byType(TextField),
 );
+
+Future<void> _entrarCom(
+  WidgetTester tester,
+  String usuario, [
+  String senha = AuthService.senhaDemo,
+]) async {
+  await tester.enterText(_campo('E-mail ou CPF'), usuario);
+  await tester.enterText(_campo('Senha'), senha);
+  await tester.tap(_botaoEntrar);
+  await tester.pumpAndSettle();
+}
 
 void main() {
   testWidgets('Mostra os campos e os botões do login', (
@@ -58,7 +81,7 @@ void main() {
     expect(controller.usuario, isNull);
   });
 
-  testWidgets('Entrar com os campos preenchidos abre o menu', (
+  testWidgets('Manda o e-mail sem espaços e a senha para o controller', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -66,15 +89,56 @@ void main() {
       MaterialApp(home: LoginView(controller: controller)),
     );
 
-    await tester.enterText(_campo('E-mail ou CPF'), ' maria@email.com ');
-    await tester.enterText(_campo('Senha'), 'segredo123');
-    await tester.tap(_botaoEntrar);
-    await tester.pumpAndSettle();
+    await _entrarCom(tester, ' admin@passe.com ');
 
-    expect(controller.usuario, 'maria@email.com');
-    expect(controller.senha, 'segredo123');
-    expect(find.byType(AdminMenuView), findsOneWidget);
-    expect(find.byType(LoginView), findsNothing);
+    expect(controller.usuario, 'admin@passe.com');
+    expect(controller.senha, AuthService.senhaDemo);
+  });
+
+  for (final conta in AuthService.contasDemo) {
+    testWidgets('A conta ${conta.email} abre o menu do perfil dela', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(MaterialApp(home: LoginView()));
+
+      await _entrarCom(tester, conta.email);
+
+      expect(find.byType(_menuDoPerfil[conta.perfil]!), findsOneWidget);
+      expect(find.byType(LoginView), findsNothing);
+    });
+  }
+
+  testWidgets('Também entra pelo CPF, com ou sem pontuação', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(MaterialApp(home: LoginView()));
+
+    await _entrarCom(tester, '222.222.222-22');
+
+    expect(find.byType(AccessControllerMenuView), findsOneWidget);
+  });
+
+  testWidgets('Senha errada avisa e continua no login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(MaterialApp(home: LoginView()));
+
+    await _entrarCom(tester, 'admin@passe.com', 'senha-errada');
+
+    expect(find.text('E-mail, CPF ou senha incorretos.'), findsOneWidget);
+    expect(find.byType(LoginView), findsOneWidget);
+    expect(find.byType(AdminMenuView), findsNothing);
+  });
+
+  testWidgets('Conta que não existe avisa e continua no login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(MaterialApp(home: LoginView()));
+
+    await _entrarCom(tester, 'ninguem@passe.com');
+
+    expect(find.text('E-mail, CPF ou senha incorretos.'), findsOneWidget);
+    expect(find.byType(LoginView), findsOneWidget);
   });
 
   testWidgets('Mostrar e Ocultar trocam a visibilidade da senha', (
@@ -110,10 +174,7 @@ void main() {
   ) async {
     await tester.pumpWidget(MaterialApp(home: LoginView()));
 
-    await tester.enterText(_campo('E-mail ou CPF'), 'maria@email.com');
-    await tester.enterText(_campo('Senha'), 'segredo123');
-    await tester.tap(_botaoEntrar);
-    await tester.pumpAndSettle();
+    await _entrarCom(tester, 'admin@passe.com');
 
     await tester.scrollUntilVisible(find.text('Sair da conta'), 200);
     await tester.ensureVisible(find.text('Sair da conta'));

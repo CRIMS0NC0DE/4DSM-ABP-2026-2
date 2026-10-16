@@ -1,8 +1,16 @@
 import 'package:flutter/foundation.dart';
 
+import '../services/auth_service.dart';
+
 /// Tela de primeiro acesso (criar conta).
-/// Protótipo: ainda não chama a API, só valida os campos e registra o pedido.
+/// Protótipo: guarda a conta no AuthService, que ainda não chama a API.
+/// Toda conta criada aqui é de morador.
 class RegisterController {
+  RegisterController({AuthService? auth})
+    : _auth = auth ?? AuthService.instancia;
+
+  final AuthService _auth;
+
   static const tamanhoMinimoSenha = 8;
   static final _email = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
@@ -41,13 +49,21 @@ class RegisterController {
     return null;
   }
 
-  void registrar({
+  /// Devolve a mensagem de erro, ou null se a conta foi criada.
+  String? registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
   }) {
-    // Lógica para criar a conta na API
     debugPrint('Registrando $nome ($email)...');
+    final usuario = _auth.registrar(
+      nome: nome,
+      cpf: cpf,
+      email: email,
+      senha: senha,
+    );
+    if (usuario == null) return 'Já existe uma conta com esse e-mail ou CPF.';
+    return null;
   }
 }

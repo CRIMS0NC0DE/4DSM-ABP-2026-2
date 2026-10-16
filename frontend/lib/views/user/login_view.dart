@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../controllers/login_controller.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/usuario.dart';
+import '../access_controller/access_controller_menu_view.dart';
 import '../admin/admin_menu_view.dart';
+import '../resident/resident_menu_view.dart';
 import '../widgets/campo_texto.dart';
 import 'register_view.dart';
 
@@ -38,10 +41,21 @@ class _LoginViewState extends State<LoginView> {
       setState(() => _validarAoDigitar = true);
       return;
     }
-    controller.entrar(_usuario.text.trim(), _senha.text);
+    final usuario = controller.entrar(_usuario.text.trim(), _senha.text);
+    if (usuario == null) {
+      _avisar('E-mail, CPF ou senha incorretos.');
+      return;
+    }
+    // Cada perfil abre o seu menu.
+    final Widget menu = switch (usuario.perfil) {
+      Perfil.admin => AdminMenuView(),
+      Perfil.controladorAcesso => AccessControllerMenuView(),
+      Perfil.morador => ResidentMenuView(),
+    };
     // Troca o login pelo menu, para o Voltar do celular não voltar ao login.
-    Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (_) => AdminMenuView()));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => menu),
+    );
   }
 
   Future<void> _registrar() async {
