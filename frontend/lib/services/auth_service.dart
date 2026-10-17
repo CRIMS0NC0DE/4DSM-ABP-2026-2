@@ -1,89 +1,55 @@
 import '../models/usuario.dart';
+import 'api_client.dart';
+import 'sessao_service.dart';
 
-typedef _Conta = ({Usuario usuario, String senha});
-
-/// Login e cadastro de contas.
-/// Protótipo: enquanto a API não existe, as contas ficam só na memória
-/// (somem ao fechar o app) e já começam com uma conta de demonstração de
-/// cada perfil, todas com a senha [senhaDemo]:
-///
-/// | Perfil                | E-mail             | CPF            |
-/// |-----------------------|--------------------|----------------|
-/// | Admin                 | admin@passe.com    | 111.111.111-11 |
-/// | Controlador de acesso | portaria@passe.com | 222.222.222-22 |
-/// | Morador               | morador@passe.com  | 333.333.333-33 |
+/// Login, cadastro e saída da conta, pela API (módulo auth do backend).
+/// As contas de demonstração vêm do seed do backend (npm run db:seed),
+/// todas com a senha passe123: admin@, portaria@, morador@ e
+/// visitante@passe.com.
 class AuthService {
-  AuthService()
-    : _contas = [
-        for (final usuario in contasDemo) (usuario: usuario, senha: senhaDemo),
-      ];
+  AuthService({ApiClient? api, SessaoService? sessao})
+    : _api = api ?? ApiClient.instancia,
+      _sessao = sessao ?? SessaoService.instancia;
 
-  /// A mesma para o app inteiro, para o login achar as contas criadas
-  /// no cadastro.
+  /// O mesmo para o app inteiro.
   static final instancia = AuthService();
 
-  static const senhaDemo = 'passe123';
+  final ApiClient _api;
+  final SessaoService _sessao;
 
-  static const contasDemo = [
-    Usuario(
-      nome: 'Carlos Lima',
-      email: 'admin@passe.com',
-      cpf: '11111111111',
-      perfil: Perfil.admin,
-    ),
-    Usuario(
-      nome: 'Paula Rocha',
-      email: 'portaria@passe.com',
-      cpf: '22222222222',
-      perfil: Perfil.controladorAcesso,
-    ),
-    Usuario(
-      nome: 'Maria Souza',
-      email: 'morador@passe.com',
-      cpf: '33333333333',
-      perfil: Perfil.morador,
-    ),
-  ];
+  /// Quem está logado agora, ou null.
+  Usuario? get usuario => _sessao.usuario;
 
-  final List<_Conta> _contas;
-
-  /// Aceita o e-mail ou o CPF (com ou sem pontuação).
-  /// Devolve null se a conta não existir ou a senha estiver errada.
-  Usuario? entrar(String emailOuCpf, String senha) {
-    final conta = _buscar(emailOuCpf);
-    if (conta == null || conta.senha != senha) return null;
-    return conta.usuario;
+  /// RF07 · POST /auth/login. Aceita o e-mail ou o CPF (com ou sem
+  /// pontuação); a API normaliza. Guarda o token para as próximas chamadas.
+  /// Lança [ApiException] com a mensagem da API (ex.: senha errada,
+  /// cadastro desativado) ou de falta de conexão.
+  Future<Usuario> entrar(String emailOuCpf, String senha) async {
+    final resposta = await _api.post('/auth/login', {
+      'login': emailOuCpf,
+      'senha': senha,
+    });
+    final usuario = Usuario.fromJson(
+      resposta['usuario'] as Map<String, dynamic>,
+    );
+    await _sessao.iniciar(resposta['token'] as String, usuario);
+    return usuario;
   }
 
-  /// O cadastro do app sempre cria morador: admin e controlador de acesso
-  /// só o admin pode criar.
-  /// Devolve null se já existir conta com o mesmo e-mail ou CPF.
-  Usuario? registrar({
+  /// Ainda não existe na API: quem cria conta é a portaria ou o admin
+  /// (POST /users, só para a equipe). Quando o backend ganhar uma rota
+  /// pública de cadastro, a chamada entra aqui. Ver docs/integracao-frontend-backend.md.
+  Future<Usuario> registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
-  }) {
-    if (_buscar(email) != null || _buscar(cpf) != null) return null;
-
-    final usuario = Usuario(
-      nome: nome.trim(),
-      email: email.trim().toLowerCase(),
-      cpf: _numeros(cpf),
-      perfil: Perfil.morador,
+  }) async {
+    throw const ApiException(
+      'O cadastro pelo app ainda não está disponível. '
+      'Peça seu cadastro na portaria.',
     );
-    _contas.add((usuario: usuario, senha: senha));
-    return usuario;
   }
 
-  _Conta? _buscar(String emailOuCpf) {
-    final texto = emailOuCpf.trim().toLowerCase();
-    if (texto.contains('@')) {
-      return _contas.where((conta) => conta.usuario.email == texto).firstOrNull;
-    }
-    final cpf = _numeros(texto);
-    return _contas.where((conta) => conta.usuario.cpf == cpf).firstOrNull;
-  }
-
-  static String _numeros(String texto) => texto.replaceAll(RegExp(r'\D'), '');
+  Future<void> sair() => _sessao.encerrar();
 }

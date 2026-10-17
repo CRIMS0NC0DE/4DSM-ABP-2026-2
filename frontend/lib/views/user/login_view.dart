@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/login_controller.dart';
+import '../../core/routes/rotas.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/usuario.dart';
-import '../access_controller/access_controller_menu_view.dart';
-import '../admin/admin_menu_view.dart';
-import '../resident/resident_menu_view.dart';
+import '../../services/api_client.dart';
 import '../widgets/campo_texto.dart';
 import 'register_view.dart';
 
@@ -27,6 +25,9 @@ class _LoginViewState extends State<LoginView> {
   /// Só valida enquanto digita depois da primeira tentativa de entrar.
   var _validarAoDigitar = false;
 
+  /// Esperando a resposta da API; trava o botão para não enviar duas vezes.
+  var _entrando = false;
+
   LoginController get controller => widget.controller;
 
   @override
@@ -36,26 +37,30 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  void _entrar() {
+  Future<void> _entrar() async {
+    if (_entrando) return;
     if (!_form.currentState!.validate()) {
       setState(() => _validarAoDigitar = true);
       return;
     }
-    final usuario = controller.entrar(_usuario.text.trim(), _senha.text);
-    if (usuario == null) {
-      _avisar('E-mail, CPF ou senha incorretos.');
-      return;
+    setState(() => _entrando = true);
+    try {
+      final usuario = await controller.entrar(
+        _usuario.text.trim(),
+        _senha.text,
+      );
+      if (!mounted) return;
+      // Troca o login pelo menu do perfil, para o Voltar do celular não
+      // voltar ao login.
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => menuDoPerfil(usuario.perfil)),
+      );
+    } on ApiException catch (erro) {
+      // A mensagem vem da API, ex.: "E-mail, CPF ou senha não conferem."
+      if (mounted) _avisar(erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _entrando = false);
     }
-    // Cada perfil abre o seu menu.
-    final Widget menu = switch (usuario.perfil) {
-      Perfil.admin => AdminMenuView(),
-      Perfil.controladorAcesso => AccessControllerMenuView(),
-      Perfil.morador => ResidentMenuView(),
-    };
-    // Troca o login pelo menu, para o Voltar do celular não voltar ao login.
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => menu),
-    );
   }
 
   Future<void> _registrar() async {
@@ -146,9 +151,16 @@ class _LoginViewState extends State<LoginView> {
                           children: [
                             const SizedBox(height: 32),
                             FilledButton.icon(
-                              onPressed: _entrar,
-                              icon: const Icon(Icons.login),
-                              label: const Text('Entrar'),
+                              onPressed: _entrando ? null : _entrar,
+                              icon: _entrando
+                                  ? const SizedBox.square(
+                                      dimension: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.login),
+                              label: Text(_entrando ? 'Entrando…' : 'Entrar'),
                             ),
                             const SizedBox(height: 12),
                             OutlinedButton.icon(

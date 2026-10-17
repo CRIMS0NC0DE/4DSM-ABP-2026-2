@@ -15,7 +15,7 @@ class _ControllerEspiao extends AccessControllerMenuController {
   void abrir(OpcaoMenu opcao) => abertas.add(opcao.titulo);
 
   @override
-  void sair() => saiu = true;
+  Future<void> sair() async => saiu = true;
 }
 
 List<String> _titulos(List<SecaoMenu> secoes) => [

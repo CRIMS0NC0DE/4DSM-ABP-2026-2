@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/register_controller.dart';
-import 'package:public/services/auth_service.dart';
-import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/register_view.dart';
 
@@ -11,12 +9,12 @@ class _ControllerEspiao extends RegisterController {
   Map<String, String>? dados;
 
   @override
-  String? registrar({
+  Future<String?> registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
-  }) {
+  }) async {
     dados = {'nome': nome, 'cpf': cpf, 'email': email, 'senha': senha};
     return null;
   }
@@ -113,8 +111,38 @@ void main() {
     expect(find.text('Conta criada. Agora é só entrar.'), findsOneWidget);
   });
 
+  testWidgets('Depois de registrar volta com o e-mail para o login preencher', (
+    WidgetTester tester,
+  ) async {
+    String? devolvido;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              devolvido = await Navigator.of(context).push<String>(
+                MaterialPageRoute(
+                  builder: (_) => RegisterView(controller: _ControllerEspiao()),
+                ),
+              );
+            },
+            child: const Text('Abrir cadastro'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Abrir cadastro'));
+    await tester.pumpAndSettle();
+
+    await _preencher(tester);
+    await _tocarRegistrar(tester);
+
+    expect(find.byType(RegisterView), findsNothing);
+    expect(devolvido, 'maria@email.com');
+  });
+
   testWidgets(
-    'Depois de registrar volta para o login com o e-mail preenchido',
+    'Sem cadastro público na API, avisa para pedir na portaria e não sai',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: LoginView()));
 
@@ -127,44 +155,15 @@ void main() {
       await _preencher(tester);
       await _tocarRegistrar(tester);
 
-      expect(find.byType(RegisterView), findsNothing);
-      expect(find.byType(LoginView), findsOneWidget);
-      expect(find.text('maria@email.com'), findsOneWidget);
-
-      // A conta nova já entra, e quem se cadastra pelo app é morador.
-      await tester.enterText(_campo('Senha'), 'segredo123');
-      await tester.tap(
-        find.ancestor(
-          of: find.text('Entrar'),
-          matching: find.bySubtype<FilledButton>(),
+      expect(
+        find.text(
+          'O cadastro pelo app ainda não está disponível. '
+          'Peça seu cadastro na portaria.',
         ),
+        findsOneWidget,
       );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ResidentMenuView), findsOneWidget);
+      expect(find.text('Conta criada. Agora é só entrar.'), findsNothing);
+      expect(find.byType(RegisterView), findsOneWidget);
     },
   );
-
-  testWidgets('E-mail que já tem conta avisa e não cria outra', (
-    WidgetTester tester,
-  ) async {
-    final auth = AuthService();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: RegisterView(controller: RegisterController(auth: auth)),
-      ),
-    );
-
-    await _preencher(tester, email: 'morador@passe.com');
-    await _tocarRegistrar(tester);
-
-    expect(
-      find.text('Já existe uma conta com esse e-mail ou CPF.'),
-      findsOneWidget,
-    );
-    expect(find.text('Conta criada. Agora é só entrar.'), findsNothing);
-    // A senha da conta original continua valendo.
-    expect(auth.entrar('morador@passe.com', 'segredo123'), isNull);
-    expect(auth.entrar('morador@passe.com', AuthService.senhaDemo), isNotNull);
-  });
 }

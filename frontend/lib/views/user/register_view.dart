@@ -37,18 +37,19 @@ class _RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
-  void _registrar() {
+  Future<void> _registrar() async {
     if (!_form.currentState!.validate()) {
       setState(() => _validarAoDigitar = true);
       return;
     }
     final email = _email.text.trim();
-    final erro = controller.registrar(
+    final erro = await controller.registrar(
       nome: _nome.text.trim(),
       cpf: _cpf.text.trim(),
       email: email,
       senha: _senha.text,
     );
+    if (!mounted) return;
     if (erro != null) {
       _avisar(erro);
       return;

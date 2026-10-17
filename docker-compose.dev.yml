@@ -1,5 +1,6 @@
 name: 4dsm-abp
 
+# Ambiente de desenvolvimento: docker compose -f docker-compose.dev.yml up
 services:
   database:
     image: postgres:16-alpine
@@ -17,33 +18,38 @@ services:
       timeout: 5s
       retries: 10
 
-  server:
+  backend:
     build:
-      context: ./server
+      context: ./backend
+      target: dev
     environment:
       PORT: 3000
+      NODE_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@database:5432/${POSTGRES_DB:-app}?schema=public
-    command: npm start
+      JWT_SECRET: ${JWT_SECRET:-segredo-jwt-so-para-desenvolvimento}
+      QR_SECRET: ${QR_SECRET:-segredo-qr-so-para-desenvolvimento}
+    # Aplica as migrations, carrega os dados de demonstração e sobe com recarga automática.
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run db:seed && npm run dev"
     ports:
       - "${SERVER_PORT:-3000}:3000"
     volumes:
-      - ./server:/usr/src/app
-      - server_node_modules:/usr/src/app/node_modules
+      - ./backend:/usr/src/app
+      - backend_node_modules:/usr/src/app/node_modules
     depends_on:
       database:
         condition: service_healthy
 
   frontend:
     build:
-      context: ./public
-    command: flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080
+      context: ./frontend
+    command: flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080 --dart-define=API_URL=http://localhost:${SERVER_PORT:-3000}
     ports:
       - "${FRONTEND_PORT:-8080}:8080"
     volumes:
-      - ./public:/app
+      - ./frontend:/app
       - flutter_pub_cache:/root/.pub-cache
 
 volumes:
   postgres_data:
-  server_node_modules:
+  backend_node_modules:
   flutter_pub_cache:
