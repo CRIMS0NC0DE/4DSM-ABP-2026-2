@@ -2,10 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../models/opcao_menu.dart';
+import '../services/auth_service.dart';
 
 /// Menu do administrador.
 /// Protótipo: as opções ainda não abrem telas, só registram o clique.
 class AdminMenuController {
+  AdminMenuController({AuthService? auth})
+    : _auth = auth ?? AuthService.instancia;
+
+  final AuthService _auth;
+
   List<SecaoMenu> get secoes => const [
     SecaoMenu(
       titulo: 'Controle de acesso',
@@ -92,8 +98,9 @@ class AdminMenuController {
     debugPrint('Abrindo ${opcao.titulo}...');
   }
 
-  void sair() {
-    // Lógica para encerrar a sessão
+  /// Esquece o token guardado no login.
+  Future<void> sair() {
     debugPrint('Saindo da conta...');
+    return _auth.sair();
   }
 }

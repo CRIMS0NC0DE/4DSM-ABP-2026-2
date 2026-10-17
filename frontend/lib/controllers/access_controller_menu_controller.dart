@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../models/opcao_menu.dart';
+import '../services/auth_service.dart';
 
 /// Menu do controlador de acesso (portaria).
 /// Cuida do dia a dia: atende quem foi barrado, cadastra visitantes e
@@ -10,6 +11,11 @@ import '../models/opcao_menu.dart';
 /// Configurações ficam só com o admin.
 /// Protótipo: as opções ainda não abrem telas, só registram o clique.
 class AccessControllerMenuController {
+  AccessControllerMenuController({AuthService? auth})
+    : _auth = auth ?? AuthService.instancia;
+
+  final AuthService _auth;
+
   List<SecaoMenu> get secoes => const [
     SecaoMenu(
       titulo: 'Portaria',
@@ -76,8 +82,9 @@ class AccessControllerMenuController {
     debugPrint('Abrindo ${opcao.titulo}...');
   }
 
-  void sair() {
-    // Lógica para encerrar a sessão
+  /// Esquece o token guardado no login.
+  Future<void> sair() {
     debugPrint('Saindo da conta...');
+    return _auth.sair();
   }
 }

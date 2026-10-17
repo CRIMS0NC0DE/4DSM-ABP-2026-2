@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../models/opcao_menu.dart';
+import '../services/auth_service.dart';
 
 /// Menu do morador.
 /// Só mostra o que é dele: as próprias autorizações, acessos e conta,
@@ -9,6 +10,11 @@ import '../models/opcao_menu.dart';
 /// Locais, Usuários...) fica com o admin e o controlador de acesso.
 /// Protótipo: as opções ainda não abrem telas, só registram o clique.
 class ResidentMenuController {
+  ResidentMenuController({AuthService? auth})
+    : _auth = auth ?? AuthService.instancia;
+
+  final AuthService _auth;
+
   List<SecaoMenu> get secoes => const [
     SecaoMenu(
       titulo: 'Acessos',
@@ -70,8 +76,9 @@ class ResidentMenuController {
     debugPrint('Abrindo ${opcao.titulo}...');
   }
 
-  void sair() {
-    // Lógica para encerrar a sessão
+  /// Esquece o token guardado no login.
+  Future<void> sair() {
     debugPrint('Saindo da conta...');
+    return _auth.sair();
   }
 }

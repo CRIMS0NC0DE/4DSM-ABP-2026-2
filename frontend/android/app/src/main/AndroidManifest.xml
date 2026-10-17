@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Chamar a API do Passe. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="public"
         android:name="${applicationName}"

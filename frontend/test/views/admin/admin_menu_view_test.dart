@@ -13,7 +13,7 @@ class _ControllerEspiao extends AdminMenuController {
   void abrir(OpcaoMenu opcao) => abertas.add(opcao.titulo);
 
   @override
-  void sair() => saiu = true;
+  Future<void> sair() async => saiu = true;
 }
 
 void main() {

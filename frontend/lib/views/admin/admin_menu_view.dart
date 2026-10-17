@@ -21,8 +21,9 @@ class AdminMenuView extends StatelessWidget {
       );
   }
 
-  void _sair(BuildContext context) {
-    controller.sair();
+  Future<void> _sair(BuildContext context) async {
+    await controller.sair();
+    if (!context.mounted) return;
     // Volta para o login e limpa o histórico, para o Voltar não reabrir o menu.
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => LoginView()),
