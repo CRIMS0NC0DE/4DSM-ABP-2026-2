@@ -13,6 +13,7 @@ import 'package:public/views/admin/admin_menu_view.dart';
 import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/register_view.dart';
+import 'package:public/views/visitor/visitor_menu_view.dart';
 
 import '../../support/api_falsa.dart';
 
@@ -41,7 +42,7 @@ const _menuDoPerfil = {
   Perfil.admin: AdminMenuView,
   Perfil.controladorAcesso: AccessControllerMenuView,
   Perfil.morador: ResidentMenuView,
-  Perfil.visitante: ResidentMenuView,
+  Perfil.visitante: VisitorMenuView,
 };
 
 /// O texto "Entrar" aparece no título e no botão; aqui só o botão.
