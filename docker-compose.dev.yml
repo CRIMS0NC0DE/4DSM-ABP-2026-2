@@ -21,7 +21,7 @@ services:
   backend:
     build:
       context: ./backend
-      target: build
+      target: dev
     environment:
       PORT: 3000
       NODE_ENV: development

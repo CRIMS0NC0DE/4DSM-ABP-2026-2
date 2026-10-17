@@ -22,7 +22,7 @@ Referências: telas do `docs/Design.pdf` (U = usuário, N = negação, E = estad
 |---|---|
 | Backend | 7 módulos prontos (auth, users, locations, authorizations, access, events, terminals). 69 testes passando e o teste de fumaça com Postgres passa 16/16. |
 | Frontend antes desta branch | Login, cadastro e os 3 menus funcionavam só com contas em memória (`AuthService` falso). Nenhuma chamada HTTP. |
-| Frontend agora | Login, sessão (token JWT guardado), restaurar sessão ao abrir o app e sair da conta ligados à API. Camada `ApiClient` pronta para as próximas telas. 62 testes com API falsa e 8 testes contra a API real passando. |
+| Frontend agora | Login, sessão (token JWT guardado), restaurar sessão ao abrir o app e sair da conta ligados à API. Camada `ApiClient` pronta para as próximas telas. 70 testes com API falsa e 8 testes contra a API real passando. |
 | Telas do design | 2 de 35 integradas (U1 Login e E5 Senha errada; o E2 "sem internet" já funciona no login). As outras estão nas seções 4 e 5. |
 
 ---
@@ -31,7 +31,10 @@ Referências: telas do `docs/Design.pdf` (U = usuário, N = negação, E = estad
 
 ```bash
 # 1a. Banco + API, tudo no Docker (na raiz do repositório)
-docker compose -f docker-compose.dev.yml up database backend
+docker compose -f docker-compose.dev.yml up --build database backend
+#    Se você subiu antes de 17/10/2026 e o seed falhou com "spawn tsx ENOENT",
+#    apague o cache de dependências uma vez (o banco não é afetado):
+#    docker compose -f docker-compose.dev.yml rm -f backend && docker volume rm 4dsm-abp_backend_node_modules
 
 # 1b. Ou só o banco no Docker e a API rodando direto no Node:
 docker compose -f docker-compose.dev.yml up -d database   # Postgres em localhost:5432 (app/app)
@@ -55,7 +58,7 @@ Sem `--dart-define`, o app usa `http://localhost:3000` (`lib/core/constants/api_
 | admin@passe.com | 111.111.111-11 | `ADMIN` | Administrador |
 | portaria@passe.com | 222.222.222-22 | `CONTROLADOR_ACESSO` | Controlador de acesso |
 | morador@passe.com | 333.333.333-33 | `CONDOMINO` | Morador |
-| visitante@passe.com | 444.444.444-44 | `VISITANTE` | Morador (provisório, ver pendência P1.4) |
+| visitante@passe.com | 444.444.444-44 | `VISITANTE` | Visitante |
 
 Terminal de demonstração: `X-Terminal-Id=00000000-0000-4000-8000-000000000005`, `X-Terminal-Key=chave-demo-terminal-catraca-1`.
 
@@ -89,7 +92,7 @@ flutter test test/integracao --dart-define=API_REAL=http://localhost:3000 # cont
 | **Abrir o app já logado** `main.dart` | Sempre abria no login | Se há sessão guardada e o token ainda vale, abre direto no menu do perfil. |
 | **Sair da conta** (3 menus) | Só voltava ao login | Apaga o token guardado e depois volta ao login. |
 | **Cadastro** `register_view.dart` + `register_controller.dart` | Criava conta em memória | A tela continua igual, mas ao enviar mostra "O cadastro pelo app ainda não está disponível. Peça seu cadastro na portaria." A API não tem rota pública de cadastro (P1.1). |
-| **Perfil visitante** | Não existia no app | O login de `VISITANTE` abre o menu do morador (P1.4). |
+| **Menu do visitante** `visitor_menu_view.dart` + `visitor_menu_controller.dart` | Não existia no app | O login de `VISITANTE` abre o menu próprio: o do morador sem "Meus visitantes", com selo "Visitante". Sair apaga a sessão. As opções usam só rotas `/me` e `/auth/me`, liberadas para o visitante. |
 
 ### 3.3 Configuração de plataforma
 
@@ -97,6 +100,7 @@ flutter test test/integracao --dart-define=API_REAL=http://localhost:3000 # cont
 |---|---|---|
 | `android/app/src/main/AndroidManifest.xml` | `INTERNET` | Sem ela, o APK de release não consegue chamar a API. Antes só o manifesto de debug tinha. |
 | `android/app/src/debug/AndroidManifest.xml` | `usesCleartextTraffic="true"` | O Android 9+ bloqueia `http://`. Isso libera a API local (ex.: `http://10.0.2.2:3000`) **só no debug**; a release continua exigindo HTTPS. |
+| `backend/Dockerfile` + `docker-compose.dev.yml` | Novo estágio `dev` (com devDependencies), usado pelo compose no lugar de `build` | O estágio `build` termina com `npm prune --omit=dev`, que apagava o `tsx`. Com isso o seed falhava (`spawn tsx ENOENT`) e o `npm run dev` não subia no container. A imagem de produção (`runtime`) não mudou. |
 
 ### 3.4 Testes
 
@@ -107,7 +111,8 @@ flutter test test/integracao --dart-define=API_REAL=http://localhost:3000 # cont
 | `test/services/sessao_service_test.dart` | Restaurar sessão, token vencido, token inválido, encerrar |
 | `test/services/auth_service_test.dart` | Login por e-mail e CPF, os 4 perfis, senha errada, sem internet, sair, cadastro indisponível |
 | `test/views/user/login_view_test.dart` | Cada conta abre o menu certo, mensagem da API, sem internet, botão travado durante o envio, sair apaga a sessão |
-| `test/widget_test.dart` | App abre no login; com sessão abre no menu; visitante usa o menu do morador |
+| `test/widget_test.dart` | App abre no login; com sessão abre no menu; visitante abre o menu do visitante |
+| `test/views/visitor/visitor_menu_view_test.dart` | Opções do visitante (sem gestão e sem "Meus visitantes"; o morador tem todas as dele), cabe com fonte 2×, sair apaga a sessão aberta pela API |
 | `test/integracao/api_real_test.dart` | **Contra a API real:** login dos 4 perfis, CPF com pontuação, 401, token liberando `/dashboard`, 403 do morador em `/users`, `/me/authorizations`, erro 400 com campos, restaurar sessão com JWT real |
 
 ---
@@ -213,7 +218,7 @@ Ordem sugerida: P1 libera o fluxo principal, P2 é configuração do app, P3 dep
    Hoje a tela abre e, ao enviar, avisa para pedir o cadastro na portaria.
 2. **Regras do cadastro diferentes do backend.** App: senha ≥ 8 e nome só não vazio. API: senha ≥ 6 e nome ≥ 3. Se ficar com a opção (a), alinhar (a API aceita senha de 6, então o app ser mais rígido não quebra nada, mas o nome de 1–2 letras vai dar 400).
 3. **"Entrar com NFC" no login.** A API só valida tag no terminal da catraca (`POST /terminal/nfc`); não existe login por NFC. Tirar o botão ou trocar a função (ex.: ler o UID da própria tag com `nfc_manager` para a portaria vincular).
-4. **Menu do visitante.** O login de `VISITANTE` abre o `ResidentMenuView`, que mostra o selo "Morador" e opções que não servem para visitante ("Meus visitantes", "Minha tag NFC"). Criar `VisitorMenuController`/`VisitorMenuView` (Escanear QR, Minhas autorizações, Histórico, Ajuda) e trocar a linha em `lib/core/routes/rotas.dart`.
+4. ~~**Menu do visitante.**~~ Feito: `VisitorMenuView`, ligado em `lib/core/routes/rotas.dart`. As opções ainda mostram "tela em construção" (item 5).
 5. **Ligar cada opção dos menus a uma tela.** Hoje todas mostram "tela em construção". O `abrir(opcao)` de cada controller é o ponto de navegação; a seção 4 diz qual rota cada tela usa.
 6. **Sessão vencida nas próximas telas.** O login já trata o 401. Nas telas novas, quando uma chamada der `e.naoAutenticado`, chamar `AuthService.instancia.sair()` e voltar ao `LoginView` (mesmo código do `_sair` dos menus). Se ficar repetitivo, centralizar num callback do `ApiClient`.
 7. **Código legado.** `lib/views/user/menu_view.dart` e `lib/controllers/menu_controller.dart` ("1. Entrar, 2. Registrar, 3. Criar conta, 4. Fechar") não são usados por nenhuma tela. Apagar (e o `test/views/user/menu_view_test.dart`) ou reaproveitar.

@@ -8,6 +8,14 @@ RUN npm ci
 COPY . .
 RUN npm run build && npm prune --omit=dev
 
+# --- desenvolvimento (docker-compose.dev.yml): mantém as devDependencies,
+#     porque o seed e o "npm run dev" usam o tsx ---
+FROM node:24-alpine AS dev
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci
+
 # --- imagem final, só o necessário para rodar ---
 FROM node:24-alpine AS runtime
 WORKDIR /usr/src/app
