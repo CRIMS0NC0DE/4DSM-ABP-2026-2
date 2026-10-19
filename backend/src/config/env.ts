@@ -1,6 +1,13 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
+// Variável vazia no .env (MQTT_URL=) conta como não informada.
+const opcional = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => v || undefined);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
@@ -12,6 +19,12 @@ const envSchema = z.object({
   QR_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(20),
   APP_TIMEZONE: z.string().default('America/Sao_Paulo'),
   CORS_ORIGIN: z.string().default('*'),
+  // Broker MQTT que leva as decisões aos terminais. Sem ele, os terminais consultam por HTTP.
+  MQTT_URL: opcional,
+  MQTT_USERNAME: opcional,
+  MQTT_PASSWORD: opcional,
+  // Endereço WebSocket do broker visto pelo navegador, usado pelo simulador do terminal.
+  MQTT_WS_URL: opcional,
 });
 
 export type Env = z.infer<typeof envSchema>;

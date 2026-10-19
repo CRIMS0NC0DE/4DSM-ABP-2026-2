@@ -9,6 +9,7 @@ import { eventsRouter, filtroEventosSchema } from './modules/events/events.contr
 import { locationsRouter } from './modules/locations/locations.controller.js';
 import { deviceRouter, terminalsRouter } from './modules/terminals/terminals.controller.js';
 import { usersRouter } from './modules/users/users.controller.js';
+import { simuladorRouter } from './modules/simulador/simulador.router.js';
 import { PERFIS_EQUIPE } from './modules/users/users.types.js';
 import { toLocal } from './shared/clock.js';
 import { authDe, autenticar, autenticarTerminal, exigirPerfil } from './shared/http/auth.js';
@@ -54,6 +55,7 @@ export function createApp(c: Container) {
 
   // Dispositivo IoT
   app.use('/terminal', autenticarTerminal(c.repos.terminals), deviceRouter(services.terminals, services.access, c.decisoes));
+  app.use('/simulador', simuladorRouter(c.config.simulador ?? {}));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

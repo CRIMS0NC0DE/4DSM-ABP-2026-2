@@ -1,25 +1,16 @@
 // Dados de demonstração. Pode rodar várias vezes: atualiza em vez de duplicar.
 // npm run db:seed
 import 'dotenv/config';
+import { DEMO_CATRACA_POS, DEMO_IDS, DEMO_SENHA, DEMO_TAG_UID, demoChaveTerminal } from '../src/database/demo.js';
 import { createPrisma } from '../src/database/prisma.js';
 import { hashChave, hashSenha } from '../src/shared/security.js';
 
 const db = createPrisma(process.env.DATABASE_URL ?? 'postgresql://app:app@localhost:5432/app');
 
 // Mesmas contas do frontend/Contas.MD (senha passe123).
-const SENHA = 'passe123';
-// Chave fixa só para desenvolvimento; em produção cadastre o terminal pela API.
-const CHAVE_TERMINAL_DEMO = process.env.TERMINAL_DEMO_KEY ?? 'chave-demo-terminal-catraca-1';
-
-const IDS = {
-  edificio: '00000000-0000-4000-8000-000000000001',
-  portaria: '00000000-0000-4000-8000-000000000002',
-  porta: '00000000-0000-4000-8000-000000000003',
-  catraca: '00000000-0000-4000-8000-000000000004',
-  terminal: '00000000-0000-4000-8000-000000000005',
-  autorizacaoMorador: '00000000-0000-4000-8000-000000000006',
-  autorizacaoVisitante: '00000000-0000-4000-8000-000000000007',
-};
+const SENHA = DEMO_SENHA;
+const CHAVE_TERMINAL_DEMO = demoChaveTerminal();
+const IDS = DEMO_IDS;
 
 async function main() {
   const senhaHash = await hashSenha(SENHA);
@@ -43,18 +34,17 @@ async function main() {
   });
   await db.gate.upsert({ where: { id: IDS.portaria }, update: {}, create: { id: IDS.portaria, nome: 'Portaria Principal', buildingId: IDS.edificio } });
   await db.door.upsert({ where: { id: IDS.porta }, update: {}, create: { id: IDS.porta, nome: 'Porta A', gateId: IDS.portaria } });
-  // Coordenada aproximada: ajuste pela tela "Locais" com o ponto real da catraca.
   await db.accessPoint.upsert({
     where: { id: IDS.catraca },
     update: {},
-    create: { id: IDS.catraca, nome: 'Catraca 1', doorId: IDS.porta, latitude: -23.3053, longitude: -45.9658, raioMetros: 100 },
+    create: { id: IDS.catraca, nome: 'Catraca 1', doorId: IDS.porta, ...DEMO_CATRACA_POS, raioMetros: 100 },
   });
   await db.terminal.upsert({
     where: { id: IDS.terminal },
     update: { chaveHash: hashChave(CHAVE_TERMINAL_DEMO) },
     create: { id: IDS.terminal, nome: 'Terminal Catraca 1', accessPointId: IDS.catraca, chaveHash: hashChave(CHAVE_TERMINAL_DEMO) },
   });
-  await db.nfcTag.upsert({ where: { uid: '04A1B2C3' }, update: {}, create: { uid: '04A1B2C3', userId: maria!.id } });
+  await db.nfcTag.upsert({ where: { uid: DEMO_TAG_UID }, update: {}, create: { uid: DEMO_TAG_UID, userId: maria!.id } });
 
   const hoje = new Date();
   const dia = (deslocamento: number) => new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate() + deslocamento));
