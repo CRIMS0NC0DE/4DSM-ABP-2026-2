@@ -166,16 +166,16 @@ export type DoorWhereInput = {
   id?: Prisma.StringFilter<"Door"> | string
   nome?: Prisma.StringFilter<"Door"> | string
   gateId?: Prisma.StringFilter<"Door"> | string
-  portaria?: Prisma.XOR<Prisma.GateScalarRelationFilter, Prisma.GateWhereInput>
   catracas?: Prisma.AccessPointListRelationFilter
+  portaria?: Prisma.XOR<Prisma.GateScalarRelationFilter, Prisma.GateWhereInput>
 }
 
 export type DoorOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   nome?: Prisma.SortOrder
   gateId?: Prisma.SortOrder
-  portaria?: Prisma.GateOrderByWithRelationInput
   catracas?: Prisma.AccessPointOrderByRelationAggregateInput
+  portaria?: Prisma.GateOrderByWithRelationInput
 }
 
 export type DoorWhereUniqueInput = Prisma.AtLeast<{
@@ -185,8 +185,8 @@ export type DoorWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.DoorWhereInput | Prisma.DoorWhereInput[]
   nome?: Prisma.StringFilter<"Door"> | string
   gateId?: Prisma.StringFilter<"Door"> | string
-  portaria?: Prisma.XOR<Prisma.GateScalarRelationFilter, Prisma.GateWhereInput>
   catracas?: Prisma.AccessPointListRelationFilter
+  portaria?: Prisma.XOR<Prisma.GateScalarRelationFilter, Prisma.GateWhereInput>
 }, "id">
 
 export type DoorOrderByWithAggregationInput = {
@@ -210,8 +210,8 @@ export type DoorScalarWhereWithAggregatesInput = {
 export type DoorCreateInput = {
   id?: string
   nome: string
-  portaria: Prisma.GateCreateNestedOneWithoutPortasInput
   catracas?: Prisma.AccessPointCreateNestedManyWithoutPortaInput
+  portaria: Prisma.GateCreateNestedOneWithoutPortasInput
 }
 
 export type DoorUncheckedCreateInput = {
@@ -224,8 +224,8 @@ export type DoorUncheckedCreateInput = {
 export type DoorUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nome?: Prisma.StringFieldUpdateOperationsInput | string
-  portaria?: Prisma.GateUpdateOneRequiredWithoutPortasNestedInput
   catracas?: Prisma.AccessPointUpdateManyWithoutPortaNestedInput
+  portaria?: Prisma.GateUpdateOneRequiredWithoutPortasNestedInput
 }
 
 export type DoorUncheckedUpdateInput = {
@@ -485,8 +485,8 @@ export type DoorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   nome?: boolean
   gateId?: boolean
-  portaria?: boolean | Prisma.GateDefaultArgs<ExtArgs>
   catracas?: boolean | Prisma.Door$catracasArgs<ExtArgs>
+  portaria?: boolean | Prisma.GateDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.DoorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["door"]>
 
@@ -512,8 +512,8 @@ export type DoorSelectScalar = {
 
 export type DoorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "gateId", ExtArgs["result"]["door"]>
 export type DoorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  portaria?: boolean | Prisma.GateDefaultArgs<ExtArgs>
   catracas?: boolean | Prisma.Door$catracasArgs<ExtArgs>
+  portaria?: boolean | Prisma.GateDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.DoorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DoorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -526,8 +526,8 @@ export type DoorIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $DoorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Door"
   objects: {
-    portaria: Prisma.$GatePayload<ExtArgs>
     catracas: Prisma.$AccessPointPayload<ExtArgs>[]
+    portaria: Prisma.$GatePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -927,8 +927,8 @@ readonly fields: DoorFieldRefs;
  */
 export interface Prisma__DoorClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  portaria<T extends Prisma.GateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GateDefaultArgs<ExtArgs>>): Prisma.Prisma__GateClient<runtime.Types.Result.GetResult<Prisma.$GatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   catracas<T extends Prisma.Door$catracasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Door$catracasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessPointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  portaria<T extends Prisma.GateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GateDefaultArgs<ExtArgs>>): Prisma.Prisma__GateClient<runtime.Types.Result.GetResult<Prisma.$GatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

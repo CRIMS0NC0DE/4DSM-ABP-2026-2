@@ -284,9 +284,9 @@ export type AuthorizationWhereInput = {
   canceladaEm?: Prisma.DateTimeNullableFilter<"Authorization"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Authorization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Authorization"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
   eventos?: Prisma.AccessEventListRelationFilter
+  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type AuthorizationOrderByWithRelationInput = {
@@ -303,9 +303,9 @@ export type AuthorizationOrderByWithRelationInput = {
   canceladaEm?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
-  catraca?: Prisma.AccessPointOrderByWithRelationInput
   eventos?: Prisma.AccessEventOrderByRelationAggregateInput
+  catraca?: Prisma.AccessPointOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type AuthorizationWhereUniqueInput = Prisma.AtLeast<{
@@ -325,9 +325,9 @@ export type AuthorizationWhereUniqueInput = Prisma.AtLeast<{
   canceladaEm?: Prisma.DateTimeNullableFilter<"Authorization"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Authorization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Authorization"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
   eventos?: Prisma.AccessEventListRelationFilter
+  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type AuthorizationOrderByWithAggregationInput = {
@@ -382,9 +382,9 @@ export type AuthorizationCreateInput = {
   canceladaEm?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutAutorizacoesInput
-  catraca: Prisma.AccessPointCreateNestedOneWithoutAutorizacoesInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutAutorizacaoInput
+  catraca: Prisma.AccessPointCreateNestedOneWithoutAutorizacoesInput
+  user: Prisma.UserCreateNestedOneWithoutAutorizacoesInput
 }
 
 export type AuthorizationUncheckedCreateInput = {
@@ -416,9 +416,9 @@ export type AuthorizationUpdateInput = {
   canceladaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutAutorizacoesNestedInput
-  catraca?: Prisma.AccessPointUpdateOneRequiredWithoutAutorizacoesNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutAutorizacaoNestedInput
+  catraca?: Prisma.AccessPointUpdateOneRequiredWithoutAutorizacoesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutAutorizacoesNestedInput
 }
 
 export type AuthorizationUncheckedUpdateInput = {
@@ -673,8 +673,8 @@ export type AuthorizationCreateWithoutUserInput = {
   canceladaEm?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  catraca: Prisma.AccessPointCreateNestedOneWithoutAutorizacoesInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutAutorizacaoInput
+  catraca: Prisma.AccessPointCreateNestedOneWithoutAutorizacoesInput
 }
 
 export type AuthorizationUncheckedCreateWithoutUserInput = {
@@ -750,8 +750,8 @@ export type AuthorizationCreateWithoutCatracaInput = {
   canceladaEm?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutAutorizacoesInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutAutorizacaoInput
+  user: Prisma.UserCreateNestedOneWithoutAutorizacoesInput
 }
 
 export type AuthorizationUncheckedCreateWithoutCatracaInput = {
@@ -808,8 +808,8 @@ export type AuthorizationCreateWithoutEventosInput = {
   canceladaEm?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutAutorizacoesInput
   catraca: Prisma.AccessPointCreateNestedOneWithoutAutorizacoesInput
+  user: Prisma.UserCreateNestedOneWithoutAutorizacoesInput
 }
 
 export type AuthorizationUncheckedCreateWithoutEventosInput = {
@@ -856,8 +856,8 @@ export type AuthorizationUpdateWithoutEventosInput = {
   canceladaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutAutorizacoesNestedInput
   catraca?: Prisma.AccessPointUpdateOneRequiredWithoutAutorizacoesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutAutorizacoesNestedInput
 }
 
 export type AuthorizationUncheckedUpdateWithoutEventosInput = {
@@ -903,8 +903,8 @@ export type AuthorizationUpdateWithoutUserInput = {
   canceladaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  catraca?: Prisma.AccessPointUpdateOneRequiredWithoutAutorizacoesNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutAutorizacaoNestedInput
+  catraca?: Prisma.AccessPointUpdateOneRequiredWithoutAutorizacoesNestedInput
 }
 
 export type AuthorizationUncheckedUpdateWithoutUserInput = {
@@ -965,8 +965,8 @@ export type AuthorizationUpdateWithoutCatracaInput = {
   canceladaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutAutorizacoesNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutAutorizacaoNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutAutorizacoesNestedInput
 }
 
 export type AuthorizationUncheckedUpdateWithoutCatracaInput = {
@@ -1045,9 +1045,9 @@ export type AuthorizationSelect<ExtArgs extends runtime.Types.Extensions.Interna
   canceladaEm?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
   eventos?: boolean | Prisma.Authorization$eventosArgs<ExtArgs>
+  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.AuthorizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authorization"]>
 
@@ -1065,8 +1065,8 @@ export type AuthorizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   canceladaEm?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authorization"]>
 
 export type AuthorizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1083,8 +1083,8 @@ export type AuthorizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   canceladaEm?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authorization"]>
 
 export type AuthorizationSelectScalar = {
@@ -1105,26 +1105,26 @@ export type AuthorizationSelectScalar = {
 
 export type AuthorizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "accessPointId" | "dataInicio" | "dataFim" | "horaInicio" | "horaFim" | "maxUsos" | "usosRealizados" | "status" | "canceladaEm" | "createdAt" | "updatedAt", ExtArgs["result"]["authorization"]>
 export type AuthorizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
   eventos?: boolean | Prisma.Authorization$eventosArgs<ExtArgs>
+  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.AuthorizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AuthorizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type AuthorizationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $AuthorizationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Authorization"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
-    catraca: Prisma.$AccessPointPayload<ExtArgs>
     eventos: Prisma.$AccessEventPayload<ExtArgs>[]
+    catraca: Prisma.$AccessPointPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1534,9 +1534,9 @@ readonly fields: AuthorizationFieldRefs;
  */
 export interface Prisma__AuthorizationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  catraca<T extends Prisma.AccessPointDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPointDefaultArgs<ExtArgs>>): Prisma.Prisma__AccessPointClient<runtime.Types.Result.GetResult<Prisma.$AccessPointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   eventos<T extends Prisma.Authorization$eventosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Authorization$eventosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  catraca<T extends Prisma.AccessPointDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPointDefaultArgs<ExtArgs>>): Prisma.Prisma__AccessPointClient<runtime.Types.Result.GetResult<Prisma.$AccessPointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

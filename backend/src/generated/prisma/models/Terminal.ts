@@ -236,8 +236,8 @@ export type TerminalWhereInput = {
   ultimoSinal?: Prisma.DateTimeNullableFilter<"Terminal"> | Date | string | null
   latitude?: Prisma.FloatNullableFilter<"Terminal"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Terminal"> | number | null
-  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
   eventos?: Prisma.AccessEventListRelationFilter
+  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
 }
 
 export type TerminalOrderByWithRelationInput = {
@@ -248,8 +248,8 @@ export type TerminalOrderByWithRelationInput = {
   ultimoSinal?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
-  catraca?: Prisma.AccessPointOrderByWithRelationInput
   eventos?: Prisma.AccessEventOrderByRelationAggregateInput
+  catraca?: Prisma.AccessPointOrderByWithRelationInput
 }
 
 export type TerminalWhereUniqueInput = Prisma.AtLeast<{
@@ -263,8 +263,8 @@ export type TerminalWhereUniqueInput = Prisma.AtLeast<{
   ultimoSinal?: Prisma.DateTimeNullableFilter<"Terminal"> | Date | string | null
   latitude?: Prisma.FloatNullableFilter<"Terminal"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Terminal"> | number | null
-  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
   eventos?: Prisma.AccessEventListRelationFilter
+  catraca?: Prisma.XOR<Prisma.AccessPointScalarRelationFilter, Prisma.AccessPointWhereInput>
 }, "id" | "accessPointId">
 
 export type TerminalOrderByWithAggregationInput = {
@@ -302,8 +302,8 @@ export type TerminalCreateInput = {
   ultimoSinal?: Date | string | null
   latitude?: number | null
   longitude?: number | null
-  catraca: Prisma.AccessPointCreateNestedOneWithoutTerminalInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutTerminalInput
+  catraca: Prisma.AccessPointCreateNestedOneWithoutTerminalInput
 }
 
 export type TerminalUncheckedCreateInput = {
@@ -324,8 +324,8 @@ export type TerminalUpdateInput = {
   ultimoSinal?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  catraca?: Prisma.AccessPointUpdateOneRequiredWithoutTerminalNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutTerminalNestedInput
+  catraca?: Prisma.AccessPointUpdateOneRequiredWithoutTerminalNestedInput
 }
 
 export type TerminalUncheckedUpdateInput = {
@@ -624,8 +624,8 @@ export type TerminalSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   ultimoSinal?: boolean
   latitude?: boolean
   longitude?: boolean
-  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
   eventos?: boolean | Prisma.Terminal$eventosArgs<ExtArgs>
+  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.TerminalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["terminal"]>
 
@@ -663,8 +663,8 @@ export type TerminalSelectScalar = {
 
 export type TerminalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "accessPointId" | "chaveHash" | "ultimoSinal" | "latitude" | "longitude", ExtArgs["result"]["terminal"]>
 export type TerminalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
   eventos?: boolean | Prisma.Terminal$eventosArgs<ExtArgs>
+  catraca?: boolean | Prisma.AccessPointDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.TerminalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TerminalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -677,8 +677,8 @@ export type TerminalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $TerminalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Terminal"
   objects: {
-    catraca: Prisma.$AccessPointPayload<ExtArgs>
     eventos: Prisma.$AccessEventPayload<ExtArgs>[]
+    catraca: Prisma.$AccessPointPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1082,8 +1082,8 @@ readonly fields: TerminalFieldRefs;
  */
 export interface Prisma__TerminalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  catraca<T extends Prisma.AccessPointDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPointDefaultArgs<ExtArgs>>): Prisma.Prisma__AccessPointClient<runtime.Types.Result.GetResult<Prisma.$AccessPointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   eventos<T extends Prisma.Terminal$eventosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Terminal$eventosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  catraca<T extends Prisma.AccessPointDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPointDefaultArgs<ExtArgs>>): Prisma.Prisma__AccessPointClient<runtime.Types.Result.GetResult<Prisma.$AccessPointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

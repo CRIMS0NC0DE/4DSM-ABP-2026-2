@@ -232,10 +232,10 @@ export type AccessPointWhereInput = {
   latitude?: Prisma.FloatFilter<"AccessPoint"> | number
   longitude?: Prisma.FloatFilter<"AccessPoint"> | number
   raioMetros?: Prisma.IntFilter<"AccessPoint"> | number
-  porta?: Prisma.XOR<Prisma.DoorScalarRelationFilter, Prisma.DoorWhereInput>
-  terminal?: Prisma.XOR<Prisma.TerminalNullableScalarRelationFilter, Prisma.TerminalWhereInput> | null
-  autorizacoes?: Prisma.AuthorizationListRelationFilter
   eventos?: Prisma.AccessEventListRelationFilter
+  porta?: Prisma.XOR<Prisma.DoorScalarRelationFilter, Prisma.DoorWhereInput>
+  autorizacoes?: Prisma.AuthorizationListRelationFilter
+  terminal?: Prisma.XOR<Prisma.TerminalNullableScalarRelationFilter, Prisma.TerminalWhereInput> | null
 }
 
 export type AccessPointOrderByWithRelationInput = {
@@ -245,10 +245,10 @@ export type AccessPointOrderByWithRelationInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   raioMetros?: Prisma.SortOrder
-  porta?: Prisma.DoorOrderByWithRelationInput
-  terminal?: Prisma.TerminalOrderByWithRelationInput
-  autorizacoes?: Prisma.AuthorizationOrderByRelationAggregateInput
   eventos?: Prisma.AccessEventOrderByRelationAggregateInput
+  porta?: Prisma.DoorOrderByWithRelationInput
+  autorizacoes?: Prisma.AuthorizationOrderByRelationAggregateInput
+  terminal?: Prisma.TerminalOrderByWithRelationInput
 }
 
 export type AccessPointWhereUniqueInput = Prisma.AtLeast<{
@@ -261,10 +261,10 @@ export type AccessPointWhereUniqueInput = Prisma.AtLeast<{
   latitude?: Prisma.FloatFilter<"AccessPoint"> | number
   longitude?: Prisma.FloatFilter<"AccessPoint"> | number
   raioMetros?: Prisma.IntFilter<"AccessPoint"> | number
-  porta?: Prisma.XOR<Prisma.DoorScalarRelationFilter, Prisma.DoorWhereInput>
-  terminal?: Prisma.XOR<Prisma.TerminalNullableScalarRelationFilter, Prisma.TerminalWhereInput> | null
-  autorizacoes?: Prisma.AuthorizationListRelationFilter
   eventos?: Prisma.AccessEventListRelationFilter
+  porta?: Prisma.XOR<Prisma.DoorScalarRelationFilter, Prisma.DoorWhereInput>
+  autorizacoes?: Prisma.AuthorizationListRelationFilter
+  terminal?: Prisma.XOR<Prisma.TerminalNullableScalarRelationFilter, Prisma.TerminalWhereInput> | null
 }, "id">
 
 export type AccessPointOrderByWithAggregationInput = {
@@ -299,10 +299,10 @@ export type AccessPointCreateInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  porta: Prisma.DoorCreateNestedOneWithoutCatracasInput
-  terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
-  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutCatracaInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutCatracaInput
+  porta: Prisma.DoorCreateNestedOneWithoutCatracasInput
+  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointUncheckedCreateInput = {
@@ -312,9 +312,9 @@ export type AccessPointUncheckedCreateInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
-  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutCatracaInput
+  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointUpdateInput = {
@@ -323,10 +323,10 @@ export type AccessPointUpdateInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  porta?: Prisma.DoorUpdateOneRequiredWithoutCatracasNestedInput
-  terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
-  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutCatracaNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutCatracaNestedInput
+  porta?: Prisma.DoorUpdateOneRequiredWithoutCatracasNestedInput
+  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointUncheckedUpdateInput = {
@@ -336,9 +336,9 @@ export type AccessPointUncheckedUpdateInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
-  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutCatracaNestedInput
+  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointCreateManyInput = {
@@ -534,9 +534,9 @@ export type AccessPointCreateWithoutPortaInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
-  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutCatracaInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutCatracaInput
+  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointUncheckedCreateWithoutPortaInput = {
@@ -545,9 +545,9 @@ export type AccessPointUncheckedCreateWithoutPortaInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
-  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutCatracaInput
+  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointCreateOrConnectWithoutPortaInput = {
@@ -594,9 +594,9 @@ export type AccessPointCreateWithoutTerminalInput = {
   latitude: number
   longitude: number
   raioMetros?: number
+  eventos?: Prisma.AccessEventCreateNestedManyWithoutCatracaInput
   porta: Prisma.DoorCreateNestedOneWithoutCatracasInput
   autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutCatracaInput
-  eventos?: Prisma.AccessEventCreateNestedManyWithoutCatracaInput
 }
 
 export type AccessPointUncheckedCreateWithoutTerminalInput = {
@@ -606,8 +606,8 @@ export type AccessPointUncheckedCreateWithoutTerminalInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutCatracaInput
+  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
 }
 
 export type AccessPointCreateOrConnectWithoutTerminalInput = {
@@ -632,9 +632,9 @@ export type AccessPointUpdateWithoutTerminalInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
+  eventos?: Prisma.AccessEventUpdateManyWithoutCatracaNestedInput
   porta?: Prisma.DoorUpdateOneRequiredWithoutCatracasNestedInput
   autorizacoes?: Prisma.AuthorizationUpdateManyWithoutCatracaNestedInput
-  eventos?: Prisma.AccessEventUpdateManyWithoutCatracaNestedInput
 }
 
 export type AccessPointUncheckedUpdateWithoutTerminalInput = {
@@ -644,8 +644,8 @@ export type AccessPointUncheckedUpdateWithoutTerminalInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutCatracaNestedInput
+  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
 }
 
 export type AccessPointCreateWithoutAutorizacoesInput = {
@@ -654,9 +654,9 @@ export type AccessPointCreateWithoutAutorizacoesInput = {
   latitude: number
   longitude: number
   raioMetros?: number
+  eventos?: Prisma.AccessEventCreateNestedManyWithoutCatracaInput
   porta: Prisma.DoorCreateNestedOneWithoutCatracasInput
   terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
-  eventos?: Prisma.AccessEventCreateNestedManyWithoutCatracaInput
 }
 
 export type AccessPointUncheckedCreateWithoutAutorizacoesInput = {
@@ -666,8 +666,8 @@ export type AccessPointUncheckedCreateWithoutAutorizacoesInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointCreateOrConnectWithoutAutorizacoesInput = {
@@ -692,9 +692,9 @@ export type AccessPointUpdateWithoutAutorizacoesInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
+  eventos?: Prisma.AccessEventUpdateManyWithoutCatracaNestedInput
   porta?: Prisma.DoorUpdateOneRequiredWithoutCatracasNestedInput
   terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
-  eventos?: Prisma.AccessEventUpdateManyWithoutCatracaNestedInput
 }
 
 export type AccessPointUncheckedUpdateWithoutAutorizacoesInput = {
@@ -704,8 +704,8 @@ export type AccessPointUncheckedUpdateWithoutAutorizacoesInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointCreateWithoutEventosInput = {
@@ -715,8 +715,8 @@ export type AccessPointCreateWithoutEventosInput = {
   longitude: number
   raioMetros?: number
   porta: Prisma.DoorCreateNestedOneWithoutCatracasInput
-  terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
   autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointUncheckedCreateWithoutEventosInput = {
@@ -726,8 +726,8 @@ export type AccessPointUncheckedCreateWithoutEventosInput = {
   latitude: number
   longitude: number
   raioMetros?: number
-  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
   autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutCatracaInput
+  terminal?: Prisma.TerminalUncheckedCreateNestedOneWithoutCatracaInput
 }
 
 export type AccessPointCreateOrConnectWithoutEventosInput = {
@@ -753,8 +753,8 @@ export type AccessPointUpdateWithoutEventosInput = {
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
   porta?: Prisma.DoorUpdateOneRequiredWithoutCatracasNestedInput
-  terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
   autorizacoes?: Prisma.AuthorizationUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointUncheckedUpdateWithoutEventosInput = {
@@ -764,8 +764,8 @@ export type AccessPointUncheckedUpdateWithoutEventosInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
   autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointCreateManyPortaInput = {
@@ -782,9 +782,9 @@ export type AccessPointUpdateWithoutPortaInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
-  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutCatracaNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutCatracaNestedInput
+  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointUncheckedUpdateWithoutPortaInput = {
@@ -793,9 +793,9 @@ export type AccessPointUncheckedUpdateWithoutPortaInput = {
   latitude?: Prisma.FloatFieldUpdateOperationsInput | number
   longitude?: Prisma.FloatFieldUpdateOperationsInput | number
   raioMetros?: Prisma.IntFieldUpdateOperationsInput | number
-  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
-  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutCatracaNestedInput
+  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutCatracaNestedInput
+  terminal?: Prisma.TerminalUncheckedUpdateOneWithoutCatracaNestedInput
 }
 
 export type AccessPointUncheckedUpdateManyWithoutPortaInput = {
@@ -812,13 +812,13 @@ export type AccessPointUncheckedUpdateManyWithoutPortaInput = {
  */
 
 export type AccessPointCountOutputType = {
-  autorizacoes: number
   eventos: number
+  autorizacoes: number
 }
 
 export type AccessPointCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  autorizacoes?: boolean | AccessPointCountOutputTypeCountAutorizacoesArgs
   eventos?: boolean | AccessPointCountOutputTypeCountEventosArgs
+  autorizacoes?: boolean | AccessPointCountOutputTypeCountAutorizacoesArgs
 }
 
 /**
@@ -834,15 +834,15 @@ export type AccessPointCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
 /**
  * AccessPointCountOutputType without action
  */
-export type AccessPointCountOutputTypeCountAutorizacoesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AuthorizationWhereInput
+export type AccessPointCountOutputTypeCountEventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccessEventWhereInput
 }
 
 /**
  * AccessPointCountOutputType without action
  */
-export type AccessPointCountOutputTypeCountEventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AccessEventWhereInput
+export type AccessPointCountOutputTypeCountAutorizacoesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthorizationWhereInput
 }
 
 
@@ -853,10 +853,10 @@ export type AccessPointSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   latitude?: boolean
   longitude?: boolean
   raioMetros?: boolean
-  porta?: boolean | Prisma.DoorDefaultArgs<ExtArgs>
-  terminal?: boolean | Prisma.AccessPoint$terminalArgs<ExtArgs>
-  autorizacoes?: boolean | Prisma.AccessPoint$autorizacoesArgs<ExtArgs>
   eventos?: boolean | Prisma.AccessPoint$eventosArgs<ExtArgs>
+  porta?: boolean | Prisma.DoorDefaultArgs<ExtArgs>
+  autorizacoes?: boolean | Prisma.AccessPoint$autorizacoesArgs<ExtArgs>
+  terminal?: boolean | Prisma.AccessPoint$terminalArgs<ExtArgs>
   _count?: boolean | Prisma.AccessPointCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["accessPoint"]>
 
@@ -891,10 +891,10 @@ export type AccessPointSelectScalar = {
 
 export type AccessPointOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "doorId" | "latitude" | "longitude" | "raioMetros", ExtArgs["result"]["accessPoint"]>
 export type AccessPointInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  porta?: boolean | Prisma.DoorDefaultArgs<ExtArgs>
-  terminal?: boolean | Prisma.AccessPoint$terminalArgs<ExtArgs>
-  autorizacoes?: boolean | Prisma.AccessPoint$autorizacoesArgs<ExtArgs>
   eventos?: boolean | Prisma.AccessPoint$eventosArgs<ExtArgs>
+  porta?: boolean | Prisma.DoorDefaultArgs<ExtArgs>
+  autorizacoes?: boolean | Prisma.AccessPoint$autorizacoesArgs<ExtArgs>
+  terminal?: boolean | Prisma.AccessPoint$terminalArgs<ExtArgs>
   _count?: boolean | Prisma.AccessPointCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccessPointIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -907,10 +907,10 @@ export type AccessPointIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type $AccessPointPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AccessPoint"
   objects: {
-    porta: Prisma.$DoorPayload<ExtArgs>
-    terminal: Prisma.$TerminalPayload<ExtArgs> | null
-    autorizacoes: Prisma.$AuthorizationPayload<ExtArgs>[]
     eventos: Prisma.$AccessEventPayload<ExtArgs>[]
+    porta: Prisma.$DoorPayload<ExtArgs>
+    autorizacoes: Prisma.$AuthorizationPayload<ExtArgs>[]
+    terminal: Prisma.$TerminalPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1313,10 +1313,10 @@ readonly fields: AccessPointFieldRefs;
  */
 export interface Prisma__AccessPointClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  porta<T extends Prisma.DoorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DoorDefaultArgs<ExtArgs>>): Prisma.Prisma__DoorClient<runtime.Types.Result.GetResult<Prisma.$DoorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  terminal<T extends Prisma.AccessPoint$terminalArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPoint$terminalArgs<ExtArgs>>): Prisma.Prisma__TerminalClient<runtime.Types.Result.GetResult<Prisma.$TerminalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  autorizacoes<T extends Prisma.AccessPoint$autorizacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPoint$autorizacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthorizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   eventos<T extends Prisma.AccessPoint$eventosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPoint$eventosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  porta<T extends Prisma.DoorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DoorDefaultArgs<ExtArgs>>): Prisma.Prisma__DoorClient<runtime.Types.Result.GetResult<Prisma.$DoorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  autorizacoes<T extends Prisma.AccessPoint$autorizacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPoint$autorizacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthorizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  terminal<T extends Prisma.AccessPoint$terminalArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessPoint$terminalArgs<ExtArgs>>): Prisma.Prisma__TerminalClient<runtime.Types.Result.GetResult<Prisma.$TerminalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1753,22 +1753,27 @@ export type AccessPointDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
- * AccessPoint.terminal
+ * AccessPoint.eventos
  */
-export type AccessPoint$terminalArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type AccessPoint$eventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Terminal
+   * Select specific fields to fetch from the AccessEvent
    */
-  select?: Prisma.TerminalSelect<ExtArgs> | null
+  select?: Prisma.AccessEventSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Terminal
+   * Omit specific fields from the AccessEvent
    */
-  omit?: Prisma.TerminalOmit<ExtArgs> | null
+  omit?: Prisma.AccessEventOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TerminalInclude<ExtArgs> | null
-  where?: Prisma.TerminalWhereInput
+  include?: Prisma.AccessEventInclude<ExtArgs> | null
+  where?: Prisma.AccessEventWhereInput
+  orderBy?: Prisma.AccessEventOrderByWithRelationInput | Prisma.AccessEventOrderByWithRelationInput[]
+  cursor?: Prisma.AccessEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccessEventScalarFieldEnum | Prisma.AccessEventScalarFieldEnum[]
 }
 
 /**
@@ -1796,27 +1801,22 @@ export type AccessPoint$autorizacoesArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
- * AccessPoint.eventos
+ * AccessPoint.terminal
  */
-export type AccessPoint$eventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type AccessPoint$terminalArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the AccessEvent
+   * Select specific fields to fetch from the Terminal
    */
-  select?: Prisma.AccessEventSelect<ExtArgs> | null
+  select?: Prisma.TerminalSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the AccessEvent
+   * Omit specific fields from the Terminal
    */
-  omit?: Prisma.AccessEventOmit<ExtArgs> | null
+  omit?: Prisma.TerminalOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AccessEventInclude<ExtArgs> | null
-  where?: Prisma.AccessEventWhereInput
-  orderBy?: Prisma.AccessEventOrderByWithRelationInput | Prisma.AccessEventOrderByWithRelationInput[]
-  cursor?: Prisma.AccessEventWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AccessEventScalarFieldEnum | Prisma.AccessEventScalarFieldEnum[]
+  include?: Prisma.TerminalInclude<ExtArgs> | null
+  where?: Prisma.TerminalWhereInput
 }
 
 /**

@@ -214,9 +214,9 @@ export type UserWhereInput = {
   ativo?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  tags?: Prisma.NfcTagListRelationFilter
-  autorizacoes?: Prisma.AuthorizationListRelationFilter
   eventos?: Prisma.AccessEventListRelationFilter
+  autorizacoes?: Prisma.AuthorizationListRelationFilter
+  tags?: Prisma.NfcTagListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -229,9 +229,9 @@ export type UserOrderByWithRelationInput = {
   ativo?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  tags?: Prisma.NfcTagOrderByRelationAggregateInput
-  autorizacoes?: Prisma.AuthorizationOrderByRelationAggregateInput
   eventos?: Prisma.AccessEventOrderByRelationAggregateInput
+  autorizacoes?: Prisma.AuthorizationOrderByRelationAggregateInput
+  tags?: Prisma.NfcTagOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -247,9 +247,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   ativo?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  tags?: Prisma.NfcTagListRelationFilter
-  autorizacoes?: Prisma.AuthorizationListRelationFilter
   eventos?: Prisma.AccessEventListRelationFilter
+  autorizacoes?: Prisma.AuthorizationListRelationFilter
+  tags?: Prisma.NfcTagListRelationFilter
 }, "id" | "email" | "cpf">
 
 export type UserOrderByWithAggregationInput = {
@@ -292,9 +292,9 @@ export type UserCreateInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  tags?: Prisma.NfcTagCreateNestedManyWithoutUserInput
-  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutUserInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutUserInput
+  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutUserInput
+  tags?: Prisma.NfcTagCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -307,9 +307,9 @@ export type UserUncheckedCreateInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  tags?: Prisma.NfcTagUncheckedCreateNestedManyWithoutUserInput
-  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutUserInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutUserInput
+  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.NfcTagUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -322,9 +322,9 @@ export type UserUpdateInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tags?: Prisma.NfcTagUpdateManyWithoutUserNestedInput
-  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutUserNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutUserNestedInput
+  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutUserNestedInput
+  tags?: Prisma.NfcTagUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -337,9 +337,9 @@ export type UserUncheckedUpdateInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tags?: Prisma.NfcTagUncheckedUpdateManyWithoutUserNestedInput
-  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutUserNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutUserNestedInput
+  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.NfcTagUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -494,8 +494,8 @@ export type UserCreateWithoutTagsInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutUserInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutUserInput
+  autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTagsInput = {
@@ -508,8 +508,8 @@ export type UserUncheckedCreateWithoutTagsInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutUserInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutUserInput
+  autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTagsInput = {
@@ -538,8 +538,8 @@ export type UserUpdateWithoutTagsInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutUserNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutUserNestedInput
+  autorizacoes?: Prisma.AuthorizationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTagsInput = {
@@ -552,8 +552,8 @@ export type UserUncheckedUpdateWithoutTagsInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutUserNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutUserNestedInput
+  autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAutorizacoesInput = {
@@ -566,8 +566,8 @@ export type UserCreateWithoutAutorizacoesInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  tags?: Prisma.NfcTagCreateNestedManyWithoutUserInput
   eventos?: Prisma.AccessEventCreateNestedManyWithoutUserInput
+  tags?: Prisma.NfcTagCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAutorizacoesInput = {
@@ -580,8 +580,8 @@ export type UserUncheckedCreateWithoutAutorizacoesInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  tags?: Prisma.NfcTagUncheckedCreateNestedManyWithoutUserInput
   eventos?: Prisma.AccessEventUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.NfcTagUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAutorizacoesInput = {
@@ -610,8 +610,8 @@ export type UserUpdateWithoutAutorizacoesInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tags?: Prisma.NfcTagUpdateManyWithoutUserNestedInput
   eventos?: Prisma.AccessEventUpdateManyWithoutUserNestedInput
+  tags?: Prisma.NfcTagUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAutorizacoesInput = {
@@ -624,8 +624,8 @@ export type UserUncheckedUpdateWithoutAutorizacoesInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tags?: Prisma.NfcTagUncheckedUpdateManyWithoutUserNestedInput
   eventos?: Prisma.AccessEventUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.NfcTagUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEventosInput = {
@@ -638,8 +638,8 @@ export type UserCreateWithoutEventosInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  tags?: Prisma.NfcTagCreateNestedManyWithoutUserInput
   autorizacoes?: Prisma.AuthorizationCreateNestedManyWithoutUserInput
+  tags?: Prisma.NfcTagCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEventosInput = {
@@ -652,8 +652,8 @@ export type UserUncheckedCreateWithoutEventosInput = {
   ativo?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  tags?: Prisma.NfcTagUncheckedCreateNestedManyWithoutUserInput
   autorizacoes?: Prisma.AuthorizationUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.NfcTagUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEventosInput = {
@@ -682,8 +682,8 @@ export type UserUpdateWithoutEventosInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tags?: Prisma.NfcTagUpdateManyWithoutUserNestedInput
   autorizacoes?: Prisma.AuthorizationUpdateManyWithoutUserNestedInput
+  tags?: Prisma.NfcTagUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventosInput = {
@@ -696,8 +696,8 @@ export type UserUncheckedUpdateWithoutEventosInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tags?: Prisma.NfcTagUncheckedUpdateManyWithoutUserNestedInput
   autorizacoes?: Prisma.AuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.NfcTagUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -706,15 +706,15 @@ export type UserUncheckedUpdateWithoutEventosInput = {
  */
 
 export type UserCountOutputType = {
-  tags: number
-  autorizacoes: number
   eventos: number
+  autorizacoes: number
+  tags: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tags?: boolean | UserCountOutputTypeCountTagsArgs
-  autorizacoes?: boolean | UserCountOutputTypeCountAutorizacoesArgs
   eventos?: boolean | UserCountOutputTypeCountEventosArgs
+  autorizacoes?: boolean | UserCountOutputTypeCountAutorizacoesArgs
+  tags?: boolean | UserCountOutputTypeCountTagsArgs
 }
 
 /**
@@ -730,8 +730,8 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.NfcTagWhereInput
+export type UserCountOutputTypeCountEventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccessEventWhereInput
 }
 
 /**
@@ -744,8 +744,8 @@ export type UserCountOutputTypeCountAutorizacoesArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountEventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AccessEventWhereInput
+export type UserCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NfcTagWhereInput
 }
 
 
@@ -759,9 +759,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   ativo?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  tags?: boolean | Prisma.User$tagsArgs<ExtArgs>
-  autorizacoes?: boolean | Prisma.User$autorizacoesArgs<ExtArgs>
   eventos?: boolean | Prisma.User$eventosArgs<ExtArgs>
+  autorizacoes?: boolean | Prisma.User$autorizacoesArgs<ExtArgs>
+  tags?: boolean | Prisma.User$tagsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -803,9 +803,9 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "email" | "cpf" | "senhaHash" | "perfil" | "ativo" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tags?: boolean | Prisma.User$tagsArgs<ExtArgs>
-  autorizacoes?: boolean | Prisma.User$autorizacoesArgs<ExtArgs>
   eventos?: boolean | Prisma.User$eventosArgs<ExtArgs>
+  autorizacoes?: boolean | Prisma.User$autorizacoesArgs<ExtArgs>
+  tags?: boolean | Prisma.User$tagsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -814,9 +814,9 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    tags: Prisma.$NfcTagPayload<ExtArgs>[]
-    autorizacoes: Prisma.$AuthorizationPayload<ExtArgs>[]
     eventos: Prisma.$AccessEventPayload<ExtArgs>[]
+    autorizacoes: Prisma.$AuthorizationPayload<ExtArgs>[]
+    tags: Prisma.$NfcTagPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1222,9 +1222,9 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  tags<T extends Prisma.User$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NfcTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  autorizacoes<T extends Prisma.User$autorizacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$autorizacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthorizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   eventos<T extends Prisma.User$eventosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  autorizacoes<T extends Prisma.User$autorizacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$autorizacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthorizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tags<T extends Prisma.User$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NfcTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1656,27 +1656,27 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.tags
+ * User.eventos
  */
-export type User$tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$eventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the NfcTag
+   * Select specific fields to fetch from the AccessEvent
    */
-  select?: Prisma.NfcTagSelect<ExtArgs> | null
+  select?: Prisma.AccessEventSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the NfcTag
+   * Omit specific fields from the AccessEvent
    */
-  omit?: Prisma.NfcTagOmit<ExtArgs> | null
+  omit?: Prisma.AccessEventOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.NfcTagInclude<ExtArgs> | null
-  where?: Prisma.NfcTagWhereInput
-  orderBy?: Prisma.NfcTagOrderByWithRelationInput | Prisma.NfcTagOrderByWithRelationInput[]
-  cursor?: Prisma.NfcTagWhereUniqueInput
+  include?: Prisma.AccessEventInclude<ExtArgs> | null
+  where?: Prisma.AccessEventWhereInput
+  orderBy?: Prisma.AccessEventOrderByWithRelationInput | Prisma.AccessEventOrderByWithRelationInput[]
+  cursor?: Prisma.AccessEventWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.NfcTagScalarFieldEnum | Prisma.NfcTagScalarFieldEnum[]
+  distinct?: Prisma.AccessEventScalarFieldEnum | Prisma.AccessEventScalarFieldEnum[]
 }
 
 /**
@@ -1704,27 +1704,27 @@ export type User$autorizacoesArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
- * User.eventos
+ * User.tags
  */
-export type User$eventosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the AccessEvent
+   * Select specific fields to fetch from the NfcTag
    */
-  select?: Prisma.AccessEventSelect<ExtArgs> | null
+  select?: Prisma.NfcTagSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the AccessEvent
+   * Omit specific fields from the NfcTag
    */
-  omit?: Prisma.AccessEventOmit<ExtArgs> | null
+  omit?: Prisma.NfcTagOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AccessEventInclude<ExtArgs> | null
-  where?: Prisma.AccessEventWhereInput
-  orderBy?: Prisma.AccessEventOrderByWithRelationInput | Prisma.AccessEventOrderByWithRelationInput[]
-  cursor?: Prisma.AccessEventWhereUniqueInput
+  include?: Prisma.NfcTagInclude<ExtArgs> | null
+  where?: Prisma.NfcTagWhereInput
+  orderBy?: Prisma.NfcTagOrderByWithRelationInput | Prisma.NfcTagOrderByWithRelationInput[]
+  cursor?: Prisma.NfcTagWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.AccessEventScalarFieldEnum | Prisma.AccessEventScalarFieldEnum[]
+  distinct?: Prisma.NfcTagScalarFieldEnum | Prisma.NfcTagScalarFieldEnum[]
 }
 
 /**
