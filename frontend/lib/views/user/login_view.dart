@@ -5,7 +5,6 @@ import '../../core/routes/rotas.dart';
 import '../../services/api_client.dart';
 import '../widgets/botao_acao.dart';
 import '../widgets/campo_texto.dart';
-import '../widgets/logo_passe.dart';
 import '../widgets/tela_carregando.dart';
 import 'register_view.dart';
 
