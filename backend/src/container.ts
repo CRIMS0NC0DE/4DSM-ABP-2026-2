@@ -7,6 +7,7 @@ import type { EventsRepository, QrTokenStore } from './modules/events/events.typ
 import { EventsService } from './modules/events/events.service.js';
 import type { LocationsRepository } from './modules/locations/locations.types.js';
 import { LocationsService } from './modules/locations/locations.service.js';
+import type { SimuladorConfig } from './modules/simulador/simulador.router.js';
 import { QrTokenService } from './modules/terminals/qr-token.js';
 import { CompositeTerminalNotifier, InMemoryTerminalNotifier, type TerminalNotifier } from './modules/terminals/terminal-notifier.js';
 import type { TerminalsRepository } from './modules/terminals/terminals.types.js';
@@ -31,6 +32,7 @@ export interface AppConfig {
   qrRotationSeconds: number;
   timezone: string;
   corsOrigin: string;
+  simulador?: SimuladorConfig;
 }
 
 export interface Container {

@@ -14,4 +14,9 @@ export default tseslint.config(
       'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
     },
   },
+  {
+    // Simulador do terminal: roda no navegador, sem build.
+    files: ['public/**/*.js'],
+    languageOptions: { globals: globals.browser, sourceType: 'script' },
+  },
 );
