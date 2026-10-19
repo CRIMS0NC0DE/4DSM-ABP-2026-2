@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/admin_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/views/admin/admin_menu_view.dart';
+import 'package:public/views/user/login_view.dart';
 
 /// Guarda o que a tela pediu ao controller, para conferir no teste.
 class _ControllerEspiao extends AdminMenuController {
@@ -70,7 +71,7 @@ void main() {
     expect(find.text('Usuários: tela em construção.'), findsOneWidget);
   });
 
-  testWidgets('Tocar em Sair da conta chama o controller', (
+  testWidgets('Tocar em Sair da conta chama o controller e volta ao login', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -84,5 +85,12 @@ void main() {
     await tester.pump();
 
     expect(controller.saiu, isTrue);
+    // A rota nova só aparece no frame seguinte ao push.
+    await tester.pump();
+    expect(find.text('Saindo…'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginView), findsOneWidget);
+    expect(find.byType(AdminMenuView), findsNothing);
   });
 }

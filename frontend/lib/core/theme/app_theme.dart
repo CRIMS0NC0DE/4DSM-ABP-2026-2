@@ -48,6 +48,8 @@ abstract final class AppTheme {
     inverseSurface: AppColors.darkSurface,
     onInverseSurface: AppColors.darkTextPrimary,
     inversePrimary: AppColors.darkPrimary,
+    primaryFixed: AppColors.brand,
+    onPrimaryFixed: AppColors.onBrand,
   );
 
   static const _darkScheme = ColorScheme(
@@ -74,6 +76,8 @@ abstract final class AppTheme {
     inverseSurface: AppColors.lightSurface,
     onInverseSurface: AppColors.lightTextPrimary,
     inversePrimary: AppColors.lightPrimary,
+    primaryFixed: AppColors.brand,
+    onPrimaryFixed: AppColors.onBrand,
   );
 
   static ThemeData _build(
@@ -121,11 +125,12 @@ abstract final class AppTheme {
         titleTextStyle: textTheme.titleLarge,
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       ),
-      // Ação principal da tela (ver BotaoAcao).
+      // Ação principal da tela (ver BotaoAcao), no amarelo da marca nos
+      // dois modos.
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
+          backgroundColor: colorScheme.primaryFixed,
+          foregroundColor: colorScheme.onPrimaryFixed,
           disabledBackgroundColor: colorScheme.surfaceContainerHighest,
           disabledForegroundColor: colorScheme.onSurfaceVariant,
           elevation: 0,

@@ -4,13 +4,18 @@ import 'package:flutter/material.dart';
 /// Nas telas, prefira `Theme.of(context).colorScheme` e [StatusColors.of]
 /// em vez destas constantes: assim a cor acompanha o modo do celular.
 abstract final class AppColors {
+  // Marca — amarelo da linha de scan do logo (docs/gorila-monitoramento.svg).
+  // Igual nos dois modos: preenche o botão da ação principal.
+  static const brand = Color(0xFFF2A900);
+  static const onBrand = Color(0xFF1F1600);
+
   // Escuro — grafite
   static const darkBackground = Color(0xFF121316);
   static const darkSurface = Color(0xFF1E2026);
   static const darkSurfaceHigh = Color(0xFF272A31);
-  static const darkPrimary = Color(0xFF00C2FF);
-  static const darkOnPrimary = Color(0xFF001A1C);
-  static const darkPrimaryContainer = Color(0xFF00363A);
+  static const darkPrimary = brand;
+  static const darkOnPrimary = onBrand;
+  static const darkPrimaryContainer = Color(0xFF3A2B00);
   static const darkTextPrimary = Color(0xFFFFFFFF);
   static const darkTextSecondary = Color(0xFF94A3B8);
   static const darkOutline = Color(0xFF2E323B);
@@ -19,10 +24,12 @@ abstract final class AppColors {
   static const lightBackground = Color(0xFFF8FAFC);
   static const lightSurface = Color(0xFFFFFFFF);
   static const lightSurfaceHigh = Color(0xFFF1F5F9);
-  static const lightPrimary = Color(0xFF0055FF);
+  // O amarelo da marca some no fundo claro (2:1). Para texto, ícone e borda
+  // usa o mesmo tom mais escuro, que passa no WCAG AA (5,06:1 no pior fundo).
+  static const lightPrimary = Color(0xFF8A6100);
   static const lightOnPrimary = Color(0xFFFFFFFF);
-  static const lightPrimaryContainer = Color(0xFFE0EAFF);
-  static const lightOnPrimaryContainer = Color(0xFF002A80);
+  static const lightPrimaryContainer = Color(0xFFFFF1C2);
+  static const lightOnPrimaryContainer = Color(0xFF4A3300);
   static const lightTextPrimary = Color(0xFF0F172A);
   static const lightTextSecondary = Color(0xFF64748B);
   static const lightOutline = Color(0xFFE2E8F0);
@@ -45,13 +52,14 @@ abstract final class AppColors {
   static const darkSuccessContainer = Color(0xFF0B3B2A);
   static const darkOnSuccessContainer = Color(0xFFA7F3D0);
 
-  // Atenção (ex.: "Último uso disponível")
-  static const lightWarning = Color(0xFFA15C00);
-  static const lightWarningContainer = Color(0xFFFFF1CC);
-  static const lightOnWarningContainer = Color(0xFF7A4100);
-  static const darkWarning = Color(0xFFFBBF24);
-  static const darkWarningContainer = Color(0xFF3A2A06);
-  static const darkOnWarningContainer = Color(0xFFFDE68A);
+  // Atenção (ex.: "Último uso disponível").
+  // Laranja, para não se confundir com o amarelo da marca.
+  static const lightWarning = Color(0xFFC2410C);
+  static const lightWarningContainer = Color(0xFFFFEDD5);
+  static const lightOnWarningContainer = Color(0xFF9A3412);
+  static const darkWarning = Color(0xFFFB923C);
+  static const darkWarningContainer = Color(0xFF3A1E08);
+  static const darkOnWarningContainer = Color(0xFFFED7AA);
 }
 
 /// Cores de status que o [ColorScheme] do Material não tem.

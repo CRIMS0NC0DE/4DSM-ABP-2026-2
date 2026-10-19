@@ -6,6 +6,7 @@ import '../../services/api_client.dart';
 import '../widgets/botao_acao.dart';
 import '../widgets/campo_texto.dart';
 import '../widgets/logo_passe.dart';
+import '../widgets/tela_carregando.dart';
 import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -45,16 +46,18 @@ class _LoginViewState extends State<LoginView> {
       return;
     }
     setState(() => _entrando = true);
+    final usuario = _usuario.text.trim();
+    final senha = _senha.text;
     try {
-      final usuario = await controller.entrar(
-        _usuario.text.trim(),
-        _senha.text,
-      );
-      if (!mounted) return;
-      // Troca o login pelo menu do perfil, para o Voltar do celular não
-      // voltar ao login.
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => menuDoPerfil(usuario.perfil)),
+      // A tela de carregamento troca o login pelo menu do perfil, para o
+      // Voltar do celular não voltar ao login.
+      await TelaCarregando.abrir(
+        context,
+        mensagem: 'Entrando…',
+        tarefa: () async {
+          final conta = await controller.entrar(usuario, senha);
+          return menuDoPerfil(conta.perfil);
+        },
       );
     } on ApiException catch (erro) {
       // A mensagem vem da API, ex.: "E-mail, CPF ou senha não conferem."
@@ -216,8 +219,6 @@ class _Marca extends StatelessWidget {
 
     return Row(
       children: [
-        const LogoPasse(tamanho: 56),
-        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

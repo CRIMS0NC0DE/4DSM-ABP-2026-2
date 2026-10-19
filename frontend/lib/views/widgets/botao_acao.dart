@@ -92,14 +92,14 @@ class _BotaoAcaoState extends State<BotaoAcao> {
       onPressed: _habilitado ? _tocar : null,
       style:
           ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
+            backgroundColor: colorScheme.primaryFixed,
+            foregroundColor: colorScheme.onPrimaryFixed,
             disabledBackgroundColor: apagado
                 ? colorScheme.surfaceContainerHighest
-                : colorScheme.primary,
+                : colorScheme.primaryFixed,
             disabledForegroundColor: apagado
                 ? colorScheme.onSurfaceVariant
-                : colorScheme.onPrimary,
+                : colorScheme.onPrimaryFixed,
             elevation: 0,
             side: BorderSide(
               color: apagado
@@ -109,7 +109,7 @@ class _BotaoAcaoState extends State<BotaoAcao> {
           ).copyWith(
             overlayColor: WidgetStateProperty.resolveWith((estados) {
               if (estados.contains(WidgetState.pressed)) {
-                return colorScheme.onPrimary.withValues(alpha: 0.14);
+                return colorScheme.onPrimaryFixed.withValues(alpha: 0.14);
               }
               if (estados.contains(WidgetState.hovered)) {
                 return Colors.white.withValues(alpha: 0.08);
@@ -128,7 +128,7 @@ class _BotaoAcaoState extends State<BotaoAcao> {
                     dimension: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.6,
-                      color: colorScheme.onPrimary,
+                      color: colorScheme.onPrimaryFixed,
                     ),
                   )
                 : Icon(widget.icone, key: ValueKey(widget.icone), size: 22),
@@ -149,7 +149,7 @@ class _BotaoAcaoState extends State<BotaoAcao> {
           borderRadius: BorderRadius.circular(AppTheme.radius),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withValues(alpha: alfaBrilho),
+              color: colorScheme.primaryFixed.withValues(alpha: alfaBrilho),
               blurRadius: pressionado ? 12 : 28,
               spreadRadius: -6,
               offset: Offset(0, pressionado ? 4 : 12),

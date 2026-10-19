@@ -14,6 +14,7 @@ import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/register_view.dart';
 import 'package:public/views/visitor/visitor_menu_view.dart';
+import 'package:public/views/widgets/tela_carregando.dart';
 
 import '../../support/api_falsa.dart';
 
@@ -197,14 +198,19 @@ void main() {
     await tester.tap(_botaoEntrar);
     await tester.pump();
 
-    expect(find.text('Entrando…'), findsOneWidget);
     final botao = find.ancestor(
       of: find.text('Entrando…'),
       matching: find.bySubtype<ElevatedButton>(),
     );
+    expect(botao, findsOneWidget);
     expect(tester.widget<ElevatedButton>(botao).onPressed, isNull);
-    await tester.tap(botao);
+    // O toque cai na tela de carregamento, que já está abrindo por cima.
+    await tester.tap(botao, warnIfMissed: false);
     expect(chamadas, 1);
+
+    // A rota nova só aparece no frame seguinte ao push.
+    await tester.pump();
+    expect(find.byType(TelaCarregando), findsOneWidget);
 
     resposta.complete(
       respostaJson({
