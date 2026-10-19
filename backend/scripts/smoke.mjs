@@ -68,6 +68,10 @@ const novaTag = await chamar('POST', `/users/${ana.id}/tags`, {
 });
 conferir(novaTag.status === 201, 'vincula tag NFC', novaTag.body);
 
+// O seed dá à visitante uma autorização das 14h às 16h; sem cancelar, o teste do limite de usos depende da hora.
+const doSeed = await chamar('GET', `/authorizations?situacao=ATIVA&userId=${ana.id}`, { token: admin });
+for (const a of doSeed.body ?? []) await chamar('POST', `/authorizations/${a.id}/cancel`, { token: admin });
+
 const autorizacao = await chamar('POST', '/authorizations', {
   token: admin,
   body: { userId: ana.id, accessPointId: catracaId, dataInicio: hojeEmSP, dataFim: hojeEmSP, horaInicio: '00:00', horaFim: '23:59', maxUsos: 1 },
