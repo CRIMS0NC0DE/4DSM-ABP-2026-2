@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Passe · Simulador do terminal</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/qrcode.js" defer></script>
+  <script src="vendor/mqtt.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <h1>Passe <span>simulador do terminal</span></h1>
+    <div class="chips">
+      <span id="chip-api" class="chip">API: desligado</span>
+      <span id="chip-mqtt" class="chip">MQTT: desligado</span>
+    </div>
+  </header>
+
+  <main class="grade">
+    <!-- Terminal da catraca: faz o papel do ESP32 -->
+    <section class="painel">
+      <h2>Terminal da catraca</h2>
+
+      <form id="form-terminal" class="campos">
+        <label>ID do terminal <input id="terminal-id" required autocomplete="off"></label>
+        <label>Chave do terminal <input id="terminal-chave" type="password" required autocomplete="off"></label>
+        <button type="submit" id="btn-ligar">Ligar terminal</button>
+      </form>
+
+      <div class="aparelho">
+        <div id="tela" class="tela">
+          <p id="tela-nome" class="tela-nome">Terminal desligado</p>
+          <div id="qr" class="qr" aria-label="QR Code do terminal"></div>
+          <div class="barra"><div id="barra-tempo"></div></div>
+          <p id="tela-dica" class="tela-dica">Aponte a câmera do app Passe</p>
+
+          <div id="decisao" class="decisao" hidden>
+            <div id="decisao-icone" class="decisao-icone"></div>
+            <p id="decisao-titulo" class="decisao-titulo"></p>
+            <p id="decisao-texto" class="decisao-texto"></p>
+            <p id="decisao-via" class="decisao-via"></p>
+          </div>
+        </div>
+      </div>
+
+      <form id="form-nfc" class="linha">
+        <label>Tag NFC (UID) <input id="nfc-uid" required autocomplete="off"></label>
+        <button type="submit">Aproximar tag</button>
+      </form>
+    </section>
+
+    <!-- Celular de teste: faz o papel do app Flutter enquanto ele não chama a API -->
+    <section class="painel">
+      <h2>Celular de teste</h2>
+
+      <form id="form-login" class="campos">
+        <label>E-mail ou CPF <input id="login" list="contas" required autocomplete="off"></label>
+        <datalist id="contas">
+          <option value="morador@passe.com"></option>
+          <option value="visitante@passe.com"></option>
+          <option value="admin@passe.com"></option>
+        </datalist>
+        <label>Senha <input id="senha" type="password" required></label>
+        <button type="submit">Entrar</button>
+        <p id="logado" class="nota"></p>
+      </form>
+
+      <fieldset class="campos">
+        <legend>Localização do celular</legend>
+        <div class="linha">
+          <label>Latitude <input id="lat" inputmode="decimal" autocomplete="off"></label>
+          <label>Longitude <input id="lng" inputmode="decimal" autocomplete="off"></label>
+        </div>
+        <div class="botoes">
+          <button type="button" id="pos-perto" class="secundario">Na catraca</button>
+          <button type="button" id="pos-longe" class="secundario">A 1 km</button>
+          <button type="button" id="pos-sem" class="secundario">Sem GPS</button>
+        </div>
+      </fieldset>
+
+      <div class="botoes">
+        <button type="button" id="btn-escanear">Ler o QR da tela</button>
+        <button type="button" id="btn-reusar" class="secundario">Reenviar o último QR lido</button>
+      </div>
+
+      <div id="resultado" class="resultado" hidden></div>
+    </section>
+
+    <section class="painel largo">
+      <h2>Registro</h2>
+      <ol id="log" class="log"></ol>
+    </section>
+  </main>
+</body>
+</html>

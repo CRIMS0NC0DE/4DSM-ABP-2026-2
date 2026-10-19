@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/login_controller.dart';
-import '../../core/theme/app_colors.dart';
-import '../../models/usuario.dart';
-import '../access_controller/access_controller_menu_view.dart';
-import '../admin/admin_menu_view.dart';
-import '../resident/resident_menu_view.dart';
+import '../../core/routes/rotas.dart';
+import '../../services/api_client.dart';
+import '../widgets/botao_acao.dart';
 import '../widgets/campo_texto.dart';
+import '../widgets/tela_carregando.dart';
 import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -27,6 +26,9 @@ class _LoginViewState extends State<LoginView> {
   /// Só valida enquanto digita depois da primeira tentativa de entrar.
   var _validarAoDigitar = false;
 
+  /// Esperando a resposta da API; trava o botão para não enviar duas vezes.
+  var _entrando = false;
+
   LoginController get controller => widget.controller;
 
   @override
@@ -36,26 +38,32 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  void _entrar() {
+  Future<void> _entrar() async {
+    if (_entrando) return;
     if (!_form.currentState!.validate()) {
       setState(() => _validarAoDigitar = true);
       return;
     }
-    final usuario = controller.entrar(_usuario.text.trim(), _senha.text);
-    if (usuario == null) {
-      _avisar('E-mail, CPF ou senha incorretos.');
-      return;
+    setState(() => _entrando = true);
+    final usuario = _usuario.text.trim();
+    final senha = _senha.text;
+    try {
+      // A tela de carregamento troca o login pelo menu do perfil, para o
+      // Voltar do celular não voltar ao login.
+      await TelaCarregando.abrir(
+        context,
+        mensagem: 'Entrando…',
+        tarefa: () async {
+          final conta = await controller.entrar(usuario, senha);
+          return menuDoPerfil(conta.perfil);
+        },
+      );
+    } on ApiException catch (erro) {
+      // A mensagem vem da API, ex.: "E-mail, CPF ou senha não conferem."
+      if (mounted) _avisar(erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _entrando = false);
     }
-    // Cada perfil abre o seu menu.
-    final Widget menu = switch (usuario.perfil) {
-      Perfil.admin => AdminMenuView(),
-      Perfil.controladorAcesso => AccessControllerMenuView(),
-      Perfil.morador => ResidentMenuView(),
-    };
-    // Troca o login pelo menu, para o Voltar do celular não voltar ao login.
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => menu),
-    );
   }
 
   Future<void> _registrar() async {
@@ -75,9 +83,9 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Form(
           key: _form,
@@ -111,7 +119,7 @@ class _LoginViewState extends State<LoginView> {
                               'Use seu e-mail ou CPF e a senha que você '
                               'recebeu da portaria.',
                               style: textTheme.bodyLarge?.copyWith(
-                                color: AppColors.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 28),
@@ -145,10 +153,11 @@ class _LoginViewState extends State<LoginView> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const SizedBox(height: 32),
-                            FilledButton.icon(
-                              onPressed: _entrar,
-                              icon: const Icon(Icons.login),
-                              label: const Text('Entrar'),
+                            BotaoAcao(
+                              rotulo: _entrando ? 'Entrando…' : 'Entrar',
+                              icone: Icons.login,
+                              carregando: _entrando,
+                              onTocar: _entrar,
                             ),
                             const SizedBox(height: 12),
                             OutlinedButton.icon(
@@ -175,7 +184,7 @@ class _LoginViewState extends State<LoginView> {
                                 Text(
                                   'Primeiro acesso?',
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 TextButton(
@@ -209,20 +218,6 @@ class _Marca extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Icon(
-            Icons.door_front_door,
-            color: AppColors.onPrimary,
-            size: 32,
-          ),
-        ),
-        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/register_controller.dart';
-import '../../core/theme/app_colors.dart';
+import '../widgets/botao_acao.dart';
 import '../widgets/campo_texto.dart';
 
 class RegisterView extends StatefulWidget {
@@ -37,18 +37,19 @@ class _RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
-  void _registrar() {
+  Future<void> _registrar() async {
     if (!_form.currentState!.validate()) {
       setState(() => _validarAoDigitar = true);
       return;
     }
     final email = _email.text.trim();
-    final erro = controller.registrar(
+    final erro = await controller.registrar(
       nome: _nome.text.trim(),
       cpf: _cpf.text.trim(),
       email: email,
       senha: _senha.text,
     );
+    if (!mounted) return;
     if (erro != null) {
       _avisar(erro);
       return;
@@ -67,9 +68,9 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Form(
           key: _form,
@@ -100,7 +101,7 @@ class _RegisterViewState extends State<RegisterView> {
                       Text(
                         'Preencha seus dados para o primeiro acesso.',
                         style: textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -157,10 +158,10 @@ class _RegisterViewState extends State<RegisterView> {
                         onEnviar: _registrar,
                       ),
                       const SizedBox(height: 32),
-                      FilledButton.icon(
-                        onPressed: _registrar,
-                        icon: const Icon(Icons.person_add_alt_1_outlined),
-                        label: const Text('Registrar'),
+                      BotaoAcao(
+                        rotulo: 'Registrar',
+                        icone: Icons.person_add_alt_1_outlined,
+                        onTocar: _registrar,
                       ),
                     ],
                   ),

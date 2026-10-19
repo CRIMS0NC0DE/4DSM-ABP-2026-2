@@ -4,6 +4,7 @@ import '../../controllers/access_controller_menu_controller.dart';
 import '../../models/opcao_menu.dart';
 import '../user/login_view.dart';
 import '../widgets/menu_grade.dart';
+import '../widgets/tela_carregando.dart';
 
 class AccessControllerMenuView extends StatelessWidget {
   final AccessControllerMenuController controller;
@@ -23,14 +24,16 @@ class AccessControllerMenuView extends StatelessWidget {
       );
   }
 
-  void _sair(BuildContext context) {
-    controller.sair();
-    // Volta para o login e limpa o histórico, para o Voltar não reabrir o menu.
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => LoginView()),
-      (_) => false,
-    );
-  }
+  /// Volta para o login; a tela de carregamento limpa o histórico, para o
+  /// Voltar não reabrir o menu.
+  Future<void> _sair(BuildContext context) => TelaCarregando.abrir(
+    context,
+    mensagem: 'Saindo…',
+    tarefa: () async {
+      await controller.sair();
+      return LoginView();
+    },
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -14,7 +14,7 @@ class _ControllerEspiao extends ResidentMenuController {
   void abrir(OpcaoMenu opcao) => abertas.add(opcao.titulo);
 
   @override
-  void sair() => saiu = true;
+  Future<void> sair() async => saiu = true;
 }
 
 void main() {

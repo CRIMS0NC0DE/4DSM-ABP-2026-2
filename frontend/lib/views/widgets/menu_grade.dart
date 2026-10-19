@@ -29,6 +29,7 @@ class MenuGrade extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final medidas = _MedidasCard(context, secoes);
 
     return CustomScrollView(
@@ -83,8 +84,8 @@ class MenuGrade extends StatelessWidget {
               icon: const Icon(Icons.logout),
               label: const Text('Sair da conta'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error),
+                foregroundColor: colorScheme.error,
+                side: BorderSide(color: colorScheme.error, width: 1.5),
               ),
             ),
           ),
@@ -173,6 +174,7 @@ class _Cabecalho extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,19 +184,23 @@ class _Cabecalho extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.primaryContainer,
+            color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(iconePerfil, size: 18, color: AppColors.onPrimaryContainer),
+              Icon(
+                iconePerfil,
+                size: 18,
+                color: colorScheme.onPrimaryContainer,
+              ),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   perfil,
                   style: textTheme.labelMedium?.copyWith(
-                    color: AppColors.onPrimaryContainer,
+                    color: colorScheme.onPrimaryContainer,
                   ),
                 ),
               ),
@@ -215,11 +221,13 @@ class _CardOpcao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final status = StatusColors.of(context);
     final (cor, fundo) = switch (opcao.tom) {
-      TomOpcao.padrao => (AppColors.primary, AppColors.primaryContainer),
-      TomOpcao.sucesso => (AppColors.success, AppColors.successContainer),
-      TomOpcao.atencao => (AppColors.warning, AppColors.warningContainer),
-      TomOpcao.perigo => (AppColors.error, AppColors.errorContainer),
+      TomOpcao.padrao => (colorScheme.primary, colorScheme.primaryContainer),
+      TomOpcao.sucesso => (status.success, status.successContainer),
+      TomOpcao.atencao => (status.warning, status.warningContainer),
+      TomOpcao.perigo => (colorScheme.error, colorScheme.errorContainer),
     };
 
     return Semantics(

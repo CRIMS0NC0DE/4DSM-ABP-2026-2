@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+import '../services/api_client.dart';
 import '../services/auth_service.dart';
 
 /// Tela de primeiro acesso (criar conta).
-/// Protótipo: guarda a conta no AuthService, que ainda não chama a API.
-/// Toda conta criada aqui é de morador.
+/// A API ainda não tem cadastro público (ver AuthService.registrar), então
+/// por enquanto a tela avisa para pedir o cadastro na portaria.
 class RegisterController {
   RegisterController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;
@@ -50,20 +51,18 @@ class RegisterController {
   }
 
   /// Devolve a mensagem de erro, ou null se a conta foi criada.
-  String? registrar({
+  Future<String?> registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
-  }) {
+  }) async {
     debugPrint('Registrando $nome ($email)...');
-    final usuario = _auth.registrar(
-      nome: nome,
-      cpf: cpf,
-      email: email,
-      senha: senha,
-    );
-    if (usuario == null) return 'Já existe uma conta com esse e-mail ou CPF.';
-    return null;
+    try {
+      await _auth.registrar(nome: nome, cpf: cpf, email: email, senha: senha);
+      return null;
+    } on ApiException catch (erro) {
+      return erro.mensagem;
+    }
   }
 }

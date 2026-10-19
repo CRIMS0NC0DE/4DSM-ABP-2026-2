@@ -1,0 +1,186 @@
+// Modelo de dados do Passe. Segue o diagrama ER em docs/.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Perfil {
+  ADMIN
+  CONTROLADOR_ACESSO
+  CONDOMINO
+  VISITANTE
+}
+
+enum StatusAutorizacao {
+  ATIVA
+  CANCELADA
+}
+
+enum MetodoAcesso {
+  QR
+  NFC
+}
+
+enum ResultadoAcesso {
+  LIBERADO
+  NEGADO
+}
+
+model User {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  cpf       String   @unique
+  senhaHash String
+  perfil    Perfil
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tags         NfcTag[]
+  autorizacoes Authorization[]
+  eventos      AccessEvent[]
+
+  @@map("users")
+}
+
+model NfcTag {
+  id        String   @id @default(uuid())
+  uid       String   @unique
+  userId    String
+  ativa     Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("nfc_tags")
+}
+
+// Edifício > Portaria > Porta > Catraca (RF02)
+model Building {
+  id       String @id @default(uuid())
+  nome     String
+  endereco String
+
+  portarias Gate[]
+
+  @@map("buildings")
+}
+
+model Gate {
+  id         String @id @default(uuid())
+  nome       String
+  buildingId String
+
+  edificio Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  portas   Door[]
+
+  @@map("gates")
+}
+
+model Door {
+  id     String @id @default(uuid())
+  nome   String
+  gateId String
+
+  portaria Gate          @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  catracas AccessPoint[]
+
+  @@map("doors")
+}
+
+// Catraca: o ponto onde o acesso é liberado ou negado.
+model AccessPoint {
+  id         String @id @default(uuid())
+  nome       String
+  doorId     String
+  latitude   Float
+  longitude  Float
+  raioMetros Int    @default(100)
+
+  porta        Door            @relation(fields: [doorId], references: [id], onDelete: Cascade)
+  terminal     Terminal?
+  autorizacoes Authorization[]
+  eventos      AccessEvent[]
+
+  @@map("access_points")
+}
+
+// O dispositivo IoT instalado na catraca.
+model Terminal {
+  id            String    @id @default(uuid())
+  nome          String
+  accessPointId String    @unique
+  chaveHash     String
+  ultimoSinal   DateTime?
+  latitude      Float?
+  longitude     Float?
+
+  catraca AccessPoint   @relation(fields: [accessPointId], references: [id], onDelete: Cascade)
+  eventos AccessEvent[]
+
+  @@map("terminals")
+}
+
+model Authorization {
+  id             String            @id @default(uuid())
+  userId         String
+  accessPointId  String
+  dataInicio     DateTime          @db.Date
+  dataFim        DateTime          @db.Date
+  // "HH:MM" no fuso do prédio
+  horaInicio     String
+  horaFim        String
+  maxUsos        Int
+  usosRealizados Int               @default(0)
+  status         StatusAutorizacao @default(ATIVA)
+  canceladaEm    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  catraca AccessPoint   @relation(fields: [accessPointId], references: [id], onDelete: Cascade)
+  eventos AccessEvent[]
+
+  @@index([userId, accessPointId])
+  @@map("authorizations")
+}
+
+// Toda tentativa de acesso, liberada ou negada (RF06, RF17).
+model AccessEvent {
+  id              String          @id @default(uuid())
+  metodo          MetodoAcesso
+  resultado       ResultadoAcesso
+  motivo          String?
+  userId          String?
+  accessPointId   String?
+  terminalId      String?
+  authorizationId String?
+  credencial      String?
+  latitude        Float?
+  longitude       Float?
+  distanciaMetros Float?
+  createdAt       DateTime        @default(now())
+
+  user        User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  catraca     AccessPoint?   @relation(fields: [accessPointId], references: [id], onDelete: SetNull)
+  terminal    Terminal?      @relation(fields: [terminalId], references: [id], onDelete: SetNull)
+  autorizacao Authorization? @relation(fields: [authorizationId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("access_events")
+}
+
+// Cada QR só pode ser usado uma vez.
+model UsedQrToken {
+  jti    String   @id
+  usedAt DateTime @default(now())
+
+  @@map("used_qr_tokens")
+}

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// Cor do ícone da opção. A tela troca pelo par de cores do AppColors.
+/// Cor do ícone da opção. A tela troca pelo par de cores do tema.
 enum TomOpcao { padrao, sucesso, atencao, perigo }
 
 /// Um card do menu em grade.

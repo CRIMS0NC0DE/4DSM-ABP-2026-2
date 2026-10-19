@@ -3,13 +3,13 @@ import 'package:flutter/foundation.dart';
 import '../models/usuario.dart';
 import '../services/auth_service.dart';
 
-/// Tela de login.
-/// Protótipo: confere as contas do AuthService, que ainda não chama a API.
+/// Tela de login. Entra pela API (POST /auth/login).
 class LoginController {
   LoginController({AuthService? auth}) : _auth = auth ?? AuthService.instancia;
 
   final AuthService _auth;
 
+  // Mesmas regras do loginSchema do backend (auth.controller.ts).
   String? validarUsuario(String? valor) {
     if (valor == null || valor.trim().isEmpty) {
       return 'Informe seu e-mail ou CPF.';
@@ -22,19 +22,22 @@ class LoginController {
     return null;
   }
 
-  /// Devolve quem entrou, ou null se o e-mail/CPF ou a senha estiverem errados.
-  /// O perfil do usuário diz qual menu abrir.
-  Usuario? entrar(String usuario, String senha) {
+  /// Devolve quem entrou; o perfil diz qual menu abrir.
+  /// Lança ApiException com a mensagem para a tela (senha errada,
+  /// cadastro desativado ou sem conexão).
+  Future<Usuario> entrar(String usuario, String senha) {
     debugPrint('Entrando como $usuario...');
     return _auth.entrar(usuario, senha);
   }
 
   void entrarComNfc() {
-    // Lógica para ler a tag NFC
+    // A API só valida tag NFC no terminal da catraca (POST /terminal/nfc),
+    // não no login do app.
     debugPrint('Entrando com NFC...');
   }
 
   void esqueciSenha() {
+    // Sem rota na API: a portaria troca a senha (PATCH /users/:id).
     debugPrint('Esqueci minha senha...');
   }
 
