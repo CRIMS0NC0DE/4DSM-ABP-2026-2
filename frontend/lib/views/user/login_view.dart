@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../controllers/login_controller.dart';
 import '../../core/routes/rotas.dart';
-import '../../core/theme/app_colors.dart';
 import '../../services/api_client.dart';
+import '../widgets/botao_acao.dart';
 import '../widgets/campo_texto.dart';
+import '../widgets/logo_passe.dart';
 import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -80,9 +81,9 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Form(
           key: _form,
@@ -116,7 +117,7 @@ class _LoginViewState extends State<LoginView> {
                               'Use seu e-mail ou CPF e a senha que você '
                               'recebeu da portaria.',
                               style: textTheme.bodyLarge?.copyWith(
-                                color: AppColors.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 28),
@@ -150,17 +151,11 @@ class _LoginViewState extends State<LoginView> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const SizedBox(height: 32),
-                            FilledButton.icon(
-                              onPressed: _entrando ? null : _entrar,
-                              icon: _entrando
-                                  ? const SizedBox.square(
-                                      dimension: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.login),
-                              label: Text(_entrando ? 'Entrando…' : 'Entrar'),
+                            BotaoAcao(
+                              rotulo: _entrando ? 'Entrando…' : 'Entrar',
+                              icone: Icons.login,
+                              carregando: _entrando,
+                              onTocar: _entrar,
                             ),
                             const SizedBox(height: 12),
                             OutlinedButton.icon(
@@ -187,7 +182,7 @@ class _LoginViewState extends State<LoginView> {
                                 Text(
                                   'Primeiro acesso?',
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 TextButton(
@@ -221,19 +216,7 @@ class _Marca extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Icon(
-            Icons.door_front_door,
-            color: AppColors.onPrimary,
-            size: 32,
-          ),
-        ),
+        const LogoPasse(tamanho: 56),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

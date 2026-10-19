@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/routes/rotas.dart';
@@ -27,6 +28,17 @@ class PasseApp extends StatelessWidget {
       title: 'Passe',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      // Segue o modo claro/escuro escolhido no celular.
+      themeMode: ThemeMode.system,
+      // Ícones da barra de status legíveis nas telas sem AppBar
+      // (login e menus).
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        child: child!,
+      ),
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       // CORREÇÃO AQUI: Lista explícita dos delegados de localização

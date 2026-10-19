@@ -48,7 +48,7 @@ const _menuDoPerfil = {
 /// O texto "Entrar" aparece no título e no botão; aqui só o botão.
 final _botaoEntrar = find.ancestor(
   of: find.text('Entrar'),
-  matching: find.bySubtype<FilledButton>(),
+  matching: find.bySubtype<ElevatedButton>(),
 );
 
 Finder _campo(String rotulo) => find.descendant(
@@ -200,9 +200,9 @@ void main() {
     expect(find.text('Entrando…'), findsOneWidget);
     final botao = find.ancestor(
       of: find.text('Entrando…'),
-      matching: find.bySubtype<FilledButton>(),
+      matching: find.bySubtype<ElevatedButton>(),
     );
-    expect(tester.widget<FilledButton>(botao).onPressed, isNull);
+    expect(tester.widget<ElevatedButton>(botao).onPressed, isNull);
     await tester.tap(botao);
     expect(chamadas, 1);
 

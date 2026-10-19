@@ -11,6 +11,8 @@ class MenuView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Menu')),
       body: Padding(
@@ -37,8 +39,8 @@ class MenuView extends StatelessWidget {
             ElevatedButton(
               onPressed: () => controller.fechar(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
               ),
               child: const Text('4. Fechar'),
             ),
