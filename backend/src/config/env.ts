@@ -16,7 +16,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('8h'),
   QR_SECRET: z.string().min(16, 'QR_SECRET precisa de pelo menos 16 caracteres'),
   QR_ROTATION_SECONDS: z.coerce.number().int().positive().default(10),
-  QR_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(20),
+  QR_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(30),
   APP_TIMEZONE: z.string().default('America/Sao_Paulo'),
   CORS_ORIGIN: z.string().default('*'),
   // Broker MQTT que leva as decisões aos terminais. Sem ele, os terminais consultam por HTTP.

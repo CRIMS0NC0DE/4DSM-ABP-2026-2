@@ -127,7 +127,7 @@ As colunas "Rotas" e "Validações" vêm do código do backend (`backend/src/mod
 |---|---|---|---|
 | **U1 Login** | ✅ | `POST /auth/login` `{login, senha}` → `{token, usuario}` | Feito. `login` aceita e-mail ou CPF com ou sem pontuação. |
 | **U2 Início** ("Olá, Maria", próxima autorização) | 🟢 | `GET /me/authorizations` | Nome vem de `AuthService.instancia.usuario`. "Sua próxima autorização" = primeiro item com `situacao == 'ATIVA'`. Mostrar `dataFim`, `horaInicio`–`horaFim` e `usosRestantes` de `maxUsos`. |
-| **U3 Scanner de QR** | 🟢 (falta config) | nenhuma; só lê o QR | `mobile_scanner` já está no pubspec. O conteúdo do QR **é** o token (JWT) que o terminal mostra; vale cerca de 20 s e troca a cada 10 s. Falta permissão de câmera (P2.1). |
+| **U3 Scanner de QR** | 🟢 (falta config) | nenhuma; só lê o QR | `mobile_scanner` já está no pubspec. O conteúdo do QR **é** o token (JWT) que o terminal mostra; vale cerca de 30 s e troca a cada 10 s. Falta permissão de câmera (P2.1). |
 | **U4 Validando** | 🟢 | `POST /access/qr` `{token, latitude, longitude}` | Pegar a posição com `geolocator` (já no pubspec) **antes** de enviar. Sem posição, a API nega com `LOCALIZACAO_AUSENTE`. A resposta é sempre **200**, mesmo negado: decidir pela flag `liberado`. |
 | **U5 Acesso liberado** | 🟢 | resposta do `POST /access/qr` | `liberado: true`, `catraca.nome`, `catraca.caminho` ("Edifício › Portaria › Porta"), `usosRestantes`, `em`. |
 | **U6 Acesso negado** | 🟢 | resposta do `POST /access/qr` | `liberado: false`; a API já manda `titulo` e `oQueFazer` com o texto do design. Usar `motivo` só para escolher ícone/cor. |
@@ -154,7 +154,7 @@ A tela de "Acesso negado" é a mesma; muda o texto, que já vem pronto em `titul
 | — | `AUTORIZACAO_NAO_INICIADA` | Antes de `dataInicio` (sem tela no design) |
 | — | `SEM_AUTORIZACAO` | Nenhuma autorização para aquela catraca |
 | E8 | `LOCALIZACAO_AUSENTE` | O app não mandou latitude/longitude |
-| — | `QR_INVALIDO`, `QR_EXPIRADO`, `QR_JA_UTILIZADO` | QR errado, velho (> 20 s) ou já usado: "Tentar novamente" deve reabrir o scanner |
+| — | `QR_INVALIDO`, `QR_EXPIRADO`, `QR_JA_UTILIZADO` | QR errado, velho (> 30 s) ou já usado: "Tentar novamente" deve reabrir o scanner |
 | — | `USUARIO_INATIVO`, `TERMINAL_DESCONHECIDO` | Cadastro desativado ou catraca sem terminal |
 | — | `TAG_DESCONHECIDA`, `TAG_BLOQUEADA` | Só no NFC, aparecem no histórico e no terminal |
 

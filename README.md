@@ -20,7 +20,7 @@ App Flutter ──REST/JWT──▶ API (Express + Prisma) ──▶ Postgres
 
 ## Como o acesso por QR funciona
 
-1. O terminal busca um QR em `GET /terminal/qr-token`. É um JWT de uso único que vale 20 s e troca a cada 10 s.
+1. O terminal busca um QR em `GET /terminal/qr-token`. É um JWT de uso único que vale 30 s e troca a cada 10 s.
 2. O morador lê o QR com o app, que manda `POST /access/qr` com o token, a localização do celular e o JWT do usuário.
 3. A API confere a assinatura e a validade do QR, se o usuário está ativo e tem autorização para aquele ponto, se está a até 100 m do terminal e se o QR ainda não foi usado.
 4. A decisão (`ABRIR` ou `NEGAR`) vai para o terminal pelo tópico MQTT `passe/terminais/{terminalId}/decisoes` (QoS 1). Se o broker cair, o terminal consulta `GET /terminal/decisions?apos={seq}` como reserva.
