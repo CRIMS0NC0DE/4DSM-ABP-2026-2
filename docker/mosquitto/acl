@@ -1,0 +1,7 @@
+# A API publica a decisão (ABRIR/NEGAR) no tópico de qualquer terminal.
+user passe-api
+topic write passe/terminais/+/decisoes
+
+# Cada terminal entra com usuário = Id do terminal e só lê o próprio tópico.
+# %u é trocado pelo usuário conectado; um terminal não lê decisões de outro.
+pattern read passe/terminais/%u/decisoes

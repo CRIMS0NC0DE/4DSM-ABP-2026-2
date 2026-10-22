@@ -127,7 +127,7 @@ As colunas "Rotas" e "Validações" vêm do código do backend (`backend/src/mod
 |---|---|---|---|
 | **U1 Login** | ✅ | `POST /auth/login` `{login, senha}` → `{token, usuario}` | Feito. `login` aceita e-mail ou CPF com ou sem pontuação. |
 | **U2 Início** ("Olá, Maria", próxima autorização) | 🟢 | `GET /me/authorizations` | Nome vem de `AuthService.instancia.usuario`. "Sua próxima autorização" = primeiro item com `situacao == 'ATIVA'`. Mostrar `dataFim`, `horaInicio`–`horaFim` e `usosRestantes` de `maxUsos`. |
-| **U3 Scanner de QR** | 🟢 (falta config) | nenhuma; só lê o QR | `mobile_scanner` já está no pubspec. O conteúdo do QR **é** o token (JWT) que o terminal mostra; vale cerca de 30 s e troca a cada 10 s. Falta permissão de câmera (P2.1). |
+| **U3 Scanner de QR** | 🟢 (falta config) | nenhuma; só lê o QR | `mobile_scanner` já está no pubspec. O conteúdo do QR **é** o token que o terminal mostra (texto curto assinado, `P1.…`, ~78 caracteres; ver `docs/terminal-iot.md`); vale cerca de 30 s e troca a cada 10 s. Mandar o texto lido sem alterar. Falta permissão de câmera (P2.1). |
 | **U4 Validando** | 🟢 | `POST /access/qr` `{token, latitude, longitude}` | Pegar a posição com `geolocator` (já no pubspec) **antes** de enviar. Sem posição, a API nega com `LOCALIZACAO_AUSENTE`. A resposta é sempre **200**, mesmo negado: decidir pela flag `liberado`. |
 | **U5 Acesso liberado** | 🟢 | resposta do `POST /access/qr` | `liberado: true`, `catraca.nome`, `catraca.caminho` ("Edifício › Portaria › Porta"), `usosRestantes`, `em`. |
 | **U6 Acesso negado** | 🟢 | resposta do `POST /access/qr` | `liberado: false`; a API já manda `titulo` e `oQueFazer` com o texto do design. Usar `motivo` só para escolher ícone/cor. |

@@ -15,17 +15,19 @@ App Flutter ──REST/JWT──▶ API (Express + Prisma) ──▶ Postgres
 |---|---|
 | `backend/` | API em Node 24 + TypeScript (Express 5, Prisma 7, zod, vitest) |
 | `frontend/` | App Flutter (login, sessão e menus por perfil ligados à API) |
-| `docker/` | Configuração do broker Mosquitto |
+| `firmware/` | Firmware do terminal ESP32 (PlatformIO): QR no display, MQTT, NFC e relé |
+| `docker/` | Configuração do broker Mosquitto (login, ACL e TLS) |
+| `scripts/` | Preparação da rede no Windows para o ESP32 |
 | `docs/` | Design das telas, fluxo da arquitetura e o estado da integração front × back |
 
 ## Como o acesso por QR funciona
 
-1. O terminal busca um QR em `GET /terminal/qr-token`. É um JWT de uso único que vale 30 s e troca a cada 10 s.
+1. O terminal busca um QR em `GET /terminal/qr-token`. É um token curto assinado pelo backend (HMAC), de uso único, que vale 30 s e troca a cada 10 s. O terminal só desenha o texto como QR; nenhuma imagem trafega (decisão em `docs/terminal-iot.md`).
 2. O morador lê o QR com o app, que manda `POST /access/qr` com o token, a localização do celular e o JWT do usuário.
 3. A API confere a assinatura e a validade do QR, se o usuário está ativo e tem autorização para aquele ponto, se está a até 100 m do terminal e se o QR ainda não foi usado.
 4. A decisão (`ABRIR` ou `NEGAR`) vai para o terminal pelo tópico MQTT `passe/terminais/{terminalId}/decisoes` (QoS 1). Se o broker cair, o terminal consulta `GET /terminal/decisions?apos={seq}` como reserva.
 
-Pelo NFC o terminal manda o UID da tag em `POST /terminal/nfc` e recebe a decisão pelo mesmo caminho. As rotas do terminal se autenticam pelos cabeçalhos `X-Terminal-Id` e `X-Terminal-Key`.
+Pelo NFC o terminal manda o UID da tag em `POST /terminal/nfc` e recebe a decisão na resposta. As rotas do terminal se autenticam pelos cabeçalhos `X-Terminal-Id` e `X-Terminal-Key`; no broker, o terminal entra com usuário = Id e senha = chave, e a ACL só deixa ele ler o próprio tópico.
 
 ## Como rodar
 
@@ -68,6 +70,19 @@ Terminal de demonstração: `X-Terminal-Id=00000000-0000-4000-8000-000000000005`
 
 Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o papel da catraca: mostra o QR rotativo, recebe as decisões por MQTT (ou por consulta HTTP, se o broker não estiver no ar), lê tag NFC e tem um "celular de teste" para ler o QR de dentro do navegador, de perto da catraca, a 1 km ou sem GPS. Dá para testar acesso liberado, QR reutilizado, pessoa longe do terminal e NFC sem nenhum hardware.
 
+### Terminal físico (ESP32)
+
+| Assunto | Onde |
+|---|---|
+| Decisão do QR, firmware, provisionamento e segurança do broker | [`docs/terminal-iot.md`](docs/terminal-iot.md) |
+| Peças, pinagem e esquema de ligação | [`docs/hardware.md`](docs/hardware.md) |
+| Rede local, firewall e portas no Windows | [`docs/rede-do-prototipo.md`](docs/rede-do-prototipo.md) |
+
+```bash
+cd backend && node scripts/provisionar-terminal.mjs --trocar-chave <terminalId>  # chave nova no firmware e no broker
+cd firmware && pio run -e tft -t upload                                          # grava o ESP32
+```
+
 ## Testes
 
 ```bash
@@ -81,7 +96,7 @@ flutter test test/integracao --dart-define=API_REAL=http://localhost:3000   # co
 
 ## CI/CD
 
-O GitHub Actions roda em todo PR: lint, tipos, testes e build do backend; teste de fumaça com Postgres; `flutter analyze` e `flutter test`; e o build da imagem Docker. Na `main`, a imagem também é publicada no GitHub Container Registry e o deploy no Render é disparado quando o secret `RENDER_DEPLOY_HOOK_URL` estiver configurado.
+O GitHub Actions roda em todo PR: lint, tipos, testes e build do backend; teste de fumaça com Postgres; login, ACL e TLS do broker MQTT; build do firmware do ESP32; `flutter analyze` e `flutter test`; e o build da imagem Docker. Na `main`, a imagem também é publicada no GitHub Container Registry e o deploy no Render é disparado quando o secret `RENDER_DEPLOY_HOOK_URL` estiver configurado.
 
 O fluxo de trabalho é por branch: cada um trabalha na sua (`davi-dev`, `dev-thiago`...) ou numa `feature/`/`fix/`, abre PR para a `main` e só mescla com o CI verde.
 
@@ -94,13 +109,14 @@ Estão todas em `backend/.env.example`. O `.env` de verdade não vai para o git.
 | `DATABASE_URL` | Conexão com o Postgres |
 | `JWT_SECRET`, `JWT_EXPIRES_IN` | Token de login do app |
 | `QR_SECRET`, `QR_ROTATION_SECONDS`, `QR_TOKEN_TTL_SECONDS` | Assinatura e tempo de vida do QR do terminal |
-| `MQTT_URL`, `MQTT_USERNAME`, `MQTT_PASSWORD` | Broker para onde a API publica as decisões (opcional) |
+| `MQTT_URL`, `MQTT_USERNAME`, `MQTT_PASSWORD` | Broker para onde a API publica as decisões (opcional). No compose: usuário `passe-api` |
+| `MQTT_CA_FILE` | CA do broker para `mqtts://` (gerada por `docker/mosquitto/gerar-certificados.sh`) |
 | `MQTT_WS_URL` | Endereço WebSocket do broker usado pelo simulador |
 | `CORS_ORIGIN`, `APP_TIMEZONE`, `PORT`, `NODE_ENV` | Configurações gerais |
 
 ## Próximos passos
 
 - Deploy no Render com Postgres na nuvem
-- Firmware do ESP32 (display para o QR, relé da catraca, leitor NFC)
+- Montar o terminal físico e testar o firmware no ESP32 (`docs/hardware.md`)
 - Restante das telas do app (o andamento está em `docs/integracao-frontend-backend.md`)
-- Autenticação, ACL e TLS no broker MQTT de produção
+- Broker MQTT gerenciado com TLS para o deploy na nuvem (`docs/rede-do-prototipo.md`)

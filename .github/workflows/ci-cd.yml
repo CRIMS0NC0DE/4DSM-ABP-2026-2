@@ -90,6 +90,59 @@ jobs:
         if: failure()
         run: cat api.log
 
+  mqtt:
+    name: Broker MQTT · login, ACL e TLS
+    runs-on: ubuntu-latest
+    needs: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - name: Certificados de teste
+        run: sh docker/mosquitto/gerar-certificados.sh
+      - name: Sobe o Mosquitto com a configuração do projeto
+        run: |
+          docker run -d --name mqtt -p 1883:1883 -p 8883:8883             -v "$PWD/docker/mosquitto:/mosquitto/origem:ro"             --entrypoint sh eclipse-mosquitto:2 /mosquitto/origem/iniciar.sh
+          sleep 3
+      - name: Sem TLS (1883)
+        working-directory: backend
+        run: node scripts/mqtt-acl.mjs
+      - name: Com TLS (8883)
+        working-directory: backend
+        env:
+          MQTT_URL: mqtts://localhost:8883
+          MQTT_CA_FILE: ../docker/mosquitto/certs/ca.crt
+        run: node scripts/mqtt-acl.mjs
+      - name: Log do broker
+        if: failure()
+        run: docker logs mqtt
+
+  firmware:
+    name: Firmware ESP32 · build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/platformio.ini') }}
+      - run: pip install platformio
+      - name: Credenciais de exemplo
+        run: cp include/credenciais.exemplo.h include/credenciais.h
+      - name: Build (ST7789, ILI9341 e OLED)
+        run: pio run -e tft -e ili9341 -e oled
+
   frontend:
     name: Frontend · análise e testes
     runs-on: ubuntu-latest
@@ -127,7 +180,7 @@ jobs:
   deploy:
     name: Deploy (main)
     runs-on: ubuntu-latest
-    needs: [backend, backend-integracao, frontend, docker]
+    needs: [backend, backend-integracao, mqtt, firmware, frontend, docker]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read

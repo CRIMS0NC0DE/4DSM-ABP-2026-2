@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { createApp } from './app.js';
 import { loadEnv } from './config/env.js';
 import { createContainer } from './container.js';
@@ -9,7 +10,13 @@ import { systemClock } from './shared/clock.js';
 
 const env = loadEnv();
 const db = createPrisma(env.DATABASE_URL);
-const mqtt = env.MQTT_URL ? conectarMqtt(env.MQTT_URL, { username: env.MQTT_USERNAME, password: env.MQTT_PASSWORD }) : null;
+const mqtt = env.MQTT_URL
+  ? conectarMqtt(env.MQTT_URL, {
+      username: env.MQTT_USERNAME,
+      password: env.MQTT_PASSWORD,
+      ca: env.MQTT_CA_FILE ? readFileSync(env.MQTT_CA_FILE) : undefined,
+    })
+  : null;
 
 const container = createContainer(
   createPrismaRepositories(db),
