@@ -23,6 +23,8 @@ const envSchema = z.object({
   MQTT_URL: opcional,
   MQTT_USERNAME: opcional,
   MQTT_PASSWORD: opcional,
+  // CA própria do broker, para mqtts:// com certificado gerado por docker/mosquitto/gerar-certificados.sh.
+  MQTT_CA_FILE: opcional,
   // Endereço WebSocket do broker visto pelo navegador, usado pelo simulador do terminal.
   MQTT_WS_URL: opcional,
 });

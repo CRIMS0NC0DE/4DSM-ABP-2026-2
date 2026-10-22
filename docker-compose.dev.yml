@@ -19,14 +19,18 @@ services:
       retries: 10
 
   # Broker MQTT: o backend publica ABRIR/NEGAR e o terminal (ESP32 ou simulador) escuta.
-  # 1883 = MQTT para o ESP32; 9001 = MQTT sobre WebSocket para o simulador no navegador.
+  # 1883 = MQTT para o ESP32; 9001 = MQTT sobre WebSocket para o simulador no navegador;
+  # 8883 = MQTT com TLS (depois de rodar docker/mosquitto/gerar-certificados.sh).
+  # Exige usuário e senha (docker/mosquitto/passwd) e aplica a ACL (docker/mosquitto/acl).
   mqtt:
     image: eclipse-mosquitto:2
+    entrypoint: ["sh", "/mosquitto/origem/iniciar.sh"]
     ports:
       - "${MQTT_PORT:-1883}:1883"
       - "${MQTT_WS_PORT:-9001}:9001"
+      - "${MQTT_TLS_PORT:-8883}:8883"
     volumes:
-      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./docker/mosquitto:/mosquitto/origem:ro
 
   backend:
     build:
@@ -39,6 +43,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-segredo-jwt-so-para-desenvolvimento}
       QR_SECRET: ${QR_SECRET:-segredo-qr-so-para-desenvolvimento}
       MQTT_URL: mqtt://mqtt:1883
+      MQTT_USERNAME: passe-api
+      MQTT_PASSWORD: ${MQTT_API_PASSWORD:-passe-api-dev}
       MQTT_WS_URL: ws://localhost:${MQTT_WS_PORT:-9001}
     # Aplica as migrations, carrega os dados de demonstração e sobe com recarga automática.
     command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run db:seed && npm run dev"

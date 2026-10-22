@@ -27,9 +27,9 @@ export class MqttTerminalNotifier implements TerminalNotifier {
   }
 }
 
-export function conectarMqtt(url: string, credenciais: { username?: string; password?: string } = {}): MqttClient {
+export function conectarMqtt(url: string, opcoes: { username?: string; password?: string; ca?: Buffer } = {}): MqttClient {
   const client = mqtt.connect(url, {
-    ...credenciais,
+    ...opcoes,
     clientId: `passe-api-${randomUUID().slice(0, 8)}`,
     reconnectPeriod: 5000,
   });

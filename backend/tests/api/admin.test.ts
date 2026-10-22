@@ -228,6 +228,42 @@ describe('Histórico e painel (RF06)', () => {
     expect(lista.body[0].online).toBe(false);
   });
 
+  it('terminal novo aparece online depois do primeiro heartbeat (issue #8)', async () => {
+    const c = await montarCenario();
+    const auth = { Authorization: `Bearer ${await c.tokenDe('carlos@passe.com')}` };
+    const catraca3 = await c.repos.locations.createAccessPoint({ nome: 'Catraca 3', doorId: c.catraca.doorId, raioMetros: 100, latitude: 0, longitude: 0 });
+
+    const novo = await c.api.post('/terminals').set(auth).send({ nome: 'Terminal Catraca 3', accessPointId: catraca3.id });
+    expect(novo.status).toBe(201);
+    expect(novo.body.chave).toMatch(/^[0-9a-f]{64}$/);
+    const headers = { 'X-Terminal-Id': novo.body.id, 'X-Terminal-Key': novo.body.chave };
+
+    expect((await c.api.post('/terminal/heartbeat').set(headers).send({})).status).toBe(200);
+    const online = (await c.api.get('/terminals').set(auth)).body.find((t: { id: string }) => t.id === novo.body.id);
+    expect(online).toMatchObject({ online: true });
+    expect(online).not.toHaveProperty('chave');
+
+    c.clock.avancar(91);
+    const semSinal = (await c.api.get('/terminals').set(auth)).body.find((t: { id: string }) => t.id === novo.body.id);
+    expect(semSinal.online).toBe(false);
+  });
+
+  it('troca a chave: a antiga para de funcionar e só o admin pode trocar (issue #8)', async () => {
+    const c = await montarCenario();
+    const admin = { Authorization: `Bearer ${await c.tokenDe('carlos@passe.com')}` };
+    const portaria = { Authorization: `Bearer ${await c.tokenDe('paula@passe.com')}` };
+
+    expect((await c.api.post(`/terminals/${c.terminal.id}/rotate-key`).set(portaria)).status).toBe(403);
+
+    const troca = await c.api.post(`/terminals/${c.terminal.id}/rotate-key`).set(admin);
+    expect(troca.status).toBe(200);
+    expect(troca.body.chave).not.toBe(c.chave);
+
+    expect((await c.api.get('/terminal/qr-token').set(c.terminalHeaders)).status).toBe(401);
+    const nova = await c.api.get('/terminal/qr-token').set({ 'X-Terminal-Id': c.terminal.id, 'X-Terminal-Key': troca.body.chave });
+    expect(nova.status).toBe(200);
+  });
+
   it('responde 404 em rota inexistente e /health', async () => {
     const c = await montarCenario();
     expect((await c.api.get('/nao-existe')).status).toBe(404);
