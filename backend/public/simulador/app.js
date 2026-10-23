@@ -118,8 +118,9 @@ async function buscarQr() {
 }
 
 function desenharQr(texto) {
+  // O token só tem A-Z, 0-9 e ponto: o modo alfanumérico deixa o QR menor (versão 4).
   const qr = window.qrcode(0, 'M');
-  qr.addData(texto);
+  qr.addData(texto, /^[0-9A-Z $%*+\-./:]+$/.test(texto) ? 'Alphanumeric' : 'Byte');
   qr.make();
   $('#qr').classList.remove('vazio');
   $('#qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
@@ -149,8 +150,12 @@ function conectarMqtt() {
     return;
   }
   const topico = `passe/terminais/${estado.terminal.id}/decisoes`;
+  // O broker exige login: usuário = Id do terminal, senha = chave do terminal.
+  // A ACL só deixa cada terminal ler o tópico do próprio Id.
   const client = window.mqtt.connect(url, {
     clientId: `simulador-${Math.random().toString(16).slice(2, 10)}`,
+    username: estado.terminal.id,
+    password: estado.terminal.chave,
     reconnectPeriod: 3000,
     connectTimeout: 5000,
   });
