@@ -8,6 +8,7 @@
 
 // ---------- API ----------
 // IP do PC na rede local (veja docs/rede-do-prototipo.md), sem barra no fim.
+// Na nuvem: "https://passe-api-vlzh.onrender.com" (docs/deploy-nuvem.md).
 #define API_URL "http://192.168.0.10:3000"
 // Só para https: CA do servidor em PEM. Sem ela, o ESP32 não confere o certificado.
 // #define API_CA_CERT "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
@@ -17,6 +18,9 @@
 #define MQTT_PORT 1883
 // Com TLS: porta 8883 e o conteúdo de docker/mosquitto/certs/ca.crt.
 // #define MQTT_CA_CERT "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
+// Na nuvem (EMQX Cloud): MQTT_HOST "re211f91.ala.eu-central-1.emqxsl.com", porta 8883 e
+//   #include "ca_digicert_g2.h"
+//   #define MQTT_CA_CERT CA_DIGICERT_GLOBAL_ROOT_G2
 
 // ---------- Terminal ----------
 // Login no broker: usuário = TERMINAL_ID, senha = TERMINAL_KEY.
