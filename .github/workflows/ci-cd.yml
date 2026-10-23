@@ -142,6 +142,11 @@ jobs:
         run: cp include/credenciais.exemplo.h include/credenciais.h
       - name: Build (ST7789, ILI9341 e OLED)
         run: pio run -e tft -e ili9341 -e oled
+      - name: Build com TLS no MQTT (configuração da nuvem)
+        run: |
+          { echo '#include "ca_digicert_g2.h"'; sed 's/#define MQTT_PORT 1883/#define MQTT_PORT 8883\n#define MQTT_CA_CERT CA_DIGICERT_GLOBAL_ROOT_G2/' include/credenciais.exemplo.h; } > include/credenciais.h
+          grep -q 'MQTT_CA_CERT CA_DIGICERT' include/credenciais.h
+          pio run -e tft
 
   frontend:
     name: Frontend · análise e testes

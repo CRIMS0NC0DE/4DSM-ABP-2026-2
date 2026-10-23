@@ -77,6 +77,7 @@ Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o pape
 | Decisão do QR, firmware, provisionamento e segurança do broker | [`docs/terminal-iot.md`](docs/terminal-iot.md) |
 | Peças, pinagem e esquema de ligação | [`docs/hardware.md`](docs/hardware.md) |
 | Rede local, firewall e portas no Windows | [`docs/rede-do-prototipo.md`](docs/rede-do-prototipo.md) |
+| Produção: Render, Neon e EMQX, variáveis e armadilhas | [`docs/deploy-nuvem.md`](docs/deploy-nuvem.md) |
 
 ```bash
 cd backend && node scripts/provisionar-terminal.mjs --trocar-chave <terminalId>  # chave nova no firmware e no broker
@@ -96,7 +97,7 @@ flutter test test/integracao --dart-define=API_REAL=http://localhost:3000   # co
 
 ## CI/CD
 
-O GitHub Actions roda em todo PR: lint, tipos, testes e build do backend; teste de fumaça com Postgres; login, ACL e TLS do broker MQTT; build do firmware do ESP32; `flutter analyze` e `flutter test`; e o build da imagem Docker. Na `main`, a imagem também é publicada no GitHub Container Registry e o deploy no Render é disparado quando o secret `RENDER_DEPLOY_HOOK_URL` estiver configurado.
+O GitHub Actions roda em todo PR: lint, tipos, testes e build do backend; teste de fumaça com Postgres; login, ACL e TLS do broker MQTT; build do firmware do ESP32; `flutter analyze` e `flutter test`; e o build da imagem Docker. Na `main`, a imagem também é publicada no GitHub Container Registry e o deploy no Render é disparado quando o secret `RENDER_DEPLOY_HOOK_URL` estiver no environment `producao`. A API está em https://passe-api-vlzh.onrender.com (`docs/deploy-nuvem.md`).
 
 O fluxo de trabalho é por branch: cada um trabalha na sua (`davi-dev`, `dev-thiago`...) ou numa `feature/`/`fix/`, abre PR para a `main` e só mescla com o CI verde.
 
@@ -116,7 +117,6 @@ Estão todas em `backend/.env.example`. O `.env` de verdade não vai para o git.
 
 ## Próximos passos
 
-- Deploy no Render com Postgres na nuvem
 - Montar o terminal físico e testar o firmware no ESP32 (`docs/hardware.md`)
 - Restante das telas do app (o andamento está em `docs/integracao-frontend-backend.md`)
-- Broker MQTT gerenciado com TLS para o deploy na nuvem (`docs/rede-do-prototipo.md`)
+- ACL do broker na nuvem e troca das senhas de demonstração (`docs/deploy-nuvem.md`)
