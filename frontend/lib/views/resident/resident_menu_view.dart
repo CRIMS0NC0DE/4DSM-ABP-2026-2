@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../controllers/resident_menu_controller.dart';
 import '../../models/opcao_menu.dart';
 import '../user/login_view.dart';
+import '../user/scanner_qr_view.dart';
 import '../widgets/menu_grade.dart';
 import '../widgets/tela_carregando.dart';
 
@@ -14,7 +15,15 @@ class ResidentMenuView extends StatelessWidget {
 
   void _abrir(BuildContext context, OpcaoMenu opcao) {
     controller.abrir(opcao);
-    // Protótipo: as telas ainda não existem, então só avisa.
+    final tela = switch (opcao.titulo) {
+      'Escanear QR Code' => ScannerQrView(),
+      _ => null,
+    };
+    if (tela != null) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => tela));
+      return;
+    }
+    // Protótipo: as outras telas ainda não existem, então só avisa.
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

@@ -6,6 +6,7 @@ import 'package:public/controllers/visitor_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/services/sessao_service.dart';
 import 'package:public/views/user/login_view.dart';
+import 'package:public/views/user/scanner_qr_view.dart';
 import 'package:public/views/visitor/visitor_menu_view.dart';
 
 import '../../support/api_falsa.dart';
@@ -105,11 +106,27 @@ void main() {
       MaterialApp(home: VisitorMenuView(controller: controller)),
     );
 
-    await tester.tap(find.text('Escanear QR Code'));
+    await tester.tap(find.text('Minhas autorizações'));
     await tester.pump();
 
+    expect(controller.abertas, ['Minhas autorizações']);
+    expect(
+      find.text('Minhas autorizações: tela em construção.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Escanear QR Code abre o scanner', (WidgetTester tester) async {
+    final controller = _ControllerEspiao();
+    await tester.pumpWidget(
+      MaterialApp(home: VisitorMenuView(controller: controller)),
+    );
+
+    await tester.tap(find.text('Escanear QR Code'));
+    await tester.pumpAndSettle();
+
     expect(controller.abertas, ['Escanear QR Code']);
-    expect(find.text('Escanear QR Code: tela em construção.'), findsOneWidget);
+    expect(find.byType(ScannerQrView), findsOneWidget);
   });
 
   testWidgets('Sair da conta chama o controller e volta para o login', (
