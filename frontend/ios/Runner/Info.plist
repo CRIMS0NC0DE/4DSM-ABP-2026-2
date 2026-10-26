@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>O Passe usa a câmera para ler o QR Code da catraca.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O Passe usa sua localização só na hora de passar, para confirmar que você está perto da catraca.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

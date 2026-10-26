@@ -8,7 +8,8 @@ import '../services/auth_service.dart';
 /// Igual ao do morador, menos "Meus visitantes": visitante não cadastra
 /// outros visitantes. Tudo aqui usa só as rotas /me e /auth/me, que
 /// qualquer pessoa logada pode chamar.
-/// Protótipo: as opções ainda não abrem telas, só registram o clique.
+/// Protótipo: só "Escanear QR Code" abre uma tela; as outras opções ainda
+/// só registram o clique.
 class VisitorMenuController {
   VisitorMenuController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;

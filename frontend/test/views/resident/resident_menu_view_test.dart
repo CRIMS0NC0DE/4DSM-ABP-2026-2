@@ -4,6 +4,7 @@ import 'package:public/controllers/resident_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
+import 'package:public/views/user/scanner_qr_view.dart';
 
 /// Guarda o que a tela pediu ao controller, para conferir no teste.
 class _ControllerEspiao extends ResidentMenuController {
@@ -92,11 +93,27 @@ void main() {
       MaterialApp(home: ResidentMenuView(controller: controller)),
     );
 
-    await tester.tap(find.text('Escanear QR Code'));
+    await tester.tap(find.text('Minhas autorizações'));
     await tester.pump();
 
+    expect(controller.abertas, ['Minhas autorizações']);
+    expect(
+      find.text('Minhas autorizações: tela em construção.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Escanear QR Code abre o scanner', (WidgetTester tester) async {
+    final controller = _ControllerEspiao();
+    await tester.pumpWidget(
+      MaterialApp(home: ResidentMenuView(controller: controller)),
+    );
+
+    await tester.tap(find.text('Escanear QR Code'));
+    await tester.pumpAndSettle();
+
     expect(controller.abertas, ['Escanear QR Code']);
-    expect(find.text('Escanear QR Code: tela em construção.'), findsOneWidget);
+    expect(find.byType(ScannerQrView), findsOneWidget);
   });
 
   testWidgets('Sair da conta chama o controller e volta para o login', (

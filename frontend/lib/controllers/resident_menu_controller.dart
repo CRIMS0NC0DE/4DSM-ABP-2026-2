@@ -8,7 +8,8 @@ import '../services/auth_service.dart';
 /// Só mostra o que é dele: as próprias autorizações, acessos e conta,
 /// como nas telas U1 a U9 do docs/Design.pdf. Gestão do prédio (Painel,
 /// Locais, Usuários...) fica com o admin e o controlador de acesso.
-/// Protótipo: as opções ainda não abrem telas, só registram o clique.
+/// Protótipo: só "Escanear QR Code" abre uma tela; as outras opções ainda
+/// só registram o clique.
 class ResidentMenuController {
   ResidentMenuController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;
