@@ -19,8 +19,8 @@ class UsuarioFormView extends StatefulWidget {
     super.key,
     this.usuario,
     this.perfilInicial,
-    AdminService? servico,
-  }) : _servico = servico;
+    this._servico,
+  });
 
   /// Null cria um usuário novo.
   final UsuarioAdmin? usuario;

@@ -10,7 +10,7 @@ import 'catraca_form_view.dart';
 /// Todos da equipe veem; só o admin cadastra e edita (a API devolve 403 para
 /// a portaria, por isso os botões de criar só aparecem para o admin).
 class LocaisView extends StatefulWidget {
-  const LocaisView({super.key, AdminService? servico}) : _servico = servico;
+  const LocaisView({super.key, this._servico});
 
   final AdminService? _servico;
 

@@ -12,8 +12,7 @@ import '../widgets/botao_acao.dart';
 /// uma nova. Cancelar é o "excluir": a autorização continua no histórico.
 /// Fecha devolvendo true quando algo mudou, para a lista recarregar.
 class AutorizacaoFormView extends StatefulWidget {
-  const AutorizacaoFormView({super.key, this.autorizacao, AdminService? servico})
-    : _servico = servico;
+  const AutorizacaoFormView({super.key, this.autorizacao, this._servico});
 
   /// Null cria uma nova.
   final Autorizacao? autorizacao;

@@ -11,7 +11,7 @@ import '../widgets/admin_widgets.dart';
 /// cadastrar terminal e trocar a chave. A chave aparece uma única vez: é
 /// preciso gravá-la no firmware do ESP32.
 class TerminaisView extends StatefulWidget {
-  const TerminaisView({super.key, AdminService? servico}) : _servico = servico;
+  const TerminaisView({super.key, this._servico});
 
   final AdminService? _servico;
 

@@ -17,10 +17,9 @@ class CatracaFormView extends StatefulWidget {
     super.key,
     this.catraca,
     this.doorId,
-    AdminService? servico,
-    LocalizacaoService? localizacao,
-  }) : _servico = servico,
-       _localizacao = localizacao;
+    this._servico,
+    this._localizacao,
+  });
 
   /// Null cadastra uma nova na porta [doorId].
   final Catraca? catraca;

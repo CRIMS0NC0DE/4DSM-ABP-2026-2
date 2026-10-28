@@ -34,8 +34,8 @@ class HistoricoView extends StatefulWidget {
     super.key,
     this.somenteNegados = false,
     this.titulo = 'Histórico de acessos',
-    AdminService? servico,
-  }) : _servico = servico;
+    this._servico,
+  });
 
   /// Abre já filtrado nos negados ("Ver motivos" do painel).
   final bool somenteNegados;

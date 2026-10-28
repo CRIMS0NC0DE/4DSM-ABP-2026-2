@@ -17,8 +17,8 @@ class UsuariosView extends StatefulWidget {
     super.key,
     this.titulo = 'Usuários',
     this.perfilInicial,
-    AdminService? servico,
-  }) : _servico = servico;
+    this._servico,
+  });
 
   final String titulo;
   final Perfil? perfilInicial;

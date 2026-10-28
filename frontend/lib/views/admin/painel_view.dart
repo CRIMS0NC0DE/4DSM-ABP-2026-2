@@ -11,7 +11,7 @@ import 'historico_view.dart';
 /// Painel do administrador (A1): números de hoje e os últimos acessos
 /// negados, cada um levando para a tela com os detalhes.
 class PainelView extends StatefulWidget {
-  const PainelView({super.key, AdminService? servico}) : _servico = servico;
+  const PainelView({super.key, this._servico});
 
   final AdminService? _servico;
 

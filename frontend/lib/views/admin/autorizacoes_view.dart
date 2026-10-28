@@ -38,8 +38,7 @@ class FiltroAutorizacoes {
 /// Autorizações (A7, A8 · RF04): quem pode entrar, onde, quando e quantas
 /// vezes. Daqui o admin abre uma para editar ou cancelar e cria novas.
 class AutorizacoesView extends StatefulWidget {
-  const AutorizacoesView({super.key, AdminService? servico})
-    : _servico = servico;
+  const AutorizacoesView({super.key, this._servico});
 
   final AdminService? _servico;
 
