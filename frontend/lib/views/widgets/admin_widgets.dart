@@ -85,7 +85,12 @@ class CarregaDados<T> extends StatefulWidget {
 class _CarregaDadosState<T> extends State<CarregaDados<T>> {
   late Future<T> _futuro = widget.carregar();
 
-  void _tentarDeNovo() => setState(() => _futuro = widget.carregar());
+  void _tentarDeNovo() {
+    // O bloco do setState não pode devolver o Future: por isso as chaves.
+    setState(() {
+      _futuro = widget.carregar();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

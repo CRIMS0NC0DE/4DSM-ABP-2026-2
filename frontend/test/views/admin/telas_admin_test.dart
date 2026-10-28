@@ -95,8 +95,12 @@ void main() {
     return AdminService(api: api, auth: AuthService(api: api, sessao: sessao));
   }
 
-  Future<void> abrir(WidgetTester tester, Widget tela) async {
-    tester.view.physicalSize = const Size(390, 844);
+  Future<void> abrir(
+    WidgetTester tester,
+    Widget tela, {
+    Size tamanho = const Size(390, 844),
+  }) async {
+    tester.view.physicalSize = tamanho;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(home: tela));
@@ -242,6 +246,8 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Cancelar esta autorização'),
       200,
+      // O campo de usos também tem uma área rolável; a primeira é a lista.
+      scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(find.text('Cancelar esta autorização'));
     await tester.pumpAndSettle();
@@ -291,7 +297,9 @@ void main() {
       }, 200),
     );
 
-    await abrir(tester, HistoricoView(servico: s));
+    // Tela larga: os chips de filtro são uma lista horizontal e só são
+    // construídos os que aparecem.
+    await abrir(tester, HistoricoView(servico: s), tamanho: const Size(1600, 900));
 
     expect(find.text('Nenhum acesso encontrado'), findsOneWidget);
     // Começa em "Hoje": manda a data inicial e nenhum outro filtro.

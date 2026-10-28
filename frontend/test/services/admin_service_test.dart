@@ -318,16 +318,18 @@ void main() {
     });
 
     test('Terminal novo traz a chave só na resposta do cadastro', () async {
-      final s = servico(
-        (request) async => respostaJson({
+      final s = servico((request) async {
+        final terminal = {
           'id': 't',
           'nome': 'Terminal 1',
           'accessPointId': 'c',
           'online': false,
           'ultimoSinal': null,
           if (request.method == 'POST') 'chave': 'abc123',
-        }, 200),
-      );
+        };
+        // A listagem devolve uma lista; o cadastro, o terminal com a chave.
+        return respostaJson(request.method == 'POST' ? terminal : [terminal], 200);
+      });
 
       final novo = await s.cadastrarTerminal('Terminal 1', 'c');
       final lista = await s.terminais();
