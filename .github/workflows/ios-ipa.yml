@@ -1,0 +1,45 @@
+# Gera o .ipa do app sem assinatura, pra instalar no iPhone via Sideloadly/AltStore com Apple ID gratuito.
+# Só roda em Mac, por isso fica separado do CI principal. O .ipa sai como artifact da execução.
+name: iOS · IPA de teste
+
+on:
+  push:
+    branches: [davi-dev]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/ios-ipa.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ios-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ipa:
+    name: Build do IPA (sem assinatura)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      API_URL: ${{ vars.API_URL || 'https://passe-api-vlzh.onrender.com' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build iOS release
+        run: flutter build ios --release --no-codesign --dart-define=API_URL="$API_URL"
+      - name: Empacota o .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr passe-ios.ipa Payload
+          echo "IPA gerado apontando para **$API_URL**" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: passe-ios-ipa
+          path: frontend/passe-ios.ipa
+          retention-days: 14
