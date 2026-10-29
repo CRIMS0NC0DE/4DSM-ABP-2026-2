@@ -54,7 +54,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tocar numa opção chama o controller e avisa', (
+  testWidgets('Opção sem tela no backend chama o controller e avisa', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -62,13 +62,13 @@ void main() {
       MaterialApp(home: AdminMenuView(controller: controller)),
     );
 
-    await tester.scrollUntilVisible(find.text('Usuários'), 200);
+    await tester.scrollUntilVisible(find.text('Relatórios'), 200);
     await tester.pump();
-    await tester.tap(find.text('Usuários'));
+    await tester.tap(find.text('Relatórios'));
     await tester.pump();
 
-    expect(controller.abertas, ['Usuários']);
-    expect(find.text('Usuários: tela em construção.'), findsOneWidget);
+    expect(controller.abertas, ['Relatórios']);
+    expect(find.text('Relatórios: tela em construção.'), findsOneWidget);
   });
 
   testWidgets('Tocar em Sair da conta chama o controller e volta ao login', (

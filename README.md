@@ -70,6 +70,15 @@ Terminal de demonstração: `X-Terminal-Id=00000000-0000-4000-8000-000000000005`
 
 Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o papel da catraca: mostra o QR rotativo, recebe as decisões por MQTT (ou por consulta HTTP, se o broker não estiver no ar), lê tag NFC e tem um "celular de teste" para ler o QR de dentro do navegador, de perto da catraca, a 1 km ou sem GPS. Dá para testar acesso liberado, QR reutilizado, pessoa longe do terminal e NFC sem nenhum hardware.
 
+### Console web de testes
+
+Com a API rodando, abra `http://localhost:3000/console/`. É a versão web das telas do app Flutter, para testar o backend sem rodar o Flutter. Entre com uma conta do seed (os botões já preenchem `passe123`):
+
+- **Admin e portaria:** painel, usuários (com tags NFC), locais, autorizações (criar, editar, cancelar), histórico de acessos e terminais. A portaria só gerencia condôminos e visitantes, e só o admin cadastra locais e terminais, como na API.
+- **Todos os perfis:** minhas autorizações, meu histórico, perfil e "Ler QR Code". Nessa tela, o botão "Gerar QR do terminal de demonstração" pega um QR do terminal do seed (só com `NODE_ENV=development`) e o celular de teste manda o QR e a posição para a API decidir.
+
+É só HTML, CSS e JS em `backend/public/console/`, sem build. Quando a API devolve erro, a mensagem aparece como no app.
+
 ### Terminal físico (ESP32)
 
 | Assunto | Onde |

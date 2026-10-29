@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express, { Router } from 'express';
 import helmet from 'helmet';
@@ -56,6 +57,8 @@ export function createApp(c: Container) {
   // Dispositivo IoT
   app.use('/terminal', autenticarTerminal(c.repos.terminals), deviceRouter(services.terminals, services.access, c.decisoes));
   app.use('/simulador', simuladorRouter(c.config.simulador ?? {}));
+  // Console web de testes: as telas do app para quem não roda o Flutter. Só arquivos estáticos; a API é a mesma.
+  app.use('/console', express.static(fileURLToPath(new URL('../public/console/', import.meta.url))));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

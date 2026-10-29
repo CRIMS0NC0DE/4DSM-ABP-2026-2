@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../controllers/admin_menu_controller.dart';
 import '../../models/opcao_menu.dart';
+import '../../models/usuario.dart';
 import '../user/login_view.dart';
 import '../widgets/menu_grade.dart';
 import '../widgets/tela_carregando.dart';
+import 'autorizacoes_view.dart';
+import 'historico_view.dart';
+import 'locais_view.dart';
+import 'painel_view.dart';
+import 'terminais_view.dart';
+import 'usuarios_view.dart';
 
 class AdminMenuView extends StatelessWidget {
   final AdminMenuController controller;
@@ -12,9 +19,35 @@ class AdminMenuView extends StatelessWidget {
   AdminMenuView({super.key, AdminMenuController? controller})
     : controller = controller ?? AdminMenuController();
 
+  /// Tela de cada opção. Null para as que o backend ainda não tem
+  /// (relatórios, comunicados e configurações).
+  Widget? _telaDe(OpcaoMenu opcao) => switch (opcao.titulo) {
+    'Painel' => const PainelView(),
+    'Autorizações' => const AutorizacoesView(),
+    'Histórico de acessos' => const HistoricoView(),
+    'Acessos negados' => const HistoricoView(
+      somenteNegados: true,
+      titulo: 'Acessos negados',
+    ),
+    'Usuários' => const UsuariosView(),
+    'Visitantes' => const UsuariosView(
+      titulo: 'Visitantes',
+      perfilInicial: Perfil.visitante,
+    ),
+    'Locais' => const LocaisView(),
+    'Tags NFC' => const UsuariosView(titulo: 'Tags NFC'),
+    'Terminais' => const TerminaisView(),
+    _ => null,
+  };
+
   void _abrir(BuildContext context, OpcaoMenu opcao) {
     controller.abrir(opcao);
-    // Protótipo: as telas ainda não existem, então só avisa.
+    final tela = _telaDe(opcao);
+    if (tela != null) {
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => tela));
+      return;
+    }
+    // Sem tela ainda: só avisa.
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

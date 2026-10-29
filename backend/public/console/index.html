@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Passe · Console de testes</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <h1>Passe <span>console de testes</span></h1>
+    <div id="sessao" class="sessao" hidden>
+      <span id="sessao-nome"></span>
+      <button type="button" id="btn-sair" class="sec">Sair</button>
+    </div>
+  </header>
+
+  <!-- Login (tela U1) -->
+  <main id="tela-login" class="centro" hidden>
+    <form id="form-login" class="cartao estreito">
+      <h2>Entrar</h2>
+      <p class="suave">Use e-mail ou CPF e a senha do seed (<code>passe123</code>).</p>
+      <label>E-mail ou CPF <input id="login" required autocomplete="username"></label>
+      <label>Senha <input id="senha" type="password" required autocomplete="current-password"></label>
+      <p id="erro-login" class="erro" role="alert" hidden></p>
+      <button type="submit">Entrar</button>
+      <div class="atalhos">
+        <span class="suave">Contas de demonstração:</span>
+        <button type="button" class="sec atalho" data-login="admin@passe.com">Admin</button>
+        <button type="button" class="sec atalho" data-login="portaria@passe.com">Portaria</button>
+        <button type="button" class="sec atalho" data-login="morador@passe.com">Morador</button>
+        <button type="button" class="sec atalho" data-login="visitante@passe.com">Visitante</button>
+      </div>
+    </form>
+  </main>
+
+  <!-- App -->
+  <div id="app" hidden>
+    <nav id="menu" class="menu"></nav>
+    <p id="aviso" class="aviso" role="status" hidden></p>
+    <main id="conteudo" class="conteudo"></main>
+  </div>
+</body>
+</html>
