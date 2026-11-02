@@ -25,7 +25,14 @@ export function createMemoryRepositories() {
   const comRefs = (a: Authorization): AuthorizationWithRefs => {
     const u = db.users.find((x) => x.id === a.userId)!;
     const c = db.accessPoints.find((x) => x.id === a.accessPointId)!;
-    return { ...a, user: { id: u.id, nome: u.nome, perfil: u.perfil }, catraca: { id: c.id, nome: c.nome } };
+    const porta = db.doors.find((d) => d.id === c.doorId)!;
+    const portaria = db.gates.find((g) => g.id === porta.gateId)!;
+    const edificio = db.buildings.find((b) => b.id === portaria.buildingId)!;
+    return {
+      ...a,
+      user: { id: u.id, nome: u.nome, perfil: u.perfil },
+      catraca: { id: c.id, nome: c.nome, edificio: edificio.nome, portaria: portaria.nome, porta: porta.nome },
+    };
   };
   const atualizar = <T extends { id: string }>(lista: T[], id: string, dados: object): T => {
     const item = lista.find((x) => x.id === id);

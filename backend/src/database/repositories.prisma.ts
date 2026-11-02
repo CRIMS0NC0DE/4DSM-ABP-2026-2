@@ -10,8 +10,29 @@ function autorizacao<T extends { dataInicio: Date; dataFim: Date }>(row: T) {
 
 const comRefs = {
   user: { select: { id: true, nome: true, perfil: true } },
-  catraca: { select: { id: true, nome: true } },
+  catraca: {
+    select: {
+      id: true,
+      nome: true,
+      porta: { select: { nome: true, portaria: { select: { nome: true, edificio: { select: { nome: true } } } } } },
+    },
+  },
 } as const;
+
+type LinhaComRefs = Omit<AuthorizationWithRefs, 'dataInicio' | 'dataFim' | 'catraca'> & {
+  dataInicio: Date;
+  dataFim: Date;
+  catraca: { id: string; nome: string; porta: { nome: string; portaria: { nome: string; edificio: { nome: string } } } };
+};
+
+// Achata a catraca em { id, nome, edificio, portaria, porta }, como o findAccessPoint (telas U7 e U8).
+function comLocal(row: LinhaComRefs): AuthorizationWithRefs {
+  const { porta, ...catraca } = row.catraca;
+  return {
+    ...autorizacao(row),
+    catraca: { ...catraca, porta: porta.nome, portaria: porta.portaria.nome, edificio: porta.portaria.edificio.nome },
+  };
+}
 
 export function createPrismaRepositories(db: Prisma): Repositories {
   return {
@@ -85,15 +106,15 @@ export function createPrismaRepositories(db: Prisma): Repositories {
 
     authorizations: {
       create: async (data) =>
-        autorizacao(
+        comLocal(
           await db.authorization.create({
             data: { ...data, dataInicio: dateOnlyToDate(data.dataInicio), dataFim: dateOnlyToDate(data.dataFim) },
             include: comRefs,
           }),
-        ) as AuthorizationWithRefs,
+        ),
       findById: async (id) => {
         const row = await db.authorization.findUnique({ where: { id }, include: comRefs });
-        return row ? (autorizacao(row) as AuthorizationWithRefs) : null;
+        return row ? comLocal(row) : null;
       },
       list: async (f) => {
         const hoje = dateOnlyToDate(f.hoje);
@@ -112,14 +133,14 @@ export function createPrismaRepositories(db: Prisma): Repositories {
           include: comRefs,
           orderBy: [{ dataInicio: 'desc' }, { createdAt: 'desc' }],
         });
-        return rows.map((r) => autorizacao(r) as AuthorizationWithRefs);
+        return rows.map((r) => comLocal(r));
       },
       listForAccess: async (userId, accessPointId) => {
         const rows = await db.authorization.findMany({ where: { userId, accessPointId } });
         return rows.map((r) => autorizacao(r) as Authorization);
       },
       update: async (id, data) =>
-        autorizacao(
+        comLocal(
           await db.authorization.update({
             where: { id },
             data: {
@@ -129,7 +150,7 @@ export function createPrismaRepositories(db: Prisma): Repositories {
             },
             include: comRefs,
           }),
-        ) as AuthorizationWithRefs,
+        ),
       consumirUso: async (id) => {
         // UPDATE ... WHERE usos < max: o banco garante que dois acessos simultâneos não estourem o limite.
         const n = await db.$executeRaw`

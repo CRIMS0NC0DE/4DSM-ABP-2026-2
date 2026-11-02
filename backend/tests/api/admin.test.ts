@@ -197,6 +197,18 @@ describe('Autorizações (RF03, RF04, RF05, RF08)', () => {
     expect(res.body).toHaveLength(1);
     expect(res.body[0]).toMatchObject({ situacao: 'ATIVA', usosRestantes: 7 });
   });
+
+  it('a autorização diz onde fica a catraca, para o app mostrar (U7 e U8)', async () => {
+    const token = await c.tokenDe('maria@passe.com');
+    const res = await c.api.get('/me/authorizations').set('Authorization', `Bearer ${token}`);
+    expect(res.body[0].catraca).toEqual({
+      id: c.catraca.id,
+      nome: 'Catraca 2',
+      edificio: 'Edifício Atlântico',
+      portaria: 'Portaria Principal',
+      porta: 'Porta A',
+    });
+  });
 });
 
 describe('Histórico e painel (RF06)', () => {

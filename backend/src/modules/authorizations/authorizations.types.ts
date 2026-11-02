@@ -24,7 +24,8 @@ export interface Authorization {
 
 export type AuthorizationWithRefs = Authorization & {
   user: { id: string; nome: string; perfil: string };
-  catraca: { id: string; nome: string };
+  /** Com o nome do edifício, da portaria e da porta, como em AccessPointDetalhe (telas U7 e U8). */
+  catraca: { id: string; nome: string; edificio: string; portaria: string; porta: string };
 };
 
 export type NewAuthorization = Pick<
