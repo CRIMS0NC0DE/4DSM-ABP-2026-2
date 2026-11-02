@@ -90,11 +90,24 @@ export class UsersService {
     await this.users.removeTag(tagId);
   }
 
-  private async tagDoUsuario(quem: AuthContext, userId: string, tagId: string) {
-    const user = await this.users.findById(userId);
+  /** O dono pode bloquear a própria tag; desbloquear continua com a portaria. */
+  async bloquearMinhaTag(userId: string, tagId: string) {
     const tag = await this.users.findTagById(tagId);
-    if (!user || !tag || tag.userId !== userId) throw notFound('Tag');
+    if (!tag || tag.userId !== userId) throw notFound('Tag');
+    return this.users.updateTag(tagId, { ativa: false });
+  }
+
+  private async tagDoUsuario(
+    quem: AuthContext,
+    userId: string,
+    tagId: string,
+  ) {
+    const user = await this.users.findById(userId);
+    if (!user) throw notFound('Usuário');
     this.conferirPermissao(quem, user.perfil);
+    const tag = await this.users.findTagById(tagId);
+    if (!tag || tag.userId !== userId) throw notFound('Tag');
+    return tag;
   }
 
   private conferirPermissao(quem: AuthContext, perfilAlvo: Perfil) {

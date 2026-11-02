@@ -2,7 +2,7 @@ import type { Request, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { forbidden, unauthorized } from '../errors.js';
-import { PERFIS, type Perfil } from '../../modules/users/users.types.js';
+import { PERFIS, type Perfil, type UsersRepository } from '../../modules/users/users.types.js';
 import type { TerminalsRepository, Terminal } from '../../modules/terminals/terminals.types.js';
 import { conferirChave } from '../security.js';
 
@@ -28,19 +28,25 @@ export function assinarJwt(ctx: AuthContext, secret: string, expiresIn: string):
 }
 
 /** Exige "Authorization: Bearer <jwt>" de um usuário. */
-export function autenticar(secret: string): RequestHandler {
-  return (req, _res, next) => {
+/** Exige "Authorization: Bearer <jwt>" de um usuário que continua com o cadastro ativo. */
+export function autenticar(secret: string, users: Pick<UsersRepository, 'findById'>): RequestHandler {
+  return async (req, _res, next) => {
     const [tipo, token] = (req.headers.authorization ?? '').split(' ');
     if (tipo !== 'Bearer' || !token) throw unauthorized();
+    let payload: z.infer<typeof jwtPayloadSchema>;
     try {
-      const payload = jwtPayloadSchema.parse(jwt.verify(token, secret));
-      req.auth = { userId: payload.sub, perfil: payload.perfil };
+      payload = jwtPayloadSchema.parse(jwt.verify(token, secret));
     } catch {
       throw unauthorized('Sessão inválida ou expirada. Entre de novo.');
     }
+    // O token vale 8 h: sem isto, quem foi desativado continuaria usando a API até ele vencer.
+    const user = await users.findById(payload.sub);
+    if (!user?.ativo) throw unauthorized('Seu cadastro está desativado. Fale com a portaria.');
+    req.auth = { userId: payload.sub, perfil: user.perfil };
     next();
   };
 }
+
 
 export function exigirPerfil(...perfis: readonly Perfil[]): RequestHandler {
   return (req, _res, next) => {

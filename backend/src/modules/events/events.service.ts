@@ -1,6 +1,12 @@
-import type { EventFilter, EventsRepository } from './events.types.js';
+import { MOTIVOS, type MotivoNegacao } from '../access/access.rules.js';
+import type { AccessEventView, EventFilter, EventsRepository } from './events.types.js';
 
 /** RF06: histórico das tentativas de acesso. */
+function comTexto(evento: AccessEventView) {
+  const texto = evento.motivo ? MOTIVOS[evento.motivo as MotivoNegacao] : undefined;
+  return { ...evento, titulo: texto?.titulo ?? null, oQueFazer: texto?.oQueFazer ?? null };
+}
+
 export class EventsService {
   constructor(private readonly events: EventsRepository) {}
 
@@ -15,7 +21,7 @@ export class EventsService {
     return {
       acessosHoje: todos.liberados,
       negadosHoje: todos.negados,
-      negadosRecentes: pagina.itens,
+      negadosRecentes: pagina.itens.map(comTexto),
     };
   }
 }

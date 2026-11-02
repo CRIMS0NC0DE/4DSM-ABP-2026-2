@@ -35,7 +35,9 @@ export class AuthorizationsService {
   /** RF04 */
   async listar(filtro: Omit<AuthorizationFilter, 'hoje'>) {
     const lista = await this.authorizations.list({ ...filtro, hoje: this.hoje() });
-    return lista.map((a) => this.apresentar(a));
+    return lista
+      .map((a) => this.apresentar(a))
+      .filter((a) => !filtro.situacao || a.situacao === filtro.situacao);
   }
 
   /** RF08: as autorizações de quem está logado. */
