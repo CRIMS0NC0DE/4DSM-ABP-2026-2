@@ -4,8 +4,8 @@ import 'package:public/controllers/access_controller_menu_controller.dart';
 import 'package:public/controllers/admin_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/views/user/login_view.dart';
-import 'package:public/views/access_controller/access_controller_menu_view.dart';
-import 'package:public/views/equipe/visitantes_view.dart';
+import 'package:public/views/teams/access_controller/access_controller_menu_view.dart';
+import 'package:public/views/teams/visitantes_view.dart';
 
 /// Guarda o que a tela pediu ao controller, para conferir no teste.
 class _ControllerEspiao extends AccessControllerMenuController {
@@ -86,7 +86,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tocar numa opção chama o controller e avisa', (
+  testWidgets('Tocar numa opção chama o controller e abre a tela', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();

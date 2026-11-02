@@ -28,7 +28,8 @@ class ApiException implements Exception {
   /// Status HTTP. Null quando a requisição nem chegou na API.
   final int? status;
 
-  /// Ex.: NAO_AUTENTICADO, SEM_PERMISSAO, DADOS_INVALIDOS, CONFLITO.
+  /// Ex.: NAO_AUTENTICADO, CADASTRO_DESATIVADO, SEM_PERMISSAO,
+  /// DADOS_INVALIDOS, CONFLITO.
   final String? codigo;
 
   /// Nos erros 400, as mensagens de cada campo inválido.
@@ -36,8 +37,12 @@ class ApiException implements Exception {
 
   bool get semConexao => status == null;
 
-  /// Senha errada no login, ou sessão vencida nas outras rotas.
+  /// Senha errada no login; nas outras rotas, sessão vencida ou cadastro
+  /// desativado.
   bool get naoAutenticado => status == 401;
+
+  /// A portaria desativou o cadastro: o token ainda não venceu, mas não vale.
+  bool get cadastroDesativado => codigo == 'CADASTRO_DESATIVADO';
 
   @override
   String toString() => 'ApiException($status, $codigo): $mensagem';

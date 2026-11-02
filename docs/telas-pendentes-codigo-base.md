@@ -6529,8 +6529,15 @@ export function autenticar(secret: string): RequestHandler {
 **por:**
 
 ```ts
-/** Exige "Authorization: Bearer <jwt>" de um usuário que continua com o cadastro ativo. */
-export function autenticar(secret: string, users: Pick<UsersRepository, 'findById'>): RequestHandler {
+/**
+ * Exige "Authorization: Bearer <jwt>" de um usuário que continua com o cadastro ativo.
+ * Com aceitarInativo, quem foi desativado passa: a rota decide o que fazer com ele.
+ */
+export function autenticar(
+  secret: string,
+  users: Pick<UsersRepository, 'findById'>,
+  { aceitarInativo = false } = {},
+): RequestHandler {
   return async (req, _res, next) => {
     const [tipo, token] = (req.headers.authorization ?? '').split(' ');
     if (tipo !== 'Bearer' || !token) throw unauthorized();
@@ -6542,12 +6549,15 @@ export function autenticar(secret: string, users: Pick<UsersRepository, 'findByI
     }
     // O token vale 8 h: sem isto, quem foi desativado continuaria usando a API até ele vencer.
     const user = await users.findById(payload.sub);
-    if (!user?.ativo) throw unauthorized('Seu cadastro está desativado. Fale com a portaria.');
+    if (!user) throw unauthorized('Sessão inválida ou expirada. Entre de novo.');
+    if (!user.ativo && !aceitarInativo) throw cadastroDesativado();
     req.auth = { userId: payload.sub, perfil: user.perfil };
     next();
   };
 }
 ```
+
+`cadastroDesativado` fica em `backend/src/shared/errors.ts`: é um 401 com o código `CADASTRO_DESATIVADO`, para o app explicar o motivo. Em `backend/src/app.ts`, monte `/access` com `autenticar(c.config.jwtSecret, c.repos.users, { aceitarInativo: true })`: sem isso, o QR de quem foi desativado responde 401 e a tentativa não vira evento (RF17).
 
 
 

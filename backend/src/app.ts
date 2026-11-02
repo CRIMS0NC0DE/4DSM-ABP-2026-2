@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express, { Router } from 'express';
 import helmet from 'helmet';
+import { z } from 'zod';
 import type { Container } from './container.js';
 import { accessRouter } from './modules/access/access.controller.js';
 import { authRouter } from './modules/auth/auth.controller.js';
@@ -14,10 +15,8 @@ import { PERFIS_EQUIPE } from './modules/users/users.types.js';
 import { toLocal } from './shared/clock.js';
 import { authDe, autenticar, autenticarTerminal, exigirPerfil } from './shared/http/auth.js';
 import { errorHandler, notFoundHandler } from './shared/http/error-handler.js';
-import { parse } from './shared/http/validate.js';
-import { z } from 'zod';
 import { id } from './shared/http/schemas.js';
-
+import { parse } from './shared/http/validate.js';
 
 export function createApp(c: Container) {
   const { services } = c;
@@ -28,7 +27,7 @@ export function createApp(c: Container) {
   app.use(cors({ origin: c.config.corsOrigin === '*' ? true : c.config.corsOrigin.split(',') }));
   app.use(express.json({ limit: '100kb' }));
 
-const autenticado = autenticar(c.config.jwtSecret, c.repos.users);
+  const autenticado = autenticar(c.config.jwtSecret, c.repos.users);
   const equipe = [autenticado, exigirPerfil(...PERFIS_EQUIPE)];
   const somenteAdmin = exigirPerfil('ADMIN');
 
@@ -39,7 +38,8 @@ const autenticado = autenticar(c.config.jwtSecret, c.repos.users);
   // App: qualquer pessoa logada
   app.use('/auth', authRouter(services.auth, services.users, autenticado));
   app.use('/me', autenticado, meRouter(c));
-  app.use('/access', autenticado, accessRouter(services.access));
+  // Quem foi desativado também passa: a validação nega com USUARIO_INATIVO e registra a tentativa (RF17).
+  app.use('/access', autenticar(c.config.jwtSecret, c.repos.users, { aceitarInativo: true }), accessRouter(services.access));
 
   // App: administração (admin e portaria)
   app.use('/users', ...equipe, usersRouter(services.users));
@@ -65,6 +65,10 @@ const autenticado = autenticar(c.config.jwtSecret, c.repos.users);
   return app;
 }
 
+const bloquearTagSchema = z.object({
+  ativa: z.literal(false, { message: 'Aqui só dá para bloquear. Para desbloquear, fale com a portaria.' }),
+});
+
 function meRouter(c: Container) {
   const router = Router();
 
@@ -78,20 +82,15 @@ function meRouter(c: Container) {
     res.json(await c.services.events.listar({ ...filtro, userId: authDe(req).userId }));
   });
 
-    // "Minha tag NFC": só bloqueia. Desbloquear continua com a portaria.
+  // "Minha tag NFC": só bloqueia. Desbloquear continua com a portaria.
   router.patch('/tags/:tagId', async (req, res) => {
     const { tagId } = parse(z.object({ tagId: id }), req.params);
-    parse(z.object({ ativa: z.literal(false) }), req.body);
+    parse(bloquearTagSchema, req.body ?? {});
     res.json(await c.services.users.bloquearMinhaTag(authDe(req).userId, tagId));
   });
 
   return router;
 }
-
-/** Meia-noite
-  de hoje no fuso do prédio, como instante UTC. */
-
-
 
 /** Meia-noite de hoje no fuso do prédio, como instante UTC. */
 function inicioDoDia(c: Container): Date {

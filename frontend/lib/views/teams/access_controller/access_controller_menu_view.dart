@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/access_controller_menu_controller.dart';
-import '../../models/opcao_menu.dart';
-import '../user/login_view.dart';
-import '../widgets/tela_carregando.dart';
-import '../compartilhado/historico_view.dart';
-import '../equipe/autorizacoes_view.dart';
-import '../equipe/painel_view.dart';
-import '../equipe/tags_view.dart';
-import '../equipe/terminais_view.dart';
-import '../equipe/usuarios_view.dart';
-import '../equipe/visitantes_view.dart';
-import '../widgets/menu_grade.dart';
+import '../../../controllers/access_controller_menu_controller.dart';
+import '../../../models/opcao_menu.dart';
+import '../../user/login_view.dart';
+import '../../widgets/tela_carregando.dart';
+import '../../shared/historico_view.dart';
+import '../autorizacoes_view.dart';
+import '../painel_view.dart';
+import '../tags_view.dart';
+import '../terminais_view.dart';
+import '../usuarios_view.dart';
+import '../visitantes_view.dart';
+import '../../widgets/menu_grade.dart';
 
 
 class AccessControllerMenuView extends StatelessWidget {
@@ -39,7 +39,7 @@ class AccessControllerMenuView extends StatelessWidget {
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => tela));
       return;
     }
-    // Protótipo: as outras telas ainda não existem, então só avisa.
+    // As opções que ainda não têm tela só avisam.
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

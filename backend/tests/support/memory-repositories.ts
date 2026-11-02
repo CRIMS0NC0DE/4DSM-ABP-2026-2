@@ -5,9 +5,10 @@ import type { AccessEvent } from '../../src/modules/events/events.types.js';
 import type { AccessPoint, Building, Door, Gate } from '../../src/modules/locations/locations.types.js';
 import type { Terminal } from '../../src/modules/terminals/terminals.types.js';
 import type { NfcTag, User } from '../../src/modules/users/users.types.js';
+import { systemClock, type Clock } from '../../src/shared/clock.js';
 
 /** Repositórios em memória: mesmo contrato do Prisma, sem precisar de banco nos testes. */
-export function createMemoryRepositories() {
+export function createMemoryRepositories(clock: Clock = systemClock) {
   const db = {
     users: [] as User[],
     tags: [] as NfcTag[],
@@ -141,6 +142,7 @@ export function createMemoryRepositories() {
             return true;
           })
           .filter((a) => (!f.de || a.dataFim >= f.de) && (!f.ate || a.dataInicio <= f.ate))
+          .sort((a, b) => b.dataInicio.localeCompare(a.dataInicio) || b.createdAt.getTime() - a.createdAt.getTime())
           .map(comRefs),
       listForAccess: async (userId, accessPointId) =>
         db.authorizations.filter((a) => a.userId === userId && a.accessPointId === accessPointId),
@@ -154,7 +156,7 @@ export function createMemoryRepositories() {
     },
 
     events: {
-      create: async (data) => push(db.events, { id: randomUUID(), createdAt: new Date(), ...data }),
+      create: async (data) => push(db.events, { id: randomUUID(), createdAt: clock.now(), ...data }),
       list: async (f) => {
         const filtrados = db.events
           .filter((e) => (!f.resultado || e.resultado === f.resultado) && (!f.metodo || e.metodo === f.metodo))

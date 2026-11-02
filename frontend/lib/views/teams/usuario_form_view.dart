@@ -102,7 +102,9 @@ class _UsuarioFormViewState extends State<UsuarioFormView> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final eleMesmo = widget.usuario?.id == widget.controller.idLogado;
+    // Quem está logado não desativa nem muda o perfil da própria conta: valem
+    // na hora e a pessoa não conseguiria desfazer.
+    final eleMesmo = !_novo && widget.usuario?.id == widget.controller.idLogado;
 
     return TelaBase(
       titulo: _novo
@@ -177,7 +179,7 @@ class _UsuarioFormViewState extends State<UsuarioFormView> {
                   return _erroDaApi('senha');
                 },
               ),
-              if (widget.perfilFixo == null) ...[
+              if (widget.perfilFixo == null && !eleMesmo) ...[
                 const SizedBox(height: 20),
                 Text('Perfil', style: textTheme.labelLarge),
                 const SizedBox(height: 8),
@@ -205,7 +207,6 @@ class _UsuarioFormViewState extends State<UsuarioFormView> {
                   ),
                 ),
               ],
-              // Quem está logado não desativa a própria conta.
               if (!_novo && !eleMesmo) ...[
                 const SizedBox(height: 12),
                 SwitchListTile(

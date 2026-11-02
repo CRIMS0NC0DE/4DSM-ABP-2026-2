@@ -5,7 +5,6 @@ import '../models/opcao_menu.dart';
 import '../services/auth_service.dart';
 
 /// Menu do administrador.
-/// Protótipo: as opções ainda não abrem telas, só registram o clique.
 class AdminMenuController {
   AdminMenuController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;

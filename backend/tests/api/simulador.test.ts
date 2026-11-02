@@ -22,7 +22,9 @@ describe('Simulador do terminal (/simulador)', () => {
 
   it('libera WebSocket na política de conteúdo só da página do simulador', async () => {
     const { api } = await montarCenario();
-    expect((await api.get('/simulador/')).headers['content-security-policy']).toContain("connect-src 'self' ws: wss:");
+    const politica = (await api.get('/simulador/')).headers['content-security-policy'];
+    expect(politica).toContain("connect-src 'self' ws: wss:");
+    expect(politica).toContain("worker-src 'self' blob:");
     expect((await api.get('/health')).headers['content-security-policy']).not.toContain('ws:');
   });
 

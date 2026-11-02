@@ -42,6 +42,11 @@ export interface EventPage {
   negados: number;
 }
 
+/** O evento como as rotas devolvem: com o texto do motivo (null quando foi liberado). */
+export type AccessEventComTexto = AccessEventView & { titulo: string | null; oQueFazer: string | null };
+
+export type EventPageComTexto = Omit<EventPage, 'itens'> & { itens: AccessEventComTexto[] };
+
 export interface EventsRepository {
   create(data: NewAccessEvent): Promise<AccessEvent>;
   list(filter: EventFilter): Promise<EventPage>;

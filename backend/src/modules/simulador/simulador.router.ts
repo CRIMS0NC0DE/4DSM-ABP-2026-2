@@ -37,10 +37,10 @@ const BIBLIOTECAS: Record<string, string> = {
 export function simuladorRouter(config: SimuladorConfig) {
   const router = Router();
 
-  // A página fala com o broker por WebSocket e desenha o QR como SVG.
+  // A página fala com o broker por WebSocket e desenha o QR como SVG. O mqtt.js cria um worker por blob.
   router.use(
     helmet.contentSecurityPolicy({
-      directives: { connectSrc: ["'self'", 'ws:', 'wss:'], imgSrc: ["'self'", 'data:'] },
+      directives: { connectSrc: ["'self'", 'ws:', 'wss:'], imgSrc: ["'self'", 'data:'], workerSrc: ["'self'", 'blob:'] },
     }),
   );
 

@@ -36,7 +36,10 @@ export type NewAuthorization = Pick<
 export interface AuthorizationFilter {
   userId?: string;
   accessPointId?: string;
-  /** "ATIVA" = não cancelada e ainda dentro da data; "EXPIRADA" = não cancelada e já passou. */
+  /**
+   * O repositório pré-filtra: "ATIVA" = não cancelada e ainda dentro da data; "EXPIRADA" = não cancelada e já passou.
+   * O service confere com a situação calculada, então "ATIVA" não traz agendadas nem sem usos.
+   */
   situacao?: 'ATIVA' | 'EXPIRADA' | 'CANCELADA';
   /** Data de hoje (YYYY-MM-DD) no fuso do prédio, usada pelo filtro de situação. */
   hoje: string;

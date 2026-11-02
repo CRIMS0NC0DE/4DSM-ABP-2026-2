@@ -1,5 +1,6 @@
 import type { Repositories } from '../container.js';
 import { dateOnlyToDate, dateToDateOnly } from '../shared/clock.js';
+import { notFound } from '../shared/errors.js';
 import type { Authorization, AuthorizationWithRefs } from '../modules/authorizations/authorizations.types.js';
 import type { Prisma } from './prisma.js';
 
@@ -60,9 +61,18 @@ export function createPrismaRepositories(db: Prisma): Repositories {
       findTagByUid: (uid) => db.nfcTag.findUnique({ where: { uid } }),
       findTagById: (id) => db.nfcTag.findUnique({ where: { id } }),
       addTag: (userId, uid) => db.nfcTag.create({ data: { userId, uid } }),
-      updateTag: (id, data) => db.nfcTag.update({ where: { id }, data }),
+      updateTag: async (id, data) => {
+        try {
+          return await db.nfcTag.update({ where: { id }, data });
+        } catch (erro) {
+          // Outra chamada removeu a tag depois que o service a conferiu.
+          if ((erro as { code?: string }).code === 'P2025') throw notFound('Tag');
+          throw erro;
+        }
+      },
+      // deleteMany: se outra chamada já removeu, o resultado é o mesmo.
       removeTag: async (id) => {
-        await db.nfcTag.delete({ where: { id } });
+        await db.nfcTag.deleteMany({ where: { id } });
       },
     },
 

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/visitor_menu_controller.dart';
-import '../../models/opcao_menu.dart';
-import '../user/login_view.dart';
-import '../user/minhas_autorizacoes_view.dart';
-import '../user/scanner_qr_view.dart';
-import '../widgets/tela_carregando.dart';
-import '../compartilhado/historico_view.dart';
-import '../user/ajuda_view.dart';
-import '../user/minha_tag_view.dart';
-import '../user/perfil_view.dart';
-import '../widgets/menu_grade.dart';
+import '../../../controllers/visitor_menu_controller.dart';
+import '../../../models/opcao_menu.dart';
+import '../../user/login_view.dart';
+import '../../user/minhas_autorizacoes_view.dart';
+import '../../user/scanner_qr_view.dart';
+import '../../widgets/tela_carregando.dart';
+import '../../shared/historico_view.dart';
+import '../../user/ajuda_view.dart';
+import '../../user/minha_tag_view.dart';
+import '../../user/perfil_view.dart';
+import '../../widgets/menu_grade.dart';
 
 
 class VisitorMenuView extends StatelessWidget {
@@ -35,14 +35,13 @@ class VisitorMenuView extends StatelessWidget {
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => tela));
       return;
     }
-    // Protótipo: as outras telas ainda não existem, então só avisa.
+    // As opções que ainda não têm tela só avisam.
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(content: Text('${opcao.titulo}: tela em construção.')),
       );
   }
-}
 
 
   /// Volta para o login; a tela de carregamento limpa o histórico, para o

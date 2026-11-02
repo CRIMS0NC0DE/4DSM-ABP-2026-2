@@ -49,6 +49,19 @@ describe('Acesso por QR Code (RF12, RF13, RF15-RF17)', () => {
     expect(c.db.authorizations[0]!.usosRealizados).toBe(3);
   });
 
+  it('nega QR de quem foi desativado, registra a tentativa e avisa o terminal (RF17)', async () => {
+    const token = await qrDoTerminal();
+    c.db.users.find((u) => u.id === c.pessoas.maria.id)!.ativo = false;
+
+    const res = await escanear(token);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ liberado: false, motivo: 'USUARIO_INATIVO', titulo: 'Seu cadastro está desativado' });
+    expect(c.db.events.at(-1)).toMatchObject({ resultado: 'NEGADO', metodo: 'QR', motivo: 'USUARIO_INATIVO', userId: c.pessoas.maria.id });
+    const decisoes = await c.api.get('/terminal/decisions').set(c.terminalHeaders);
+    expect(decisoes.body.at(-1).decisao).toMatchObject({ acao: 'NEGAR', motivo: 'USUARIO_INATIVO' });
+  });
+
   it('nega sem a localização do celular', async () => {
     const res = await escanear(await qrDoTerminal(), {});
     expect(res.body).toMatchObject({ liberado: false, motivo: 'LOCALIZACAO_AUSENTE' });

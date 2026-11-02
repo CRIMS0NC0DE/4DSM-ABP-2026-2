@@ -8,12 +8,11 @@ import 'package:http/testing.dart';
 import 'package:public/controllers/login_controller.dart';
 import 'package:public/models/usuario.dart';
 import 'package:public/services/sessao_service.dart';
-import 'package:public/views/access_controller/access_controller_menu_view.dart';
-import 'package:public/views/admin/admin_menu_view.dart';
-import 'package:public/views/resident/resident_menu_view.dart';
+import 'package:public/views/teams/access_controller/access_controller_menu_view.dart';
+import 'package:public/views/teams/admin/admin_menu_view.dart';
+import 'package:public/views/user/inicio_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/register_view.dart';
-import 'package:public/views/visitor/visitor_menu_view.dart';
 import 'package:public/views/widgets/tela_carregando.dart';
 
 import '../../support/api_falsa.dart';
@@ -38,12 +37,12 @@ LoginView _login({http.Client? cliente}) => LoginView(
   controller: LoginController(auth: authFalso(cliente: cliente)),
 );
 
-/// Menu que cada perfil deve abrir depois do login.
-const _menuDoPerfil = {
+/// Tela que cada perfil deve abrir depois do login.
+const _telaDoPerfil = {
   Perfil.admin: AdminMenuView,
   Perfil.controladorAcesso: AccessControllerMenuView,
-  Perfil.morador: ResidentMenuView,
-  Perfil.visitante: VisitorMenuView,
+  Perfil.morador: InicioView,
+  Perfil.visitante: InicioView,
 };
 
 /// O texto "Entrar" aparece no título e no botão; aqui só o botão.
@@ -118,14 +117,14 @@ void main() {
   });
 
   for (final conta in contasDemo) {
-    testWidgets('A conta ${conta.email} abre o menu do perfil dela', (
+    testWidgets('A conta ${conta.email} abre a tela do perfil dela', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(MaterialApp(home: _login()));
 
       await _entrarCom(tester, conta.email);
 
-      expect(find.byType(_menuDoPerfil[conta.perfil]!), findsOneWidget);
+      expect(find.byType(_telaDoPerfil[conta.perfil]!), findsOneWidget);
       expect(find.byType(LoginView), findsNothing);
       expect(SessaoService.instancia.usuario?.email, conta.email);
     });

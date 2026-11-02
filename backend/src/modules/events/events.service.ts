@@ -1,17 +1,24 @@
 import { MOTIVOS, type MotivoNegacao } from '../access/access.rules.js';
-import type { AccessEventView, EventFilter, EventsRepository } from './events.types.js';
+import type {
+  AccessEventComTexto,
+  AccessEventView,
+  EventFilter,
+  EventPageComTexto,
+  EventsRepository,
+} from './events.types.js';
 
-/** RF06: histórico das tentativas de acesso. */
-function comTexto(evento: AccessEventView) {
+function comTexto(evento: AccessEventView): AccessEventComTexto {
   const texto = evento.motivo ? MOTIVOS[evento.motivo as MotivoNegacao] : undefined;
   return { ...evento, titulo: texto?.titulo ?? null, oQueFazer: texto?.oQueFazer ?? null };
 }
 
+/** RF06: histórico das tentativas de acesso. */
 export class EventsService {
   constructor(private readonly events: EventsRepository) {}
 
-  listar(filtro: EventFilter) {
-    return this.events.list(filtro);
+  async listar(filtro: EventFilter): Promise<EventPageComTexto> {
+    const pagina = await this.events.list(filtro);
+    return { ...pagina, itens: pagina.itens.map(comTexto) };
   }
 
   /** Números do painel (A1): acessos e negados desde um instante (ex.: meia-noite de hoje). */

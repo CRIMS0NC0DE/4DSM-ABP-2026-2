@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/resident_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
-import 'package:public/views/resident/resident_menu_view.dart';
+import 'package:public/views/teams/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
+import 'package:public/views/user/minha_tag_view.dart';
 import 'package:public/views/user/minhas_autorizacoes_view.dart';
 import 'package:public/views/user/scanner_qr_view.dart';
 
@@ -94,13 +95,31 @@ void main() {
       MaterialApp(home: ResidentMenuView(controller: controller)),
     );
 
-    await tester.tap(find.text('Histórico de acessos'));
+    await tester.scrollUntilVisible(find.text('Meus visitantes'), 200);
+    await tester.pump();
+    await tester.tap(find.text('Meus visitantes'));
     await tester.pump();
 
-    expect(controller.abertas, ['Histórico de acessos']);
+    expect(controller.abertas, ['Meus visitantes']);
+    expect(find.text('Meus visitantes: tela em construção.'), findsOneWidget);
+  });
+
+  testWidgets('Minha tag NFC abre com a opção de bloquear', (
+    WidgetTester tester,
+  ) async {
+    final controller = _ControllerEspiao();
+    await tester.pumpWidget(
+      MaterialApp(home: ResidentMenuView(controller: controller)),
+    );
+
+    await tester.scrollUntilVisible(find.text('Minha tag NFC'), 200);
+    await tester.pump();
+    await tester.tap(find.text('Minha tag NFC'));
+    await tester.pumpAndSettle();
+
     expect(
-      find.text('Histórico de acessos: tela em construção.'),
-      findsOneWidget,
+      tester.widget<MinhaTagView>(find.byType(MinhaTagView)).podeBloquear,
+      isTrue,
     );
   });
 

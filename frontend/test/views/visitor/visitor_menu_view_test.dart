@@ -5,10 +5,11 @@ import 'package:public/controllers/resident_menu_controller.dart';
 import 'package:public/controllers/visitor_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/services/sessao_service.dart';
+import 'package:public/views/user/minha_tag_view.dart';
 import 'package:public/views/user/minhas_autorizacoes_view.dart';
 import 'package:public/views/user/scanner_qr_view.dart';
-import 'package:public/views/visitor/visitor_menu_view.dart';
-import 'package:public/views/compartilhado/historico_view.dart';
+import 'package:public/views/teams/visitor/visitor_menu_view.dart';
+import 'package:public/views/shared/historico_view.dart';
 import 'package:public/views/user/login_view.dart';
 
 import '../../support/api_falsa.dart';
@@ -100,7 +101,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tocar numa opção chama o controller e avisa', (
+  testWidgets('Tocar numa opção chama o controller e abre a tela', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -113,6 +114,25 @@ void main() {
 
     expect(controller.abertas, ['Histórico de acessos']);
     expect(find.byType(HistoricoView), findsOneWidget);
+  });
+
+  testWidgets('Minha tag NFC só mostra, sem a opção de bloquear', (
+    WidgetTester tester,
+  ) async {
+    final controller = _ControllerEspiao();
+    await tester.pumpWidget(
+      MaterialApp(home: VisitorMenuView(controller: controller)),
+    );
+
+    await tester.scrollUntilVisible(find.text('Minha tag NFC'), 200);
+    await tester.pump();
+    await tester.tap(find.text('Minha tag NFC'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<MinhaTagView>(find.byType(MinhaTagView)).podeBloquear,
+      isFalse,
+    );
   });
 
   testWidgets('Minhas autorizações abre a lista', (WidgetTester tester) async {

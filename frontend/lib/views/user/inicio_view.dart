@@ -14,8 +14,6 @@ import 'scanner_qr_view.dart';
 
 /// U2 · Início, com o carregando (E1) e o sem internet (E2): a próxima
 /// autorização e o atalho para o scanner. [menu] é o menu em grade do perfil.
-/// Depende da decisão D2 do backlog: só entra no lugar do menu se o grupo
-/// quiser.
 class InicioView extends StatefulWidget {
   InicioView({
     super.key,
@@ -41,7 +39,11 @@ class _InicioViewState extends State<InicioView>
     await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => tela));
-    if (mounted) await carregar();
+    // Quem saiu da conta pelo menu não volta para cá: o Início ainda está
+    // montado, mas não é a tela atual e já não tem token para buscar nada.
+    if (mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
+      await carregar();
+    }
   }
 
   List<Widget> _resumo(List<Autorizacao> lista) {

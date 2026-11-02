@@ -11,7 +11,10 @@ import 'register_view.dart';
 class LoginView extends StatefulWidget {
   final LoginController controller;
 
-  LoginView({super.key, LoginController? controller})
+  /// Mostrado ao abrir, para explicar por que a pessoa voltou ao login.
+  final String? aviso;
+
+  LoginView({super.key, LoginController? controller, this.aviso})
     : controller = controller ?? LoginController();
 
   @override
@@ -30,6 +33,16 @@ class _LoginViewState extends State<LoginView> {
   var _entrando = false;
 
   LoginController get controller => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.aviso case final aviso?) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _avisar(aviso);
+      });
+    }
+  }
 
   @override
   void dispose() {

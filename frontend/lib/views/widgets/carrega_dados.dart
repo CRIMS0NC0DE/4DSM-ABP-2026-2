@@ -7,16 +7,26 @@ import 'cartao_erro.dart';
 import 'estado_vazio.dart';
 import 'tela_carregando.dart';
 
-/// Sessão vencida (401): esquece o token e volta ao login, como o Sair dos
-/// menus. Um lugar só para todas as telas novas (F2 do backlog).
-Future<void> voltarAoLogin(BuildContext context) => TelaCarregando.abrir(
-  context,
-  mensagem: 'Sua sessão venceu. Voltando ao login…',
-  tarefa: () async {
-    await AuthService.instancia.sair();
-    return LoginView();
-  },
-);
+/// 401: esquece o token e volta ao login, como o Sair dos menus. Um lugar só
+/// para as telas (F2 do backlog). Cadastro desativado não é sessão vencida: o
+/// login abre explicando o motivo. [sair] troca o Sair padrão.
+Future<void> voltarAoLogin(
+  BuildContext context,
+  ApiException erro, {
+  Future<void> Function()? sair,
+}) {
+  final desativado = erro.cadastroDesativado;
+  return TelaCarregando.abrir(
+    context,
+    mensagem: desativado
+        ? 'Voltando ao login…'
+        : 'Sua sessão venceu. Voltando ao login…',
+    tarefa: () async {
+      await (sair ?? AuthService.instancia.sair)();
+      return LoginView(aviso: desativado ? erro.mensagem : null);
+    },
+  );
+}
 
 void avisar(BuildContext context, String mensagem) {
   ScaffoldMessenger.of(context)
@@ -28,7 +38,7 @@ void avisar(BuildContext context, String mensagem) {
 /// resto vira aviso. Nos formulários, mostre antes os erros de [ApiException.campos].
 Future<void> tratarErro(BuildContext context, ApiException erro) async {
   if (erro.naoAutenticado) {
-    await voltarAoLogin(context);
+    await voltarAoLogin(context, erro);
   } else {
     avisar(context, erro.mensagem);
   }
@@ -63,7 +73,7 @@ mixin CarregaDados<T, W extends StatefulWidget> on State<W> {
     } on ApiException catch (e) {
       if (!mounted) return;
       if (e.naoAutenticado) {
-        await voltarAoLogin(context);
+        await voltarAoLogin(context, e);
       } else if (dados == null) {
         setState(() => erro = e);
       } else {

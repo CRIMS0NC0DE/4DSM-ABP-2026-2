@@ -78,8 +78,6 @@ class UsuariosController {
 
   Future<TagNfc> vincularTag(String usuarioId, String uid) async {
     final json = await _api.post('/users/$usuarioId/tags', {'uid': uid});
-  Future<TagNfc> vincularTag(String usuarioId, String uid) async {
-    final json = await _api.post('/users/$usuarioId/tags', {'uid': uid});
     return TagNfc.fromJson(json as Map<String, dynamic>);
   }
 

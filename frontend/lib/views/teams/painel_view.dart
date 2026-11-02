@@ -4,7 +4,7 @@ import '../../controllers/painel_controller.dart';
 import '../../core/constants/formato.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/painel.dart';
-import '../compartilhado/historico_view.dart';
+import '../shared/historico_view.dart';
 import '../widgets/carrega_dados.dart';
 import '../widgets/item_evento.dart';
 import '../widgets/tela_base.dart';

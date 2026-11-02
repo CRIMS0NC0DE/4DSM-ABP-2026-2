@@ -10,8 +10,8 @@ import '../widgets/estado_vazio.dart';
 import '../widgets/selo.dart';
 import '../widgets/tela_base.dart';
 
-/// Minha tag NFC. Ver funciona hoje. Com [podeBloquear], o morador bloqueia a
-/// própria tag: só ligue depois da B6 (PATCH /me/tags/:tagId).
+/// Minha tag NFC. Com [podeBloquear], o morador bloqueia a própria tag
+/// (PATCH /me/tags/:tagId); o visitante só vê.
 class MinhaTagView extends StatefulWidget {
   MinhaTagView({
     super.key,

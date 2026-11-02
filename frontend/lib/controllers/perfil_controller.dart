@@ -17,7 +17,7 @@ class PerfilController {
     return UsuarioCadastro.fromJson(json as Map<String, dynamic>);
   }
 
-  /// Só funciona depois da B6 (PATCH /me/tags/:tagId). Hoje responde 404.
+  /// Só bloqueia: desbloquear continua com a portaria.
   Future<void> bloquearTag(String tagId) =>
       _api.patch('/me/tags/$tagId', {'ativa': false});
 

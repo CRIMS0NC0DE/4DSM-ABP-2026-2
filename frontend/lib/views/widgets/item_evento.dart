@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/formato.dart';
-import '../../core/constants/motivos.dart';
 import '../../models/evento_acesso.dart';
 import '../../models/opcao_menu.dart';
 import 'selo.dart';
@@ -87,7 +86,7 @@ class ItemEvento extends StatelessWidget {
                     if (!evento.liberado) ...[
                       const SizedBox(height: 8),
                       Text(
-                        Motivos.titulo(evento.motivo),
+                        evento.titulo,
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.error,
                           fontWeight: FontWeight.w600,
@@ -95,7 +94,7 @@ class ItemEvento extends StatelessWidget {
                       ),
                       if (mostrarOQueFazer)
                         Text(
-                          Motivos.oQueFazer(evento.motivo),
+                          evento.oQueFazer,
                           style: textTheme.bodySmall,
                         ),
                     ],

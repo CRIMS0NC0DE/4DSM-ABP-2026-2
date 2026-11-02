@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/historico_controller.dart';
-import '../../core/constants/motivos.dart';
 import '../../models/evento_acesso.dart';
 import '../widgets/campo_selecao.dart';
 import '../widgets/carrega_dados.dart';
@@ -47,7 +46,7 @@ class _RelatoriosViewState extends State<RelatoriosView>
     final textTheme = Theme.of(context).textTheme;
     final porLocal = _contar(p.itens.map((e) => e.catraca ?? 'Sem catraca'));
     final porMotivo = _contar(
-      p.itens.where((e) => !e.liberado).map((e) => Motivos.titulo(e.motivo)),
+      p.itens.where((e) => !e.liberado).map((e) => e.titulo),
     );
 
     return [

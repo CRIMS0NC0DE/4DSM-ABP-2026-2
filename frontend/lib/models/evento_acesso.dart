@@ -4,20 +4,23 @@ class EventoAcesso {
     required this.liberado,
     required this.metodo,
     required this.em,
-    this.motivo,
+    required this.titulo,
+    required this.oQueFazer,
     this.pessoa,
     this.catraca,
     this.credencial,
     this.distanciaMetros,
   });
 
-
-    factory EventoAcesso.fromJson(Map<String, dynamic> json) => EventoAcesso(
+  factory EventoAcesso.fromJson(Map<String, dynamic> json) => EventoAcesso(
     id: json['id'] as String,
     liberado: json['resultado'] == 'LIBERADO',
     metodo: json['metodo'] as String,
     em: DateTime.parse(json['createdAt'] as String).toLocal(),
-    motivo: json['motivo'] as String?,
+    // A API manda os textos do motivo. Vem null no liberado e em motivo que ela
+    // não conhece.
+    titulo: json['titulo'] as String? ?? 'Acesso negado',
+    oQueFazer: json['oQueFazer'] as String? ?? 'Fale com a portaria.',
     // Tag desconhecida não tem pessoa; QR inválido não tem catraca.
     pessoa: (json['user'] as Map<String, dynamic>?)?['nome'] as String?,
     catraca: (json['catraca'] as Map<String, dynamic>?)?['nome'] as String?,
@@ -34,8 +37,9 @@ class EventoAcesso {
   /// Já no horário do celular.
   final DateTime em;
 
-  /// Só o código (ex.: FORA_DO_HORARIO). O texto está em Motivos.
-  final String? motivo;
+  /// Só faz sentido quando foi negado.
+  final String titulo;
+  final String oQueFazer;
   final String? pessoa;
   final String? catraca;
 

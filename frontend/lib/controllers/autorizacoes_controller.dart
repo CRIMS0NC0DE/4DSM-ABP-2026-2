@@ -52,17 +52,10 @@ class AutorizacoesController {
               },
             )
             as List<dynamic>;
-    final todas = [
+    return [
       for (final json in lista)
         AutorizacaoEquipe.fromJson(json as Map<String, dynamic>),
     ];
-    // O filtro ATIVA da API também traz agendadas e sem usos (B4 do backlog).
-    return filtro.situacao == SituacaoAutorizacao.ativa
-        ? [
-            for (final a in todas)
-              if (a.autorizacao.situacao == SituacaoAutorizacao.ativa) a,
-          ]
-        : todas;
   }
 
   /// Pessoas de GET /users e catracas de GET /locations, para os seletores.

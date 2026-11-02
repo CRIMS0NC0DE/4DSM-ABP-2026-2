@@ -14,29 +14,37 @@ import 'package:public/controllers/perfil_controller.dart';
 import 'package:public/controllers/terminais_controller.dart';
 import 'package:public/controllers/usuarios_controller.dart';
 import 'package:public/models/autorizacao.dart';
+import 'package:public/models/evento_acesso.dart';
+import 'package:public/models/local.dart';
+import 'package:public/models/usuario_cadastro.dart';
 import 'package:public/core/theme/app_theme.dart';
 import 'package:public/services/api_client.dart';
+import 'package:public/services/localizacao_service.dart';
 import 'package:public/services/sessao_service.dart';
-import 'package:public/views/compartilhado/historico_view.dart';
-import 'package:public/views/equipe/autorizacao_form_view.dart';
-import 'package:public/views/equipe/autorizacoes_view.dart';
-import 'package:public/views/equipe/locais_view.dart';
-import 'package:public/views/equipe/painel_view.dart';
-import 'package:public/views/equipe/relatorios_view.dart';
-import 'package:public/views/equipe/tags_view.dart';
-import 'package:public/views/equipe/terminais_view.dart';
-import 'package:public/views/equipe/usuario_form_view.dart';
-import 'package:public/views/equipe/usuarios_view.dart';
-import 'package:public/views/equipe/visitantes_view.dart';
+import 'package:public/views/shared/historico_view.dart';
+import 'package:public/views/teams/autorizacao_form_view.dart';
+import 'package:public/views/teams/autorizacoes_view.dart';
+import 'package:public/views/teams/catraca_form_view.dart';
+import 'package:public/views/teams/locais_view.dart';
+import 'package:public/views/teams/painel_view.dart';
+import 'package:public/views/teams/relatorios_view.dart';
+import 'package:public/views/teams/resident/resident_menu_view.dart';
+import 'package:public/views/teams/tags_view.dart';
+import 'package:public/views/teams/terminais_view.dart';
+import 'package:public/views/teams/usuario_form_view.dart';
+import 'package:public/views/teams/usuarios_view.dart';
+import 'package:public/views/teams/visitantes_view.dart';
 import 'package:public/views/user/ajuda_view.dart';
 import 'package:public/views/user/inicio_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/minha_tag_view.dart';
+import 'package:public/views/user/minhas_autorizacoes_view.dart';
 import 'package:public/views/user/perfil_view.dart';
+import 'package:public/views/widgets/cartao_erro.dart';
 
 import '../../support/api_falsa.dart';
 
-// Respostas copiadas da API real (GET de cada rota com o seed).
+// Baseadas nas respostas da API real, com ids curtos e só os campos que o app lê.
 const _tag = {
   'id': 'tag-1',
   'uid': '04A1B2C3',
@@ -71,6 +79,15 @@ const _ana = {
   'ativo': true,
   'tags': <Object>[],
 };
+const _idCatraca = '00000000-0000-4000-8000-000000000004';
+const _catraca = {
+  'id': _idCatraca,
+  'nome': 'Catraca 1',
+  'doorId': 'd1',
+  'latitude': -23.3053,
+  'longitude': -45.9658,
+  'raioMetros': 100,
+};
 const _arvore = [
   {
     'id': 'b1',
@@ -86,16 +103,7 @@ const _arvore = [
             'id': 'd1',
             'nome': 'Porta A',
             'gateId': 'g1',
-            'catracas': [
-              {
-                'id': '00000000-0000-4000-8000-000000000004',
-                'nome': 'Catraca 1',
-                'doorId': 'd1',
-                'latitude': -23.3053,
-                'longitude': -45.9658,
-                'raioMetros': 100,
-              },
-            ],
+            'catracas': [_catraca],
           },
         ],
       },
@@ -116,6 +124,8 @@ const _eventoNegado = {
   'metodo': 'QR',
   'resultado': 'NEGADO',
   'motivo': 'FORA_DO_HORARIO',
+  'titulo': 'Fora do horário permitido',
+  'oQueFazer': 'Volte dentro do horário ou fale com a portaria.',
   'credencial': 'CQFWRZQNUDLEXEYV',
   'distanciaMetros': null,
   'createdAt': '2026-11-02T03:08:24.107Z',
@@ -128,6 +138,8 @@ const _eventoSemPessoa = {
   'metodo': 'NFC',
   'resultado': 'NEGADO',
   'motivo': 'TAG_DESCONHECIDA',
+  'titulo': 'Tag não cadastrada',
+  'oQueFazer': 'Peça para a portaria vincular sua tag.',
   'credencial': 'DEADBEEF',
   'distanciaMetros': null,
   'createdAt': '2026-11-02T03:08:24.114Z',
@@ -139,12 +151,26 @@ const _eventoLiberado = {
   'metodo': 'QR',
   'resultado': 'LIBERADO',
   'motivo': null,
+  'titulo': null,
+  'oQueFazer': null,
   'credencial': 'ABC',
   'distanciaMetros': 12.4,
   'createdAt': '2026-11-02T12:08:24.114Z',
   'user': {'id': 'u-maria', 'nome': 'Maria Souza'},
   'catraca': {'id': 'c1', 'nome': 'Catraca 1'},
 };
+
+/// GPS de mentira: devolve sempre a mesma [posicao] (null = sem permissão).
+class _LocalizacaoFalsa extends LocalizacaoService {
+  _LocalizacaoFalsa(this.posicao);
+
+  final Posicao? posicao;
+
+  @override
+  Future<Posicao?> posicaoAtual({
+    Duration limite = const Duration(seconds: 8),
+  }) async => posicao;
+}
 
 /// API com as rotas das telas novas. Guarda cada requisição em [chamadas].
 MockClient _api({List<http.Request>? chamadas, int? statusFixo}) {
@@ -154,6 +180,7 @@ MockClient _api({List<http.Request>? chamadas, int? statusFixo}) {
       return erroDaApi(statusFixo, 'NAO_AUTENTICADO', 'Sessão inválida.');
     }
     final rota = '${request.method} ${request.url.path}';
+    final situacao = request.url.queryParameters['situacao'];
     final eventos = {
       'itens': [_eventoLiberado, _eventoNegado, _eventoSemPessoa],
       'total': 3,
@@ -170,11 +197,17 @@ MockClient _api({List<http.Request>? chamadas, int? statusFixo}) {
       'POST /users' => respostaJson(_ana, 201),
       'PATCH /users/u-maria' => respostaJson(_maria, 200),
       'GET /locations' => respostaJson(_arvore, 200),
+      'POST /locations/access-points' => respostaJson(_catraca, 201),
+      'PATCH /locations/access-points/$_idCatraca' => respostaJson(_catraca, 200),
       'GET /terminals' => respostaJson([_terminal], 200),
       'GET /authorizations' => respostaJson([
-        autorizacaoJson(),
-        autorizacaoJson(id: 'a2', situacao: 'AGENDADA'),
+        for (final a in [
+          autorizacaoJson(),
+          autorizacaoJson(id: 'a2', situacao: 'AGENDADA'),
+        ])
+          if (situacao == null || a['situacao'] == situacao) a,
       ], 200),
+      'PATCH /me/tags/tag-1' => respostaJson({..._tag, 'ativa': false}, 200),
       'POST /authorizations' => respostaJson(autorizacaoJson(), 201),
       'PATCH /authorizations/autorizacao-1' => respostaJson(
         autorizacaoJson(),
@@ -255,6 +288,11 @@ Map<String, Widget Function(http.Client)> _telas() {
         UsuariosView(controller: UsuariosController(api: api(c))),
     'Usuário · formulário': (c) =>
         UsuarioFormView(controller: UsuariosController(api: api(c))),
+    'Catraca · formulário': (c) => CatracaFormView(
+      portaId: 'd1',
+      caminho: 'Portaria Principal › Porta A',
+      controller: LocaisController(api: api(c)),
+    ),
     'Visitantes': (c) =>
         VisitantesView(controller: UsuariosController(api: api(c))),
     'Locais': (c) => LocaisView(controller: LocaisController(api: api(c))),
@@ -287,14 +325,17 @@ void main() {
       testWidgets('$nome cabe com a fonte no dobro', (tester) async {
         await _abrir(tester, criar(_api()), fonte: 2);
         expect(tester.takeException(), isNull);
+        expect(find.byType(CartaoErro), findsNothing);
       });
 
       testWidgets('$nome funciona no modo escuro', (tester) async {
         await _abrir(tester, criar(_api()), tema: AppTheme.dark);
         expect(tester.takeException(), isNull);
+        expect(find.byType(CartaoErro), findsNothing);
       });
 
-      if (nome != 'Usuário · formulário') {
+      // Os dois formulários só chamam a API ao salvar.
+      if (!const {'Usuário · formulário', 'Catraca · formulário'}.contains(nome)) {
         testWidgets('$nome sem internet mostra o erro', (tester) async {
           await _abrir(tester, criar(semInternet()));
           expect(find.text('Sem conexão com a internet'), findsOneWidget);
@@ -310,7 +351,7 @@ void main() {
     }
   });
 
-  testWidgets('Ajuda abre sem chamar a API', (tester) async {
+  testWidgets('Ajuda cabe com a fonte no dobro', (tester) async {
     await _abrir(tester, const AjudaView(), fonte: 2);
     expect(find.text('Ajuda'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -322,7 +363,7 @@ void main() {
     ) async {
       await _abrir(tester, _telas()['Histórico da equipe']!(_api()));
       expect(
-        find.text('3 registros · 1 liberados, 2 negados'),
+        find.text('3 registros · 1 liberado, 2 negados'),
         findsOneWidget,
       );
       expect(find.text('Fora do horário permitido'), findsOneWidget);
@@ -345,6 +386,24 @@ void main() {
       );
     });
 
+    test('O texto do motivo vem da API, com um padrão quando ela não manda', () {
+      final daApi = EventoAcesso.fromJson({
+        ..._eventoNegado,
+        'titulo': 'Texto novo',
+        'oQueFazer': 'Faça outra coisa.',
+      });
+      expect(daApi.titulo, 'Texto novo');
+      expect(daApi.oQueFazer, 'Faça outra coisa.');
+
+      final semTexto = EventoAcesso.fromJson({
+        ..._eventoNegado,
+        'titulo': null,
+        'oQueFazer': null,
+      });
+      expect(semTexto.titulo, 'Acesso negado');
+      expect(semTexto.oQueFazer, 'Fale com a portaria.');
+    });
+
     test('O período vai com data e hora, cobrindo o dia inteiro', () async {
       final chamadas = <http.Request>[];
       final controller = HistoricoController(
@@ -365,13 +424,15 @@ void main() {
   });
 
   group('Autorizações', () {
-    test('O filtro Ativa não traz as agendadas (B4)', () async {
+    test('O filtro Ativa vai para a API, que não traz as agendadas (B4)', () async {
+      final chamadas = <http.Request>[];
       final controller = AutorizacoesController(
-        api: ApiClient(cliente: _api()),
+        api: ApiClient(cliente: _api(chamadas: chamadas)),
       );
       final lista = await controller.listar(
         const FiltroAutorizacoes(situacao: SituacaoAutorizacao.ativa),
       );
+      expect(chamadas.single.url.queryParameters['situacao'], 'ATIVA');
       expect(lista.map((a) => a.autorizacao.id), ['autorizacao-1']);
     });
 
@@ -414,6 +475,7 @@ void main() {
       await tester.tap(find.text('Criar autorização'));
       await tester.pumpAndSettle();
       expect(find.text('Escolha a pessoa.'), findsOneWidget);
+      expect(find.text('Escolha a catraca.'), findsOneWidget);
       expect(chamadas.where((c) => c.method == 'POST'), isEmpty);
     });
   });
@@ -431,6 +493,10 @@ void main() {
       expect(controller.podeGerenciar(contasDemo.first.perfil), isFalse);
 
       await _abrir(tester, UsuariosView(controller: controller));
+      await tester.tap(find.text('Carlos Lima'));
+      await tester.pumpAndSettle();
+      expect(find.text('Editar usuário'), findsNothing);
+
       await tester.tap(find.text('Novo usuário'));
       await tester.pumpAndSettle();
       expect(find.text('Condômino'), findsOneWidget);
@@ -472,6 +538,351 @@ void main() {
       expect(corpo['cpf'], '123.456.789-09');
       expect(find.text('E-mail inválido'), findsOneWidget);
     });
+
+    testWidgets('Na própria conta não muda o perfil nem desativa', (
+      tester,
+    ) async {
+      final auth = authFalso();
+      await auth.entrar('admin@passe.com', senhaDemo);
+      final controller = UsuariosController(
+        api: ApiClient(cliente: _api()),
+        auth: auth,
+      );
+      final euMesmo = UsuarioCadastro.fromJson({
+        ..._carlos,
+        'id': auth.usuario!.id,
+      });
+
+      await _abrir(
+        tester,
+        UsuarioFormView(usuario: euMesmo, controller: controller),
+      );
+      expect(find.text('Perfil'), findsNothing);
+      expect(find.text('Cadastro ativo'), findsNothing);
+    });
+
+    testWidgets('Na conta de outra pessoa muda o perfil e desativa', (
+      tester,
+    ) async {
+      final auth = authFalso();
+      await auth.entrar('admin@passe.com', senhaDemo);
+      await _abrir(
+        tester,
+        UsuarioFormView(
+          usuario: UsuarioCadastro.fromJson(_maria),
+          controller: UsuariosController(
+            api: ApiClient(cliente: _api()),
+            auth: auth,
+          ),
+        ),
+      );
+      expect(find.text('Perfil'), findsOneWidget);
+      await tester.ensureVisible(find.text('Cadastro ativo'));
+      expect(find.text('Cadastro ativo'), findsOneWidget);
+    });
+  });
+
+  group('Formulários gravam na API', () {
+    Map<String, dynamic> corpoDe(List<http.Request> chamadas, String metodo) =>
+        jsonDecode(chamadas.singleWhere((c) => c.method == metodo).body)
+            as Map<String, dynamic>;
+
+    testWidgets('Usuário novo: envia os dados e volta', (tester) async {
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        _telas()['Usuário · formulário']!(_api(chamadas: chamadas)),
+      );
+      final campos = find.byType(TextFormField);
+      await tester.enterText(campos.at(0), ' Vis Teste ');
+      await tester.enterText(campos.at(1), '123.456.789-09');
+      await tester.enterText(campos.at(2), 'vis@passe.com');
+      await tester.enterText(campos.at(3), 'passe123');
+      await tester.tap(find.text('Criar usuário'));
+      await tester.pumpAndSettle();
+
+      expect(chamadas.single.url.path, '/users');
+      expect(corpoDe(chamadas, 'POST'), {
+        'nome': 'Vis Teste',
+        'email': 'vis@passe.com',
+        'cpf': '123.456.789-09',
+        'senha': 'passe123',
+        'perfil': 'CONDOMINO',
+      });
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('Usuário existente: senha em branco não vai', (tester) async {
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        UsuarioFormView(
+          usuario: UsuarioCadastro.fromJson(_maria),
+          controller: UsuariosController(
+            api: ApiClient(cliente: _api(chamadas: chamadas)),
+          ),
+        ),
+      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'Maria Lima');
+      await tester.tap(find.text('Salvar alterações'));
+      await tester.pumpAndSettle();
+
+      expect(chamadas.single.url.path, '/users/u-maria');
+      final corpo = corpoDe(chamadas, 'PATCH');
+      expect(corpo['nome'], 'Maria Lima');
+      expect(corpo['perfil'], 'CONDOMINO');
+      expect(corpo, isNot(contains('senha')));
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('Autorização nova: envia a pessoa, o local e o período', (
+      tester,
+    ) async {
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        AutorizacaoFormView(
+          pessoaFixa: UsuarioCadastro.fromJson(_ana),
+          controller: AutorizacoesController(
+            api: ApiClient(cliente: _api(chamadas: chamadas)),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(DropdownButtonFormField<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownMenuItem<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Criar autorização'));
+      await tester.pumpAndSettle();
+
+      final corpo = corpoDe(chamadas, 'POST');
+      expect(corpo['userId'], 'u-ana');
+      expect(corpo['accessPointId'], _idCatraca);
+      expect(corpo['dataFim'], corpo['dataInicio']);
+      expect(corpo['horaInicio'], '08:00');
+      expect(corpo['horaFim'], '18:00');
+      expect(corpo['maxUsos'], 1);
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('Autorização existente: não troca a pessoa', (tester) async {
+      final chamadas = <http.Request>[];
+      final controller = AutorizacoesController(
+        api: ApiClient(cliente: _api(chamadas: chamadas)),
+      );
+      final lista = await controller.listar(const FiltroAutorizacoes());
+      await _abrir(
+        tester,
+        AutorizacaoFormView(autorizacao: lista.first, controller: controller),
+      );
+      await tester.enterText(find.byType(TextFormField), '20');
+      await tester.tap(find.text('Salvar alterações'));
+      await tester.pumpAndSettle();
+
+      final edicao = chamadas.singleWhere((c) => c.method == 'PATCH');
+      expect(edicao.url.path, '/authorizations/autorizacao-1');
+      final corpo = jsonDecode(edicao.body) as Map<String, dynamic>;
+      expect(corpo['maxUsos'], 20);
+      expect(corpo['accessPointId'], _idCatraca);
+      expect(corpo['dataInicio'], '2026-10-01');
+      expect(corpo, isNot(contains('userId')));
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('Catraca nova: aceita vírgula e envia os números', (
+      tester,
+    ) async {
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        _telas()['Catraca · formulário']!(_api(chamadas: chamadas)),
+      );
+      final campos = find.byType(TextFormField);
+      await tester.enterText(campos.at(0), 'Catraca 2');
+      await tester.enterText(campos.at(1), '-23,5');
+      await tester.enterText(campos.at(2), '-45,25');
+      await tester.enterText(campos.at(3), '150');
+      await tester.tap(find.text('Salvar local'));
+      await tester.pumpAndSettle();
+
+      expect(chamadas.single.url.path, '/locations/access-points');
+      expect(corpoDe(chamadas, 'POST'), {
+        'nome': 'Catraca 2',
+        'doorId': 'd1',
+        'latitude': -23.5,
+        'longitude': -45.25,
+        'raioMetros': 150,
+      });
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('Catraca existente: edita o raio e mantém o resto', (
+      tester,
+    ) async {
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        CatracaFormView(
+          catraca: Catraca.fromJson(_catraca),
+          portaId: 'd1',
+          caminho: 'Portaria Principal › Porta A',
+          controller: LocaisController(
+            api: ApiClient(cliente: _api(chamadas: chamadas)),
+          ),
+        ),
+      );
+      expect(find.text('Editar catraca'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField).at(3), '200');
+      await tester.tap(find.text('Salvar local'));
+      await tester.pumpAndSettle();
+
+      expect(chamadas.single.url.path, '/locations/access-points/$_idCatraca');
+      expect(corpoDe(chamadas, 'PATCH'), {
+        'nome': 'Catraca 1',
+        'latitude': -23.3053,
+        'longitude': -45.9658,
+        'raioMetros': 200,
+      });
+    });
+
+    testWidgets('Catraca com dados fora da faixa não envia', (tester) async {
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        _telas()['Catraca · formulário']!(_api(chamadas: chamadas)),
+      );
+      final campos = find.byType(TextFormField);
+      await tester.enterText(campos.at(1), '91');
+      await tester.enterText(campos.at(2), '181');
+      await tester.enterText(campos.at(3), '5');
+      await tester.tap(find.text('Salvar local'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Informe o nome.'), findsOneWidget);
+      expect(find.text('A latitude vai de -90 a 90.'), findsOneWidget);
+      expect(find.text('A longitude vai de -180 a 180.'), findsOneWidget);
+      expect(find.text('O raio vai de 10 a 1000 metros.'), findsOneWidget);
+      expect(chamadas, isEmpty);
+    });
+
+    Widget catracaComGps(Posicao? posicao) => CatracaFormView(
+      portaId: 'd1',
+      caminho: 'Portaria Principal › Porta A',
+      controller: LocaisController(api: ApiClient(cliente: _api())),
+      localizacao: _LocalizacaoFalsa(posicao),
+    );
+
+    testWidgets('Usar minha localização preenche os campos', (tester) async {
+      await _abrir(tester, catracaComGps((latitude: -23.1, longitude: -45.2)));
+      await tester.tap(find.text('Usar minha localização'));
+      await tester.pumpAndSettle();
+      expect(find.text('-23.1'), findsOneWidget);
+      expect(find.text('-45.2'), findsOneWidget);
+    });
+
+    testWidgets('Usar minha localização sem GPS avisa', (tester) async {
+      await _abrir(tester, catracaComGps(null));
+      await tester.tap(find.text('Usar minha localização'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Não conseguimos sua localização. Digite os números.'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('Cadastro desativado', () {
+    const mensagem = 'Seu cadastro está desativado. Fale com a portaria.';
+    final cliente = MockClient(
+      (_) async => erroDaApi(401, 'CADASTRO_DESATIVADO', mensagem),
+    );
+    final telas = <String, Widget Function()>{
+      'Perfil': () => _telas()['Perfil']!(cliente),
+      'Minhas autorizações': () => MinhasAutorizacoesView(
+        controller: MinhasAutorizacoesController(
+          api: ApiClient(cliente: cliente),
+        ),
+      ),
+    };
+
+    for (final MapEntry(key: nome, value: criar) in telas.entries) {
+      testWidgets('$nome volta ao login explicando o motivo', (tester) async {
+        await _abrir(tester, criar());
+        expect(find.byType(LoginView), findsOneWidget);
+        expect(find.text(mensagem), findsOneWidget);
+      });
+    }
+  });
+
+  testWidgets('Morador bloqueia a própria tag pela API', (tester) async {
+    final chamadas = <http.Request>[];
+    await _abrir(
+      tester,
+      MinhaTagView(
+        podeBloquear: true,
+        controller: PerfilController(
+          api: ApiClient(cliente: _api(chamadas: chamadas)),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Bloquear tag'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bloquear'));
+    await tester.pumpAndSettle();
+
+    final bloqueio = chamadas.singleWhere((c) => c.method == 'PATCH');
+    expect(bloqueio.url.path, '/me/tags/tag-1');
+    expect(jsonDecode(bloqueio.body), {'ativa': false});
+  });
+
+  testWidgets('Sair pelo Menu do Início não chama a API sem token', (
+    tester,
+  ) async {
+    final chamadas = <http.Request>[];
+    await _abrir(
+      tester,
+      InicioView(
+        menu: ResidentMenuView(),
+        controller: MinhasAutorizacoesController(
+          api: ApiClient(cliente: _api(chamadas: chamadas)),
+        ),
+      ),
+    );
+    await tester.ensureVisible(find.text('Menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Menu'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Sair da conta'), 200);
+    await tester.pumpAndSettle();
+    chamadas.clear();
+
+    await tester.tap(find.text('Sair da conta'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginView), findsOneWidget);
+    expect(chamadas, isEmpty);
+  });
+
+  testWidgets('O Menu aberto pelo Início tem Voltar', (tester) async {
+    await _abrir(
+      tester,
+      InicioView(
+        menu: ResidentMenuView(),
+        controller: MinhasAutorizacoesController(
+          api: ApiClient(cliente: _api()),
+        ),
+      ),
+    );
+    await tester.ensureVisible(find.text('Menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Menu'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ResidentMenuView), findsOneWidget);
+
+    await tester.tap(find.text('Voltar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ResidentMenuView), findsNothing);
+    expect(find.text('Escanear QR Code'), findsOneWidget);
   });
 
   group('Terminais', () {
@@ -482,6 +893,22 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('No ar'), findsOneWidget);
+    });
+
+    testWidgets('Admin vê cadastrar e trocar chave', (tester) async {
+      final auth = authFalso();
+      await auth.entrar('admin@passe.com', senhaDemo);
+      await _abrir(
+        tester,
+        TerminaisView(
+          controller: TerminaisController(
+            api: ApiClient(cliente: _api()),
+            auth: auth,
+          ),
+        ),
+      );
+      expect(find.text('Novo terminal'), findsOneWidget);
+      expect(find.text('Trocar chave'), findsOneWidget);
     });
 
     testWidgets('Portaria não vê cadastrar nem trocar chave', (tester) async {
@@ -510,6 +937,9 @@ void main() {
     await tester.pump();
     expect(find.text('Nenhuma tag encontrada'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'b2c3');
+    await tester.pump();
+    expect(find.text('Maria Souza'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, '04:a1:b2:c3');
     await tester.pump();
     expect(find.text('Maria Souza'), findsOneWidget);
   });

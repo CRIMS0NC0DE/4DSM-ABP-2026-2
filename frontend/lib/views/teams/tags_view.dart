@@ -89,11 +89,13 @@ class _TagsViewState extends State<TagsView>
 
   List<Widget> _lista(List<UsuarioCadastro> pessoas) {
     final busca = _busca.text.trim().toLowerCase();
+    // A API guarda o UID sem separadores; o leitor mostra "04:A1:B2:C3".
+    final buscaUid = busca.replaceAll(RegExp(r'[\s:.-]'), '');
     final comTag = [
       for (final p in pessoas)
         if (p.tags.isNotEmpty &&
             (p.nome.toLowerCase().contains(busca) ||
-                p.tags.any((t) => t.uid.toLowerCase().contains(busca))))
+                p.tags.any((t) => t.uid.toLowerCase().contains(buscaUid))))
           p,
     ];
     if (comTag.isEmpty) {

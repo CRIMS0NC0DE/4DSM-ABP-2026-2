@@ -141,9 +141,16 @@ class _HistoricoViewState extends State<HistoricoView>
     ];
   }
 
-  String _resumo(PaginaEventos p) => widget.soNegados
-      ? '${p.total} ${p.total == 1 ? 'acesso negado' : 'acessos negados'}'
-      : '${p.total} registros · ${p.liberados} liberados, ${p.negados} negados';
+  String _resumo(PaginaEventos p) {
+    if (widget.soNegados) {
+      return '${p.total} ${p.total == 1 ? 'acesso negado' : 'acessos negados'}';
+    }
+    final registros = '${p.total} ${p.total == 1 ? 'registro' : 'registros'}';
+    final liberados =
+        '${p.liberados} ${p.liberados == 1 ? 'liberado' : 'liberados'}';
+    final negados = '${p.negados} ${p.negados == 1 ? 'negado' : 'negados'}';
+    return '$registros · $liberados, $negados';
+  }
 
   List<Widget> _lista(PaginaEventos pagina) {
     if (pagina.itens.isEmpty) {

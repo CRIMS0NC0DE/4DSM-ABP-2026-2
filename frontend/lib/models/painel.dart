@@ -21,7 +21,7 @@ class Painel {
   final int acessosHoje;
   final int negadosHoje;
 
-  /// Hoje também conta as agendadas e sem usos (B4 do backlog).
+  /// Só as que valem hoje: não conta as agendadas nem as sem usos.
   final int autorizacoesAtivas;
   final List<EventoAcesso> negadosRecentes;
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/admin_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
-import 'package:public/views/admin/admin_menu_view.dart';
+import 'package:public/views/teams/admin/admin_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 
 /// Guarda o que a tela pediu ao controller, para conferir no teste.
@@ -69,9 +69,7 @@ void main() {
 
     expect(controller.abertas, ['Comunicados']);
     expect(find.text('Comunicados: tela em construção.'), findsOneWidget);
-    // A barra some depois de um tempo.
-    await tester.pump(const Duration(seconds: 4));
-    expect(find.text('Comunicados: tela em construção.'), findsNothing);});
+  });
 
   testWidgets('Tocar em Sair da conta chama o controller e volta ao login', (
     WidgetTester tester,

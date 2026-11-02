@@ -96,9 +96,9 @@ jeito.
 |---|---|
 | F1 | Modelos `Autorizacao`, `EventoAcesso`, `Local`/`Catraca` e `Terminal` com `fromJson`, e as rotas novas na `test/support/api_falsa.dart` |
 | F2 | Tratar a sessão vencida (401) num lugar só. Hoje só a validação do QR trata; cada tela nova vai repetir o código |
-| F3 | Tabela de motivos no app (`lib/core/constants/motivos.dart`), se o grupo não fizer a B2 |
+| F3 | Feito: com a B2, o app mostra os textos da API e a tabela `lib/core/constants/motivos.dart` saiu |
 | F4 | O botão "Entrar com NFC" no login ainda diz "em construção" (P1.3): tirar ou mudar a função |
-| F5 | Código sem uso: `views/user/menu_view.dart`, `controllers/menu_controller.dart` e o teste deles (P1.7) |
+| F5 | Feito: `views/user/menu_view.dart`, `controllers/menu_controller.dart` e o teste deles foram removidos (P1.7) |
 | F6 | Permissão de NFC no Android e no iOS (P2.1), para a frente de Tags NFC |
 | F7 | Pacotes no `pubspec.yaml` que nenhum arquivo usa: `go_router`, `provider`, `connectivity_plus`, `nfc_manager`. Decidir se usam ou tiram |
 | F8 | O iOS bloqueia `http://` (P2.5). Só importa se alguém tiver Mac |

@@ -5,12 +5,11 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/autorizacao.dart';
 import '../../services/api_client.dart';
+import '../widgets/carrega_dados.dart';
 import '../widgets/cartao_erro.dart';
 import '../widgets/selo_situacao.dart';
-import '../widgets/tela_carregando.dart';
 import 'autorizacao_textos.dart';
 import 'detalhe_autorizacao_view.dart';
-import 'login_view.dart';
 
 /// U7 · Minhas autorizações, com o carregando (E3), o vazio (E4) e a falta
 /// de internet. "Ver detalhes" abre a U8; ao voltar, a lista recarrega,
@@ -50,7 +49,7 @@ class _MinhasAutorizacoesViewState extends State<MinhasAutorizacoesView> {
     } on ApiException catch (erro) {
       if (!mounted) return;
       if (erro.naoAutenticado) {
-        await _sessaoVencida();
+        await voltarAoLogin(context, erro, sair: controller.sair);
       } else if (_lista == null) {
         setState(() => _erro = erro);
       } else {
@@ -70,17 +69,6 @@ class _MinhasAutorizacoesViewState extends State<MinhasAutorizacoesView> {
     });
     _carregar();
   }
-
-  /// Volta para o login; a tela de carregamento limpa o histórico, como o
-  /// Sair dos menus.
-  Future<void> _sessaoVencida() => TelaCarregando.abrir(
-    context,
-    mensagem: 'Sua sessão venceu. Voltando ao login…',
-    tarefa: () async {
-      await controller.sair();
-      return LoginView();
-    },
-  );
 
   Future<void> _abrir(Autorizacao autorizacao) async {
     await Navigator.of(context).push(

@@ -87,12 +87,12 @@ Em ordem de prioridade.
 | Meus visitantes (C9) | **B8:** rotas em `/me` e regra de negócio | Contrato proposto | A tela não funciona |
 | Comunicados (C10) | **B10:** modelo, migration e rotas | Contrato proposto | A tela não funciona |
 | Configurações (S8) | **B10:** tabela e rotas | Não | A tela não funciona |
-| Minha tag NFC (S6) | **B6:** `PATCH /me/tags/:tagId` | Testado | Só ver, sem bloquear |
+| Minha tag NFC (S6) | **B6:** `PATCH /me/tags/:tagId` | Feito | O morador bloqueia pelo menu; o visitante só vê |
 | Locais (C5) | **B5:** `PATCH` e `DELETE` de edifício, portaria e porta; `DELETE` de catraca | Não | Cria tudo e edita a catraca, mas não edita nem apaga o resto |
 | Relatórios (C8) | **B12 (novo):** rota agregada | Não | Detalhes somados só sobre os 200 acessos mais recentes |
-| Painel e Autorizações (S1, C2) | **B4:** filtro `situacao=ATIVA` | Testado | O número "Autorizações ativas" do painel sai errado. A lista já se corrige no app |
-| Histórico (C1, S2, S3) | **B2:** texto do motivo nos eventos | Testado | Funciona com a tabela `motivos.dart` copiada no app |
-| Todas da equipe | **B3:** conferir `ativo` a cada chamada | Testado | Quem foi desativado continua entrando até o token vencer (8 h) |
+| Painel e Autorizações (S1, C2) | **B4:** filtro `situacao=ATIVA` | Feito | O painel e a lista contam só as que valem hoje |
+| Histórico (C1, S2, S3) | **B2:** texto do motivo nos eventos | Feito | A API manda os textos e o app os mostra |
+| Todas da equipe | **B3:** conferir `ativo` a cada chamada | Feito | Quem foi desativado perde o acesso na hora; o QR continua registrando a tentativa |
 
 ### 6.2 Usam rotas que já existem
 
@@ -134,8 +134,6 @@ São as mesmas do `backlog-sprint.md`. Elas mudam o que entra na lista, então v
 | Login | "Entrar com NFC" ainda diz "em construção", e o design não tem esse botão. Tirar | Não |
 | Login | "Registrar" abre uma tela que só avisa que não está disponível (D1) | Só com a B9 |
 | Login | "Esqueci minha senha" só mostra um aviso, o que é suficiente: a portaria troca a senha no formulário de Usuário | Não |
-| Menus | Depois de ligar as telas, atualizar o comentário "Protótipo: as opções ainda não abrem telas" nos 4 controllers | Não |
-| Código sem uso | `menu_view.dart`, `menu_controller.dart` e o teste deles (F5) | Não |
 | Android | O nome do app no celular aparece como "public" (`android:label`). Trocar para "Passe" | Não |
 | Android e iOS | Falta a permissão de NFC. Só importa se a tela Tags NFC for ler a tag pelo celular; o código-base usa digitação do UID | Não |
 
