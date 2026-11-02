@@ -5,10 +5,11 @@ import 'package:public/controllers/resident_menu_controller.dart';
 import 'package:public/controllers/visitor_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/services/sessao_service.dart';
-import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/minhas_autorizacoes_view.dart';
 import 'package:public/views/user/scanner_qr_view.dart';
 import 'package:public/views/visitor/visitor_menu_view.dart';
+import 'package:public/views/compartilhado/historico_view.dart';
+import 'package:public/views/user/login_view.dart';
 
 import '../../support/api_falsa.dart';
 
@@ -108,13 +109,10 @@ void main() {
     );
 
     await tester.tap(find.text('Histórico de acessos'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(controller.abertas, ['Histórico de acessos']);
-    expect(
-      find.text('Histórico de acessos: tela em construção.'),
-      findsOneWidget,
-    );
+    expect(find.byType(HistoricoView), findsOneWidget);
   });
 
   testWidgets('Minhas autorizações abre a lista', (WidgetTester tester) async {

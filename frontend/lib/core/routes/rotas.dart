@@ -10,6 +10,6 @@ import '../../views/visitor/visitor_menu_view.dart';
 Widget menuDoPerfil(Perfil perfil) => switch (perfil) {
   Perfil.admin => AdminMenuView(),
   Perfil.controladorAcesso => AccessControllerMenuView(),
-  Perfil.morador => ResidentMenuView(),
-  Perfil.visitante => VisitorMenuView(),
+  Perfil.morador => InicioView(menu: ResidentMenuView()),
+  Perfil.visitante => InicioView(menu: VisitorMenuView()),
 };

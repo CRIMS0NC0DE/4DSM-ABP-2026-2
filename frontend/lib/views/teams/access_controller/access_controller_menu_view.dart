@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/resident_menu_controller.dart';
+import '../../controllers/access_controller_menu_controller.dart';
 import '../../models/opcao_menu.dart';
 import '../user/login_view.dart';
-import '../user/minhas_autorizacoes_view.dart';
-import '../user/scanner_qr_view.dart';
-import '../widgets/menu_grade.dart';
 import '../widgets/tela_carregando.dart';
+import '../compartilhado/historico_view.dart';
+import '../equipe/autorizacoes_view.dart';
+import '../equipe/painel_view.dart';
+import '../equipe/tags_view.dart';
+import '../equipe/terminais_view.dart';
+import '../equipe/usuarios_view.dart';
+import '../equipe/visitantes_view.dart';
+import '../widgets/menu_grade.dart';
 
-class ResidentMenuView extends StatelessWidget {
-  final ResidentMenuController controller;
 
-  ResidentMenuView({super.key, ResidentMenuController? controller})
-    : controller = controller ?? ResidentMenuController();
+class AccessControllerMenuView extends StatelessWidget {
+  final AccessControllerMenuController controller;
+
+  AccessControllerMenuView({
+    super.key,
+    AccessControllerMenuController? controller,
+  }) : controller = controller ?? AccessControllerMenuController();
 
   void _abrir(BuildContext context, OpcaoMenu opcao) {
     controller.abrir(opcao);
     final tela = switch (opcao.titulo) {
-      'Escanear QR Code' => ScannerQrView(),
-      'Minhas autorizações' => MinhasAutorizacoesView(),
+      'Painel' => PainelView(),
+      'Autorizações' => AutorizacoesView(),
+      'Histórico de acessos' => HistoricoView(daEquipe: true),
+      'Acessos negados' => HistoricoView(daEquipe: true, soNegados: true),
+      'Usuários' => UsuariosView(),
+      'Visitantes' => VisitantesView(),
+      'Tags NFC' => TagsView(),
+      'Terminais' => TerminaisView(),
       _ => null,
     };
     if (tela != null) {
@@ -32,6 +46,7 @@ class ResidentMenuView extends StatelessWidget {
         SnackBar(content: Text('${opcao.titulo}: tela em construção.')),
       );
   }
+
 
   /// Volta para o login; a tela de carregamento limpa o histórico, para o
   /// Voltar não reabrir o menu.
@@ -49,8 +64,8 @@ class ResidentMenuView extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: MenuGrade(
-          perfil: 'Morador',
-          iconePerfil: Icons.home_outlined,
+          perfil: 'Controlador de acesso',
+          iconePerfil: Icons.shield_outlined,
           secoes: controller.secoes,
           onSelecionar: (opcao) => _abrir(context, opcao),
           onSair: () => _sair(context),

@@ -3,8 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/access_controller_menu_controller.dart';
 import 'package:public/controllers/admin_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
-import 'package:public/views/access_controller/access_controller_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
+import 'package:public/views/access_controller/access_controller_menu_view.dart';
+import 'package:public/views/equipe/visitantes_view.dart';
 
 /// Guarda o que a tela pediu ao controller, para conferir no teste.
 class _ControllerEspiao extends AccessControllerMenuController {
@@ -96,10 +97,10 @@ void main() {
     await tester.scrollUntilVisible(find.text('Visitantes'), 200);
     await tester.pump();
     await tester.tap(find.text('Visitantes'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(controller.abertas, ['Visitantes']);
-    expect(find.text('Visitantes: tela em construção.'), findsOneWidget);
+    expect(find.byType(VisitantesView), findsOneWidget);
   });
 
   testWidgets('Sair da conta chama o controller e volta para o login', (

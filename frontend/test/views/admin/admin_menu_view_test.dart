@@ -62,14 +62,16 @@ void main() {
       MaterialApp(home: AdminMenuView(controller: controller)),
     );
 
-    await tester.scrollUntilVisible(find.text('Usuários'), 200);
+    await tester.scrollUntilVisible(find.text('Comunicados'), 200);
     await tester.pump();
-    await tester.tap(find.text('Usuários'));
+    await tester.tap(find.text('Comunicados'));
     await tester.pump();
 
-    expect(controller.abertas, ['Usuários']);
-    expect(find.text('Usuários: tela em construção.'), findsOneWidget);
-  });
+    expect(controller.abertas, ['Comunicados']);
+    expect(find.text('Comunicados: tela em construção.'), findsOneWidget);
+    // A barra some depois de um tempo.
+    await tester.pump(const Duration(seconds: 4));
+    expect(find.text('Comunicados: tela em construção.'), findsNothing);});
 
   testWidgets('Tocar em Sair da conta chama o controller e volta ao login', (
     WidgetTester tester,
