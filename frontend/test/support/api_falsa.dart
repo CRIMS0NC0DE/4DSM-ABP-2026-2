@@ -166,10 +166,60 @@ http.Response respostaDoQr(String token) {
   }, 200);
 }
 
-/// Responde como o backend: POST /auth/login com e-mail ou CPF e
-/// POST /access/qr (ver [respostaDoQr]).
+/// Catraca do seed com o local onde ela fica, como vem nas autorizações.
+const catracaAutorizadaDemo = {
+  'id': '00000000-0000-4000-8000-000000000004',
+  'nome': 'Catraca 1',
+  'edificio': 'FATEC Jacareí',
+  'portaria': 'Portaria Principal',
+  'porta': 'Porta A',
+};
+
+/// Uma autorização como o GET /me/authorizations devolve (apresentar em
+/// backend/src/modules/authorizations/authorizations.service.ts).
+/// Sem parâmetros é o exemplo da U7 no design: 01/10 a 31/10/2026, das
+/// 08:00 às 18:00, 3 de 10 usos restantes.
+Map<String, Object?> autorizacaoJson({
+  String id = 'autorizacao-1',
+  String situacao = 'ATIVA',
+  String dataInicio = '2026-10-01',
+  String dataFim = '2026-10-31',
+  String horaInicio = '08:00',
+  String horaFim = '18:00',
+  int maxUsos = 10,
+  int usosRestantes = 3,
+  String? canceladaEm,
+  Map<String, Object?> catraca = catracaAutorizadaDemo,
+}) {
+  final morador = contasDemo[2];
+  return {
+    'id': id,
+    'userId': morador.id,
+    'accessPointId': catraca['id'],
+    'dataInicio': dataInicio,
+    'dataFim': dataFim,
+    'horaInicio': horaInicio,
+    'horaFim': horaFim,
+    'maxUsos': maxUsos,
+    'usosRealizados': maxUsos - usosRestantes,
+    'status': situacao == 'CANCELADA' ? 'CANCELADA' : 'ATIVA',
+    'canceladaEm': canceladaEm,
+    'createdAt': '2026-10-01T12:00:00.000Z',
+    'user': {'id': morador.id, 'nome': morador.nome, 'perfil': 'CONDOMINO'},
+    'catraca': catraca,
+    'situacao': situacao,
+    'usosRestantes': usosRestantes,
+  };
+}
+
+/// Responde como o backend: POST /auth/login com e-mail ou CPF,
+/// POST /access/qr (ver [respostaDoQr]) e GET /me/authorizations, que
+/// devolve [autorizacoes] (sem elas, uma só: [autorizacaoJson]).
 /// Guarda em [chamadas] cada requisição feita.
-MockClient apiFalsa({List<http.Request>? chamadas}) {
+MockClient apiFalsa({
+  List<http.Request>? chamadas,
+  List<Map<String, Object?>>? autorizacoes,
+}) {
   return MockClient((request) async {
     chamadas?.add(request);
     if (request.method == 'POST' && request.url.path == '/auth/login') {
@@ -202,6 +252,9 @@ MockClient apiFalsa({List<http.Request>? chamadas}) {
     if (request.method == 'POST' && request.url.path == '/access/qr') {
       final corpo = jsonDecode(request.body) as Map<String, dynamic>;
       return respostaDoQr(corpo['token'] as String);
+    }
+    if (request.method == 'GET' && request.url.path == '/me/authorizations') {
+      return respostaJson(autorizacoes ?? [autorizacaoJson()], 200);
     }
     return erroDaApi(
       404,

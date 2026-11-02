@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../controllers/resident_menu_controller.dart';
 import '../../models/opcao_menu.dart';
 import '../user/login_view.dart';
+import '../user/minhas_autorizacoes_view.dart';
 import '../user/scanner_qr_view.dart';
 import '../widgets/menu_grade.dart';
 import '../widgets/tela_carregando.dart';
@@ -17,6 +18,7 @@ class ResidentMenuView extends StatelessWidget {
     controller.abrir(opcao);
     final tela = switch (opcao.titulo) {
       'Escanear QR Code' => ScannerQrView(),
+      'Minhas autorizações' => MinhasAutorizacoesView(),
       _ => null,
     };
     if (tela != null) {

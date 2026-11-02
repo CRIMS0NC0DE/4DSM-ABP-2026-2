@@ -6,6 +6,7 @@ import 'package:public/controllers/visitor_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
 import 'package:public/services/sessao_service.dart';
 import 'package:public/views/user/login_view.dart';
+import 'package:public/views/user/minhas_autorizacoes_view.dart';
 import 'package:public/views/user/scanner_qr_view.dart';
 import 'package:public/views/visitor/visitor_menu_view.dart';
 
@@ -106,14 +107,27 @@ void main() {
       MaterialApp(home: VisitorMenuView(controller: controller)),
     );
 
-    await tester.tap(find.text('Minhas autorizações'));
+    await tester.tap(find.text('Histórico de acessos'));
     await tester.pump();
 
-    expect(controller.abertas, ['Minhas autorizações']);
+    expect(controller.abertas, ['Histórico de acessos']);
     expect(
-      find.text('Minhas autorizações: tela em construção.'),
+      find.text('Histórico de acessos: tela em construção.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Minhas autorizações abre a lista', (WidgetTester tester) async {
+    final controller = _ControllerEspiao();
+    await tester.pumpWidget(
+      MaterialApp(home: VisitorMenuView(controller: controller)),
+    );
+
+    await tester.tap(find.text('Minhas autorizações'));
+    await tester.pumpAndSettle();
+
+    expect(controller.abertas, ['Minhas autorizações']);
+    expect(find.byType(MinhasAutorizacoesView), findsOneWidget);
   });
 
   testWidgets('Escanear QR Code abre o scanner', (WidgetTester tester) async {
