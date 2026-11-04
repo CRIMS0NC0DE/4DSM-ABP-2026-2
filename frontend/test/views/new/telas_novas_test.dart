@@ -28,7 +28,7 @@ import 'package:public/views/teams/catraca_form_view.dart';
 import 'package:public/views/teams/locais_view.dart';
 import 'package:public/views/teams/painel_view.dart';
 import 'package:public/views/teams/relatorios_view.dart';
-import 'package:public/views/teams/resident/resident_menu_view.dart';
+import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/teams/tags_view.dart';
 import 'package:public/views/teams/terminais_view.dart';
 import 'package:public/views/teams/usuario_form_view.dart';
@@ -493,9 +493,20 @@ void main() {
       expect(controller.podeGerenciar(contasDemo.first.perfil), isFalse);
 
       await _abrir(tester, UsuariosView(controller: controller));
+      // Sem rolar, o cartão fica embaixo do botão "Novo usuário" e o toque
+      // abre o formulário de cadastro em vez de tocar no admin.
+      await tester.ensureVisible(find.text('Carlos Lima'));
+      await tester.pumpAndSettle();
+      final cartaoDoAdmin = find.ancestor(
+        of: find.text('Carlos Lima'),
+        matching: find.byType(InkWell),
+      );
+      expect(tester.widget<InkWell>(cartaoDoAdmin.first).onTap, isNull);
       await tester.tap(find.text('Carlos Lima'));
       await tester.pumpAndSettle();
       expect(find.text('Editar usuário'), findsNothing);
+      // Continua na lista: nenhum formulário abriu por cima.
+      expect(find.text('Nome, e-mail ou CPF'), findsOneWidget);
 
       await tester.tap(find.text('Novo usuário'));
       await tester.pumpAndSettle();

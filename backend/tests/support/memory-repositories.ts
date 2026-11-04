@@ -137,7 +137,9 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
           .filter((a) => !f.accessPointId || a.accessPointId === f.accessPointId)
           .filter((a) => {
             if (f.situacao === 'CANCELADA') return a.status === 'CANCELADA';
-            if (f.situacao === 'ATIVA') return a.status === 'ATIVA' && a.dataFim >= f.hoje;
+            if (f.situacao === 'ATIVA' || f.situacao === 'AGENDADA' || f.situacao === 'ESGOTADA') {
+              return a.status === 'ATIVA' && a.dataFim >= f.hoje;
+            }
             if (f.situacao === 'EXPIRADA') return a.status === 'ATIVA' && a.dataFim < f.hoje;
             return true;
           })

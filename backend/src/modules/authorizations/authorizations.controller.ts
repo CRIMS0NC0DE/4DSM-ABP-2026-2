@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { dataIso, hora, id, idParam } from '../../shared/http/schemas.js';
 import { parse } from '../../shared/http/validate.js';
 import type { AuthorizationsService } from './authorizations.service.js';
+import { SITUACOES } from './authorizations.types.js';
 
 const criarSchema = z.object({
   userId: id,
@@ -19,7 +20,7 @@ const atualizarSchema = criarSchema.omit({ userId: true }).partial();
 const filtroSchema = z.object({
   userId: id.optional(),
   accessPointId: id.optional(),
-  situacao: z.enum(['ATIVA', 'EXPIRADA', 'CANCELADA']).optional(),
+  situacao: z.enum(SITUACOES).optional(),
   de: dataIso.optional(),
   ate: dataIso.optional(),
 });

@@ -523,7 +523,7 @@ async function telaAutorizacoes(el) {
   const catracas = arvore.flatMap((e) => e.portarias.flatMap((p) => p.portas.flatMap((porta) => porta.catracas.map((c) => [c.id, `${c.nome} · ${e.nome} › ${p.nome} › ${porta.nome}`]))));
   const pessoas = usuarios.map((u) => [u.id, `${u.nome} · ${PERFIS[u.perfil]}`]);
 
-  const situacao = h('select', null, opcoes([['ATIVA', 'Ativas'], ['EXPIRADA', 'Expiradas'], ['CANCELADA', 'Canceladas']], 'Todas'));
+  const situacao = h('select', null, opcoes([['ATIVA', 'Ativas'], ['AGENDADA', 'Agendadas'], ['ESGOTADA', 'Sem usos'], ['EXPIRADA', 'Expiradas'], ['CANCELADA', 'Canceladas']], 'Todas'));
   situacao.value = 'ATIVA';
   const pessoa = h('select', null, opcoes(pessoas, 'Todas'));
   const local = h('select', null, opcoes(catracas, 'Todos'));

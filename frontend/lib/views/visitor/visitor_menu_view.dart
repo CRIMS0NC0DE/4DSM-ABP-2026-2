@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
-import '../../../controllers/resident_menu_controller.dart';
-import '../../../models/opcao_menu.dart';
-import '../../user/login_view.dart';
-import '../../user/minhas_autorizacoes_view.dart';
-import '../../user/scanner_qr_view.dart';
-import '../../widgets/tela_carregando.dart';
-import '../../shared/historico_view.dart';
-import '../../user/ajuda_view.dart';
-import '../../user/minha_tag_view.dart';
-import '../../user/perfil_view.dart';
-import '../../widgets/menu_grade.dart';
+import '../../controllers/visitor_menu_controller.dart';
+import '../../models/opcao_menu.dart';
+import '../user/login_view.dart';
+import '../user/minhas_autorizacoes_view.dart';
+import '../user/scanner_qr_view.dart';
+import '../widgets/tela_carregando.dart';
+import '../shared/historico_view.dart';
+import '../user/ajuda_view.dart';
+import '../user/minha_tag_view.dart';
+import '../user/perfil_view.dart';
+import '../widgets/menu_grade.dart';
 
 
-class ResidentMenuView extends StatelessWidget {
-  final ResidentMenuController controller;
+class VisitorMenuView extends StatelessWidget {
+  final VisitorMenuController controller;
 
-  ResidentMenuView({super.key, ResidentMenuController? controller})
-    : controller = controller ?? ResidentMenuController();
+  VisitorMenuView({super.key, VisitorMenuController? controller})
+    : controller = controller ?? VisitorMenuController();
 
   void _abrir(BuildContext context, OpcaoMenu opcao) {
     controller.abrir(opcao);
@@ -26,7 +26,7 @@ class ResidentMenuView extends StatelessWidget {
       'Minhas autorizações' => MinhasAutorizacoesView(),
       'Histórico de acessos' => HistoricoView(daEquipe: false),
       'Acessos negados' => HistoricoView(daEquipe: false, soNegados: true),
-      'Minha tag NFC' => MinhaTagView(podeBloquear: true),
+      'Minha tag NFC' => MinhaTagView(),
       'Perfil' => PerfilView(),
       'Ajuda' => const AjudaView(),
       _ => null,
@@ -60,8 +60,9 @@ class ResidentMenuView extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: MenuGrade(
-          perfil: 'Morador',
-          iconePerfil: Icons.home_outlined,
+          perfil: 'Visitante',
+          // Mesmo ícone do perfil Visitante na lista de usuários (A3).
+          iconePerfil: Icons.schedule,
           secoes: controller.secoes,
           onSelecionar: (opcao) => _abrir(context, opcao),
           onSair: () => _sair(context),

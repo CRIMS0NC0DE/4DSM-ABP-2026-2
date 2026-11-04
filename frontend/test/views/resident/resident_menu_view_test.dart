@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/resident_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
-import 'package:public/views/teams/resident/resident_menu_view.dart';
+import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/minha_tag_view.dart';
 import 'package:public/views/user/minhas_autorizacoes_view.dart';

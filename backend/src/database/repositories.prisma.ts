@@ -128,13 +128,15 @@ export function createPrismaRepositories(db: Prisma): Repositories {
       },
       list: async (f) => {
         const hoje = dateOnlyToDate(f.hoje);
+        // Ativa, agendada e esgotada: ainda dentro da data. O service separa uma da outra.
+        const dentroDaData = f.situacao === 'ATIVA' || f.situacao === 'AGENDADA' || f.situacao === 'ESGOTADA';
         const rows = await db.authorization.findMany({
           where: {
             userId: f.userId,
             accessPointId: f.accessPointId,
             AND: [
               f.situacao === 'CANCELADA' ? { status: 'CANCELADA' } : {},
-              f.situacao === 'ATIVA' ? { status: 'ATIVA', dataFim: { gte: hoje } } : {},
+              dentroDaData ? { status: 'ATIVA', dataFim: { gte: hoje } } : {},
               f.situacao === 'EXPIRADA' ? { status: 'ATIVA', dataFim: { lt: hoje } } : {},
               f.de ? { dataFim: { gte: dateOnlyToDate(f.de) } } : {},
               f.ate ? { dataInicio: { lte: dateOnlyToDate(f.ate) } } : {},

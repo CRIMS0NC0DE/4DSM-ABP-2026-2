@@ -336,6 +336,8 @@ class _FiltrosAutorizacoesState extends State<_FiltrosAutorizacoes> {
               opcoes: const [
                 (null, 'Todas'),
                 (SituacaoAutorizacao.ativa, 'Ativa'),
+                (SituacaoAutorizacao.agendada, 'Agendada'),
+                (SituacaoAutorizacao.esgotada, 'Sem usos'),
                 (SituacaoAutorizacao.expirada, 'Expirada'),
                 (SituacaoAutorizacao.cancelada, 'Cancelada'),
               ],

@@ -92,6 +92,23 @@ describe('O que as telas novas pedem ao backend', () => {
     expect(painel.body.autorizacoesAtivas).toBe(1);
   });
 
+  it('B4: as agendadas e as sem usos que saíram de ATIVA têm filtro próprio', async () => {
+    const c = await montarCenario();
+    const admin = { Authorization: `Bearer ${await c.tokenDe('carlos@passe.com')}` };
+    const base = { userId: c.pessoas.visitante.id, accessPointId: c.catraca.id, horaInicio: '08:00', horaFim: '18:00' };
+    const agendada = await c.api.post('/authorizations').set(admin).send({ ...base, dataInicio: '2026-12-01', dataFim: '2026-12-31', maxUsos: 1 });
+    const esgotada = await c.api.post('/authorizations').set(admin).send({ ...base, dataInicio: '2026-10-01', dataFim: '2026-10-31', maxUsos: 1 });
+    c.db.authorizations.find((a) => a.id === esgotada.body.id)!.usosRealizados = 1;
+
+    const agendadas = await c.api.get('/authorizations?situacao=AGENDADA').set(admin);
+    expect(agendadas.status).toBe(200);
+    expect(agendadas.body.map((a: { id: string }) => a.id)).toEqual([agendada.body.id]);
+
+    const esgotadas = await c.api.get('/authorizations?situacao=ESGOTADA').set(admin);
+    expect(esgotadas.status).toBe(200);
+    expect(esgotadas.body.map((a: { id: string }) => a.id)).toEqual([esgotada.body.id]);
+  });
+
   it('B4: o filtro EXPIRADA continua trazendo a que venceu sem usos', async () => {
     const c = await montarCenario();
     const admin = { Authorization: `Bearer ${await c.tokenDe('carlos@passe.com')}` };

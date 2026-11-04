@@ -8,7 +8,7 @@ import 'package:public/services/sessao_service.dart';
 import 'package:public/views/user/minha_tag_view.dart';
 import 'package:public/views/user/minhas_autorizacoes_view.dart';
 import 'package:public/views/user/scanner_qr_view.dart';
-import 'package:public/views/teams/visitor/visitor_menu_view.dart';
+import 'package:public/views/visitor/visitor_menu_view.dart';
 import 'package:public/views/shared/historico_view.dart';
 import 'package:public/views/user/login_view.dart';
 
