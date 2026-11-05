@@ -1,4 +1,4 @@
-import { unauthorized } from '../../shared/errors.js';
+import { cadastroDesativado, unauthorized } from '../../shared/errors.js';
 import { assinarJwt } from '../../shared/http/auth.js';
 import { conferirSenha, hashSenhaSync, somenteNumeros } from '../../shared/security.js';
 import { semSenha } from '../users/users.service.js';
@@ -23,7 +23,7 @@ export class AuthService {
 
     const senhaConfere = await conferirSenha(senha, user?.senhaHash ?? HASH_FALSO);
     if (!user || !senhaConfere) throw unauthorized('E-mail, CPF ou senha não conferem.');
-    if (!user.ativo) throw unauthorized('Seu cadastro está desativado. Fale com a portaria.');
+    if (!user.ativo) throw cadastroDesativado();
 
     const token = assinarJwt({ userId: user.id, perfil: user.perfil }, this.jwt.secret, this.jwt.expiresIn);
     return { token, usuario: semSenha(user) };

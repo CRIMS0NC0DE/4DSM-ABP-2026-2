@@ -93,6 +93,47 @@ describe('Usuários (RF01) e permissões', () => {
     expect(repetida.status).toBe(409);
   });
 
+  it('portaria altera a tag de morador, mas não a de admin', async () => {
+    const autorizado = `/users/${c.pessoas.maria.id}/tags/${c.tag.id}`;
+    const ok = await c.api.patch(autorizado).set('Authorization', `Bearer ${portaria}`).send({ ativa: false });
+    expect(ok.status).toBe(200);
+    expect(ok.body.ativa).toBe(false);
+
+    const tagAdmin = await c.api.post(`/users/${c.pessoas.admin.id}/tags`).set('Authorization', `Bearer ${admin}`).send({ uid: 'AA11BB22' });
+    const caminho = `/users/${c.pessoas.admin.id}/tags/${tagAdmin.body.id}`;
+    const alterar = await c.api.patch(caminho).set('Authorization', `Bearer ${portaria}`).send({ ativa: false });
+    expect(alterar.status).toBe(403);
+    const remover = await c.api.delete(caminho).set('Authorization', `Bearer ${portaria}`);
+    expect(remover.status).toBe(403);
+    expect(c.db.tags.find((t) => t.id === tagAdmin.body.id)?.ativa).toBe(true);
+  });
+
+  it('tag de outra pessoa e usuário inexistente respondem 404', async () => {
+    const deOutra = await c.api.delete(`/users/${c.pessoas.visitante.id}/tags/${c.tag.id}`).set('Authorization', `Bearer ${portaria}`);
+    expect(deOutra.status).toBe(404);
+    expect(deOutra.body.erro.mensagem).toBe('Tag não encontrado(a).');
+
+    const ninguem = await c.api.delete(`/users/00000000-0000-4000-8000-00000000dead/tags/${c.tag.id}`).set('Authorization', `Bearer ${admin}`);
+    expect(ninguem.status).toBe(404);
+    expect(ninguem.body.erro.mensagem).toBe('Usuário não encontrado(a).');
+  });
+
+  it('ninguém desativa nem muda o perfil da própria conta', async () => {
+    const caminho = `/users/${c.pessoas.admin.id}`;
+    const desativar = await c.api.patch(caminho).set('Authorization', `Bearer ${admin}`).send({ ativo: false });
+    expect(desativar.status).toBe(409);
+    const rebaixar = await c.api.patch(caminho).set('Authorization', `Bearer ${admin}`).send({ perfil: 'VISITANTE' });
+    expect(rebaixar.status).toBe(409);
+
+    // O formulário sempre manda perfil e ativo: sem mudança, salvar continua funcionando.
+    const salvar = await c.api
+      .patch(caminho)
+      .set('Authorization', `Bearer ${admin}`)
+      .send({ nome: 'Carlos Lima Filho', perfil: 'ADMIN', ativo: true });
+    expect(salvar.status).toBe(200);
+    expect(salvar.body.nome).toBe('Carlos Lima Filho');
+  });
+
   it('busca por nome', async () => {
     const res = await c.api.get('/users?busca=maria').set('Authorization', `Bearer ${admin}`);
     expect(res.body).toHaveLength(1);
@@ -196,6 +237,18 @@ describe('Autorizações (RF03, RF04, RF05, RF08)', () => {
     const res = await c.api.get('/me/authorizations').set('Authorization', `Bearer ${token}`);
     expect(res.body).toHaveLength(1);
     expect(res.body[0]).toMatchObject({ situacao: 'ATIVA', usosRestantes: 7 });
+  });
+
+  it('a autorização diz onde fica a catraca, para o app mostrar (U7 e U8)', async () => {
+    const token = await c.tokenDe('maria@passe.com');
+    const res = await c.api.get('/me/authorizations').set('Authorization', `Bearer ${token}`);
+    expect(res.body[0].catraca).toEqual({
+      id: c.catraca.id,
+      nome: 'Catraca 2',
+      edificio: 'Edifício Atlântico',
+      portaria: 'Portaria Principal',
+      porta: 'Porta A',
+    });
   });
 });
 

@@ -5,9 +5,10 @@ import type { AccessEvent } from '../../src/modules/events/events.types.js';
 import type { AccessPoint, Building, Door, Gate } from '../../src/modules/locations/locations.types.js';
 import type { Terminal } from '../../src/modules/terminals/terminals.types.js';
 import type { NfcTag, User } from '../../src/modules/users/users.types.js';
+import { systemClock, type Clock } from '../../src/shared/clock.js';
 
 /** Repositórios em memória: mesmo contrato do Prisma, sem precisar de banco nos testes. */
-export function createMemoryRepositories() {
+export function createMemoryRepositories(clock: Clock = systemClock) {
   const db = {
     users: [] as User[],
     tags: [] as NfcTag[],
@@ -25,7 +26,14 @@ export function createMemoryRepositories() {
   const comRefs = (a: Authorization): AuthorizationWithRefs => {
     const u = db.users.find((x) => x.id === a.userId)!;
     const c = db.accessPoints.find((x) => x.id === a.accessPointId)!;
-    return { ...a, user: { id: u.id, nome: u.nome, perfil: u.perfil }, catraca: { id: c.id, nome: c.nome } };
+    const porta = db.doors.find((d) => d.id === c.doorId)!;
+    const portaria = db.gates.find((g) => g.id === porta.gateId)!;
+    const edificio = db.buildings.find((b) => b.id === portaria.buildingId)!;
+    return {
+      ...a,
+      user: { id: u.id, nome: u.nome, perfil: u.perfil },
+      catraca: { id: c.id, nome: c.nome, edificio: edificio.nome, portaria: portaria.nome, porta: porta.nome },
+    };
   };
   const atualizar = <T extends { id: string }>(lista: T[], id: string, dados: object): T => {
     const item = lista.find((x) => x.id === id);
@@ -129,11 +137,14 @@ export function createMemoryRepositories() {
           .filter((a) => !f.accessPointId || a.accessPointId === f.accessPointId)
           .filter((a) => {
             if (f.situacao === 'CANCELADA') return a.status === 'CANCELADA';
-            if (f.situacao === 'ATIVA') return a.status === 'ATIVA' && a.dataFim >= f.hoje;
+            if (f.situacao === 'ATIVA' || f.situacao === 'AGENDADA' || f.situacao === 'ESGOTADA') {
+              return a.status === 'ATIVA' && a.dataFim >= f.hoje;
+            }
             if (f.situacao === 'EXPIRADA') return a.status === 'ATIVA' && a.dataFim < f.hoje;
             return true;
           })
           .filter((a) => (!f.de || a.dataFim >= f.de) && (!f.ate || a.dataInicio <= f.ate))
+          .sort((a, b) => b.dataInicio.localeCompare(a.dataInicio) || b.createdAt.getTime() - a.createdAt.getTime())
           .map(comRefs),
       listForAccess: async (userId, accessPointId) =>
         db.authorizations.filter((a) => a.userId === userId && a.accessPointId === accessPointId),
@@ -147,7 +158,7 @@ export function createMemoryRepositories() {
     },
 
     events: {
-      create: async (data) => push(db.events, { id: randomUUID(), createdAt: new Date(), ...data }),
+      create: async (data) => push(db.events, { id: randomUUID(), createdAt: clock.now(), ...data }),
       list: async (f) => {
         const filtrados = db.events
           .filter((e) => (!f.resultado || e.resultado === f.resultado) && (!f.metodo || e.metodo === f.metodo))

@@ -4,9 +4,7 @@ import 'package:flutter/material.dart' show Icons;
 import '../models/opcao_menu.dart';
 import '../services/auth_service.dart';
 
-/// Menu do administrador. A tela de cada opção é escolhida na
-/// AdminMenuView; "Relatórios", "Comunicados" e "Configurações" ainda não
-/// têm rota no backend.
+/// Menu do administrador.
 class AdminMenuController {
   AdminMenuController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;

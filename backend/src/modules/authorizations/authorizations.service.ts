@@ -24,18 +24,22 @@ export class AuthorizationsService {
   }
 
   /** Acrescenta a situação calculada e os usos restantes, que é o que as telas mostram. */
-  private apresentar(a: AuthorizationWithRefs) {
+  private apresentar(a: AuthorizationWithRefs, hoje = this.hoje()) {
     return {
       ...a,
-      situacao: situacaoDe(a, this.hoje()),
+      situacao: situacaoDe(a, hoje),
       usosRestantes: Math.max(0, a.maxUsos - a.usosRealizados),
     };
   }
 
   /** RF04 */
   async listar(filtro: Omit<AuthorizationFilter, 'hoje'>) {
-    const lista = await this.authorizations.list({ ...filtro, hoje: this.hoje() });
-    return lista.map((a) => this.apresentar(a));
+    // A mesma data na consulta e na situação: na virada do dia a linha não some da lista.
+    const hoje = this.hoje();
+    const lista = await this.authorizations.list({ ...filtro, hoje });
+    return lista
+      .map((a) => this.apresentar(a, hoje))
+      .filter((a) => !filtro.situacao || a.situacao === filtro.situacao);
   }
 
   /** RF08: as autorizações de quem está logado. */

@@ -36,6 +36,29 @@ class AuthService {
     return usuario;
   }
 
+  /// Volta a sessão guardada ao abrir o app e confere na API se ela ainda vale:
+  /// o perfil pode ter mudado e o cadastro pode ter sido desativado. Sem
+  /// resposta a tempo, segue com a cópia local para o app abrir sem internet.
+  /// [aviso] explica por que a pessoa voltou ao login.
+  Future<({Usuario? usuario, String? aviso})> restaurar({
+    Duration espera = const Duration(seconds: 3),
+  }) async {
+    final guardado = await _sessao.restaurar();
+    if (guardado == null) return (usuario: null, aviso: null);
+    try {
+      final json = await _api.get('/auth/me').timeout(espera);
+      final usuario = Usuario.fromJson(json as Map<String, dynamic>);
+      await _sessao.iniciar(_sessao.token!, usuario);
+      return (usuario: usuario, aviso: null);
+    } on ApiException catch (e) {
+      if (!e.naoAutenticado) return (usuario: guardado, aviso: null);
+      await _sessao.encerrar();
+      return (usuario: null, aviso: e.cadastroDesativado ? e.mensagem : null);
+    } catch (_) {
+      return (usuario: guardado, aviso: null);
+    }
+  }
+
   /// Ainda não existe na API: quem cria conta é a portaria ou o admin
   /// (POST /users, só para a equipe). Quando o backend ganhar uma rota
   /// pública de cadastro, a chamada entra aqui. Ver docs/integracao-frontend-backend.md.

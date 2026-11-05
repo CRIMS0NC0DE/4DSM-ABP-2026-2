@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/admin_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
-import 'package:public/views/admin/admin_menu_view.dart';
+import 'package:public/views/teams/admin/admin_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 
 /// Guarda o que a tela pediu ao controller, para conferir no teste.
@@ -54,7 +54,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Opção sem tela no backend chama o controller e avisa', (
+  testWidgets('Tocar numa opção chama o controller e avisa', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -62,13 +62,13 @@ void main() {
       MaterialApp(home: AdminMenuView(controller: controller)),
     );
 
-    await tester.scrollUntilVisible(find.text('Relatórios'), 200);
+    await tester.scrollUntilVisible(find.text('Comunicados'), 200);
     await tester.pump();
-    await tester.tap(find.text('Relatórios'));
+    await tester.tap(find.text('Comunicados'));
     await tester.pump();
 
-    expect(controller.abertas, ['Relatórios']);
-    expect(find.text('Relatórios: tela em construção.'), findsOneWidget);
+    expect(controller.abertas, ['Comunicados']);
+    expect(find.text('Comunicados: tela em construção.'), findsOneWidget);
   });
 
   testWidgets('Tocar em Sair da conta chama o controller e volta ao login', (
