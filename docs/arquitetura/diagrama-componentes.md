@@ -1,7 +1,6 @@
 # Diagrama de Componentes
 
 **Projeto:** 4DSM-ABP-2026-2  
-**Status:** Rascunho conceitual — validar com o código  
 **Revisão:** 11/11/2026
 
 > O desenho usa apenas componentes identificados na análise anterior. Protocolos, direções e contratos precisam ser confirmados nos fontes.
