@@ -3,7 +3,6 @@
 | Campo | Valor |
 |---|---|
 | Projeto | 4DSM-ABP-2026-2 |
-| Status | Rascunho para validação técnica |
 | Revisão | 11/11/2026 |
 
 > **Nota:** documento preliminar baseado nos achados de uma análise anterior. O acesso atual ao GitHub não foi confirmado nesta sessão. Nomes de serviços, versões, rotas, tabelas e configurações precisam ser validados no repositório antes da aprovação.
@@ -70,8 +69,4 @@ Foram identificados Docker, workflows CI/CD e publicação de imagens de contêi
 - Corrigir divergências entre diagramas e implementação.
 - Classificar funcionalidades como implementadas, parciais ou planejadas.
 
-## 8. Documentos relacionados
 
-- [Diagrama de componentes](diagrama-componentes.md)
-- [Modelo de dados](modelo-dados.md)
-- [Infraestrutura](infraestrutura.md)
