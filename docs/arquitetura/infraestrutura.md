@@ -35,34 +35,23 @@ flowchart TB
     APP[Aplicativo Flutter] -->|HTTPS/API| API
 ```
 
-O desenho é conceitual; não confirma que todos os componentes estejam implantados no mesmo ambiente ou que o deploy automatizado esteja operacional.
-
-## 4. Ambientes
-
-| Ambiente | Finalidade | URL/host | Banco | Broker | Status |
-|---|---|---|---|---|---|
-| Desenvolvimento | Desenvolvimento local | A confirmar | A confirmar | A confirmar | Pendente |
-| Testes/CI | Testes automatizados | A confirmar | A confirmar | A confirmar | Pendente |
-| Homologação | Validação pré-produção | A confirmar | A confirmar | A confirmar | Pendente |
-| Produção | Operação real | A confirmar | A confirmar | A confirmar | Pendente |
-
-## 5. Pipeline CI/CD
+## 4. Pipeline CI/CD
 
 Documentar gatilhos, instalação de dependências, lint, testes, build, publicação de artefatos/imagens, deploy, verificações pós-deploy e rollback.
 
 **Histórico a validar:** análise anterior relatou falha na publicação GHCR por permissão `write_package`, com deploy no Render não executado em consequência. Confirmar se o problema permanece ou foi corrigido consultando a execução mais recente.
 
-## 6. Configuração e secrets
+## 5. Configuração e secrets
 
 Registrar apenas nomes de variáveis e finalidades, nunca valores de tokens, senhas, chaves privadas ou strings de conexão. Para cada variável, informar componente consumidor, obrigatoriedade e ambiente.
 
-## 7. Rede e segurança
+## 6. Rede e segurança
 
 Verificar domínios e portas expostas, HTTPS/TLS da API, TLS e autenticação MQTT, ACL por dispositivo/tópico, firewall, armazenamento de secrets e atualização do firmware.
 
 A análise anterior apontou uso de `setInsecure()` como fallback TLS no firmware. Confirmar no código atual e tratar como risco até que haja validação adequada de certificado.
 
-## 8. Backup e recuperação
+## 7. Backup e recuperação
 
 Registrar tecnologia/versão do banco, frequência e retenção dos backups, criptografia, responsáveis, procedimento de restauração e RPO/RTO definidos pela equipe. Não há evidência suficiente nesta sessão para afirmar uma política existente.
 
