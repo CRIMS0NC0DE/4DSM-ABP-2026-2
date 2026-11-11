@@ -219,5 +219,7 @@ jobs:
             echo "::warning::Secret RENDER_DEPLOY_HOOK_URL não configurado; imagem publicada, deploy não disparado."
             exit 0
           fi
-          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          # O Render às vezes demora ou responde 5xx (ex.: 520). Limita cada tentativa
+          # a 60 s e tenta de novo, em vez de deixar o job parado por 15 minutos.
+          curl -fsS -X POST --max-time 60 --retry 4 --retry-delay 15 --retry-all-errors "$RENDER_DEPLOY_HOOK_URL"
           echo "Deploy disparado para ${{ steps.imagem.outputs.nome }}:${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
