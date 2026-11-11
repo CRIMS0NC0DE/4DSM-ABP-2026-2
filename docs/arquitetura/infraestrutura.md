@@ -1,10 +1,7 @@
 # Infraestrutura e Implantação
 
 **Projeto:** 4DSM-ABP-2026-2  
-**Status:** Rascunho — topologia e ambientes pendentes de confirmação  
 **Revisão:** 11/11/2026
-
-> A análise anterior identificou Docker, GitHub Actions, publicação de imagens no GHCR e integração/tentativa de deploy no Render. O estado atual precisa ser confirmado nos arquivos e execuções recentes. Nunca registrar valores de secrets neste documento.
 
 ## 1. Objetivo
 
