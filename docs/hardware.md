@@ -3,6 +3,10 @@
 Proposta de hardware e pinagem usada pelo firmware (`firmware/include/config.h`).
 A coluna "Temos?" é para conferir com o kit antes de comprar.
 
+Passo a passo da montagem, com desenho, teste por etapa e conferência fio a fio:
+abra [montagem-terminal.html](montagem-terminal.html) no navegador. Os testes usam o
+firmware de bancada: `pio run -e teste -t upload` e `pio device monitor`.
+
 ## Lista de materiais
 
 | Item | Modelo sugerido | Para quê | Temos? | Preço aprox. |

@@ -16,6 +16,10 @@ export const badRequest = (message: string, details?: unknown) =>
 export const unauthorized = (message = 'Faça login para continuar.') =>
   new AppError(401, 'NAO_AUTENTICADO', message);
 
+/** Tem código próprio para o app explicar o motivo em vez de dizer que a sessão venceu. */
+export const cadastroDesativado = () =>
+  new AppError(401, 'CADASTRO_DESATIVADO', 'Seu cadastro está desativado. Fale com a portaria.');
+
 export const forbidden = (message = 'Você não tem permissão para esta ação.') =>
   new AppError(403, 'SEM_PERMISSAO', message);
 

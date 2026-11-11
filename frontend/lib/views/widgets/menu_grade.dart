@@ -179,6 +179,13 @@ class _Cabecalho extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Morador e visitante chegam aqui pelo Início.
+        if (Navigator.of(context).canPop())
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).maybePop(),
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Voltar'),
+          ),
         Text('Menu', style: textTheme.headlineMedium),
         const SizedBox(height: 8),
         Container(

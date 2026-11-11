@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Montagem do Terminal Passe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Atkinson+Hyperlegible+Mono:wght@400;600;700&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+  /* Layout: manual de bancada. Trilho de etapas fixo à esquerda; cada etapa abre com o desenho da ligação ao lado da lista de fios, e o teste da etapa logo abaixo. */
+  --bg:#f4f5f7; --surface:#ffffff; --surface-2:#eceff3; --line:#dce0e7; --line-2:#c6ccd6;
+  --fg:#111827; --muted:#576072;
+  --brand:#f2a900; --on-brand:#1f1600; --accent:#8a6100; --accent-bg:#fff3cc;
+  --ok:#0b7a51; --ok-bg:#e1f4e9; --bad:#bf1d3a; --bad-bg:#fde7eb;
+  --term-bg:#15171c; --term-fg:#dce1e9; --term-dim:#8a93a3; --term-ok:#7fd99a; --term-line:#2a2e36;
+  --pcb:#172030; --pcb-edge:#33405a; --silk:#eef1f6; --silk-dim:#8592a8; --gold:#d5b35d; --metal:#bfc5cd; --metal-ink:#2a2e36;
+  --tft-pcb:#17304f; --screen:#05070b; --nfc-pcb:#1c53b0; --nfc-coil:#80b2ff; --rele-pcb:#1b4c86; --rele-cubo:#2c71de; --borne:#2e8b58; --dupont:#25282e;
+  --board:#ecebe6; --board-edge:#ccc8bf; --hole:#5c5f66; --on-board:#4b4e56; --rail-red:#d43131; --rail-blue:#2360e8;
+  --leg:#a3a9b2; --res-body:#d9c39b; --res-edge:#a48c64; --led-verde:#22c55e; --led-vermelho:#ef4444; --buzzer:#18191c; --buzzer-pcb:#2f7d4a;
+  --w-casing:rgba(17,24,39,.5);
+  --w-preto:#1f2125; --w-vermelho:#dc2f2f; --w-laranja:#f07d16; --w-amarelo:#f2c21b; --w-azul:#2563eb; --w-verde:#17a34a; --w-branco:#fafafa; --w-cinza:#8a919b; --w-marrom:#8d5a2b; --w-roxo:#8b47d8;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"Atkinson Hyperlegible Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --surface:#1a1c21; --surface-2:#23262d; --line:#2d3139; --line-2:#3c414c;
+    --fg:#f1f3f6; --muted:#9ba5b6; --accent:#f5b82a; --accent-bg:#3a2b00;
+    --ok:#45d39b; --ok-bg:#11342a; --bad:#ff7088; --bad-bg:#3b1620;
+    --term-bg:#0b0c0f; --term-line:#23262d;
+    --pcb:#111826; --pcb-edge:#4a576d; --board:#d8d5cd; --board-edge:#a6a298;
+    --w-casing:rgba(236,239,244,.55); --w-preto:#141518; --w-azul:#3d7bf0; --w-roxo:#a066ee; --w-marrom:#a46c38; --w-cinza:#959ca7;
+    --dupont:#1b1d22;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --surface:#1a1c21; --surface-2:#23262d; --line:#2d3139; --line-2:#3c414c;
+  --fg:#f1f3f6; --muted:#9ba5b6; --accent:#f5b82a; --accent-bg:#3a2b00;
+  --ok:#45d39b; --ok-bg:#11342a; --bad:#ff7088; --bad-bg:#3b1620;
+  --term-bg:#0b0c0f; --term-line:#23262d;
+  --pcb:#111826; --pcb-edge:#4a576d; --board:#d8d5cd; --board-edge:#a6a298;
+  --w-casing:rgba(236,239,244,.55); --w-preto:#141518; --w-azul:#3d7bf0; --w-roxo:#a066ee; --w-marrom:#a46c38; --w-cinza:#959ca7;
+  --dupont:#1b1d22;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 1rem/1.55 var(--f-body);-webkit-text-size-adjust:100%}
+.wrap{max-width:1340px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-stretch:80%;line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,4.8vw,3.3rem);font-weight:780;letter-spacing:-.01em}
+h2{font-size:clamp(1.65rem,2.8vw,2.15rem);font-weight:760}
+h3{font-size:1.25rem;font-weight:720;font-stretch:86%}
+h4{margin:0;font:700 .76rem/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+p,ul,ol,dl{margin:0}
+.eyebrow{font:700 .74rem/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.11em;color:var(--accent)}
+.lead{font-size:1.07rem;color:var(--muted);max-width:68ch}
+.muted{color:var(--muted)}
+code,kbd,pre{font-family:var(--f-mono)}
+code{font-size:.88em;background:var(--surface-2);padding:.06em .36em;border-radius:4px;overflow-wrap:anywhere}
+kbd{display:inline-block;min-width:1.8em;text-align:center;font-size:.9em;font-weight:700;padding:.02em .45em;border:1px solid var(--line-2);border-bottom-width:3px;border-radius:6px;background:var(--surface);color:var(--fg)}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+b,strong{font-weight:700}
+
+/* topo */
+.topo{background:var(--surface);border-bottom:1px solid var(--line)}
+.topo-in{display:flex;flex-wrap:wrap;gap:20px 48px;align-items:flex-end;justify-content:space-between;padding-block:30px 24px}
+.topo-txt{display:grid;gap:10px;flex:1 1 520px;min-width:0}
+.placar{flex:0 1 300px;display:grid;gap:8px;min-width:0}
+.placar-num{font-family:var(--f-display);font-stretch:80%;font-size:2.1rem;font-weight:760;font-variant-numeric:tabular-nums;line-height:1}
+.placar-num small{font-size:1rem;color:var(--muted);font-weight:500;font-stretch:100%;font-family:var(--f-body)}
+.barra{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.barra span{display:block;height:100%;width:0;background:var(--brand);transition:width .3s}
+.placar-leg{font-size:.82rem;color:var(--muted)}
+.btn-link{justify-self:start;background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:.82rem;cursor:pointer}
+.btn-link.armado{color:var(--bad);font-weight:700}
+
+/* trilho */
+.layout{display:grid;grid-template-columns:236px minmax(0,1fr);gap:40px;padding-block:28px 80px;align-items:start}
+.trilha{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+.trilha ol{list-style:none;padding:0;display:grid;gap:2px}
+.trilha .sep{font:700 .7rem/1 var(--f-body);text-transform:uppercase;letter-spacing:.11em;color:var(--muted);padding:16px 10px 6px}
+.trilha a{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 10px;border-radius:8px;color:var(--fg);text-decoration:none;font-size:.95rem}
+.trilha a:hover{background:var(--surface-2)}
+.trilha a[aria-current="page"]{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-2)}
+.num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 .78rem/1 var(--f-mono);background:var(--surface-2);color:var(--muted)}
+.num.q{border-radius:6px}
+.trilha a[aria-current="page"] .num{background:var(--brand);color:var(--on-brand)}
+.st{font:700 .72rem/1 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.st.ok{color:var(--ok)} .st.falha{color:var(--bad)}
+@media (max-width:980px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:20px;padding-block-start:16px}
+  .trilha{position:static}
+  .trilha ol{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}
+  .trilha .sep{display:none}
+  .trilha li{flex:0 0 auto}
+  .trilha a{grid-template-columns:auto auto auto;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+}
+
+/* vistas */
+main{min-width:0}
+.vista{display:grid;gap:30px;min-width:0}
+.vista-cab{display:grid;gap:10px}
+.bloco{display:grid;gap:12px;min-width:0}
+.bloco p{max-width:70ch}
+.duas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px 40px;align-items:start}
+.duas > *{display:grid;gap:12px;min-width:0}
+@media (max-width:860px){.duas{grid-template-columns:minmax(0,1fr)}}
+.etapa-grid{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);gap:24px;align-items:start}
+.etapa-grid > *{min-width:0}
+.lado{display:grid;gap:14px}
+@media (max-width:1180px){.etapa-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* diagrama */
+.diagrama{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+@media (max-width:1180px){.diagrama{position:relative;top:auto}}
+.dg-scroll{overflow-x:auto;border-radius:6px}
+.dg-scroll svg{display:block;width:100%;min-width:600px;height:auto;max-height:80vh}
+.diagrama figcaption{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.8rem;color:var(--muted);padding:8px 6px 2px}
+.leg{display:inline-flex;align-items:center;gap:7px}
+.leg i{display:inline-block;width:24px;border-top:4px solid var(--fg)}
+.leg i.tr{border-top-style:dashed}
+.leg i.ap{opacity:.3}
+.tip{position:absolute;z-index:5;max-width:280px;pointer-events:none;background:var(--fg);color:var(--bg);font-size:.84rem;line-height:1.35;padding:8px 10px;border-radius:7px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.tip b{font-weight:700}
+.dg{font-family:var(--f-mono)}
+.t-pin{font-size:11px;fill:var(--silk)}
+.t-pin.livre{fill:var(--silk-dim);opacity:.7}
+.t-pin.agora{fill:var(--brand);font-weight:700}
+.t-n{fill:var(--silk-dim);font-size:9px}
+.t-mod{font-size:10px;fill:var(--silk)}
+.t-nome{font:700 14px var(--f-display);font-stretch:82%;fill:var(--silk)}
+.t-sub{font-size:10px;fill:var(--silk-dim)}
+.t-metal{font-size:10px;font-weight:700;fill:var(--metal-ink)}
+.t-bb{font-size:8.5px;fill:var(--on-board)}
+.t-tag{font-size:9.5px;font-weight:700;fill:var(--on-board)}
+.t-rail{font:700 15px var(--f-body)}
+.t-usb{font:600 12px var(--f-body);fill:var(--muted)}
+.t-fant{font:700 14px var(--f-body);fill:var(--muted)}
+.fantasma{opacity:.15}
+.anel{fill:none;stroke:var(--brand);stroke-width:2.5}
+.fio .cas{stroke:var(--w-casing);stroke-width:7.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.fio .nuc{stroke-width:4.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.fio .cab-c{stroke:var(--w-casing);stroke-width:9.5}
+.fio .cab{stroke:var(--dupont);stroke-width:7}
+.fio .hit{stroke:transparent;stroke-width:16;fill:none;pointer-events:stroke;cursor:pointer}
+.fio.falta .nuc{stroke-dasharray:9 6}
+.fio.antes{opacity:.28}
+.peca{cursor:pointer}
+.peca.falta{opacity:.42}
+.peca.antes{opacity:.7}
+svg.foco .fio:not(.on), svg.foco .peca:not(.on){opacity:.1}
+.fio.on,.peca.on{opacity:1}
+.fio.on .nuc{stroke-width:6.5}
+.fio.on .cas{stroke-width:10.5}
+.fio, .peca{transition:opacity .15s}
+
+/* listas de montagem */
+.lista{list-style:none;padding:0;display:grid;gap:6px}
+.item label{display:grid;grid-template-columns:22px 28px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer}
+.item label:hover,.item.on label{border-color:var(--line-2);background:var(--surface-2)}
+.item.feito label{background:var(--ok-bg);border-color:transparent}
+.item input,.chk input,.tenho input{margin:1px 0 0;width:20px;height:20px;accent-color:var(--ok)}
+.sw{display:block;margin-top:8px;width:28px;height:6px;border-radius:3px;background:var(--c);box-shadow:0 0 0 1.5px var(--w-casing)}
+.sw.peca{width:12px;height:12px;margin:4px 0 0 8px;border-radius:3px;background:var(--res-body);box-shadow:0 0 0 1.5px var(--res-edge)}
+.sw.acao{width:12px;height:12px;margin:4px 0 0 8px;border-radius:50%;background:none;box-shadow:inset 0 0 0 2px var(--line-2)}
+.txt{display:grid;gap:3px;min-width:0}
+.t1{font-weight:600}
+.t2{font-size:.86rem;color:var(--muted)}
+.t2 .cor{color:var(--fg);font-weight:600}
+.item.perigo .t2 b{color:var(--bad)}
+.pin,.furo,.trilho{font:700 .8em/1.45 var(--f-mono);padding:.04em .42em;border-radius:4px;white-space:nowrap}
+.pin{background:var(--pcb);color:var(--silk)}
+.furo{background:var(--board);color:var(--on-board);box-shadow:inset 0 0 0 1px var(--board-edge)}
+.trilho{background:var(--board);color:var(--on-board);box-shadow:inset 0 -3px 0 var(--tc)}
+.trilho.mais{--tc:var(--rail-red)} .trilho.menos{--tc:var(--rail-blue)}
+
+/* caixas */
+.perigo-box{border:1.5px solid var(--bad);background:var(--bad-bg);border-radius:var(--r);padding:18px 20px;display:grid;gap:12px}
+.selo{justify-self:start;font:700 .7rem/1 var(--f-body);letter-spacing:.11em;text-transform:uppercase;padding:6px 9px;border-radius:4px;background:var(--bad);color:var(--surface)}
+.regras{display:grid;gap:8px;padding-left:1.3em}
+.nota-box{background:var(--accent-bg);border-radius:var(--r);padding:14px 16px;display:grid;gap:6px;font-size:.93rem}
+.nota-box h4{color:var(--accent)}
+.como{display:grid;gap:10px;padding-left:1.3em;max-width:72ch}
+.passo-a-passo{display:grid;gap:10px;padding-left:1.4em;max-width:72ch}
+.passo-a-passo li::marker{font-weight:700;color:var(--accent)}
+
+/* terminal */
+.term{border-radius:8px;overflow:hidden;background:var(--term-bg);min-width:0}
+.term-cab{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--term-dim);font:700 .72rem/1 var(--f-mono);padding:8px 12px;border-bottom:1px solid var(--term-line);text-transform:uppercase;letter-spacing:.06em}
+.copiar{font:700 .72rem/1 var(--f-mono);color:var(--term-fg);background:transparent;border:1px solid var(--term-line);border-radius:5px;padding:5px 8px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em}
+.copiar:hover{border-color:var(--term-dim)}
+.serial{margin:0;color:var(--term-fg);padding:12px 14px;font-size:.84rem;line-height:1.55;overflow-x:auto;white-space:pre}
+.serial .d{color:var(--term-dim)} .serial .k{color:var(--term-ok)}
+
+/* teste */
+.teste{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:grid;gap:16px;min-width:0}
+.teste-cab{display:grid;gap:6px}
+.espera{display:grid;gap:6px;padding-left:1.2em}
+.resultado{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:4px}
+.resultado > span{font-weight:700;margin-right:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:700 .95rem/1 var(--f-body);padding:12px 16px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--fg);cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--surface-2)}
+.btn-pri{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn-pri:hover{background:var(--brand);filter:brightness(1.06)}
+.btn[data-res="ok"][aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.btn[data-res="falha"][aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+details.problemas{border-top:1px solid var(--line);padding-top:14px}
+details.problemas summary{cursor:pointer;font-weight:700}
+.problemas dl{display:grid;gap:14px;margin-top:14px}
+.problemas dt{font-weight:700}
+.problemas dd{margin:3px 0 0;color:var(--muted);max-width:72ch}
+.passos{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px}
+.passos .volta{color:var(--muted);text-decoration:none;font-weight:600}
+.passos .volta:hover{color:var(--fg)}
+
+/* início */
+.inicio-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start}
+.inicio-grid > *{min-width:0}
+@media (max-width:1180px){.inicio-grid{grid-template-columns:minmax(0,1fr)}}
+.resumo{display:grid;gap:12px}
+.resumo div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding-top:12px;border-top:1px solid var(--line)}
+.resumo dt{font:700 1.02rem/1.3 var(--f-display);font-stretch:84%}
+.resumo dd{margin:0;color:var(--muted);font-size:.95rem}
+.cores{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 18px}
+.cores li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;font-size:.9rem}
+.cores .sw{margin-top:7px}
+.cores b{display:block}
+.mini-bb{margin:0;display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.mini-bb svg{width:100%;height:auto;display:block}
+.mini-bb figcaption{font-size:.88rem;color:var(--muted);min-height:2.6em}
+.mh{fill:var(--hole);cursor:pointer}
+.mh.on{fill:var(--brand)}
+.mh-g.on{stroke:var(--brand)}
+
+/* peças */
+.pecas{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.pc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px;align-content:start}
+.pc.feito{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
+.pc h3{font-size:1.12rem}
+.pc .mod{font:700 .78rem/1.3 var(--f-mono);color:var(--accent)}
+.pc p{font-size:.92rem}
+.pc .alerta{color:var(--bad);font-size:.88rem}
+.tenho{display:flex;gap:9px;align-items:center;font-weight:700;font-size:.92rem;cursor:pointer}
+.ilu{width:100%;max-width:240px;height:auto;display:block}
+.tabela-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:460px;font-size:.93rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:700 .74rem/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+td.n{font:700 1rem/1.3 var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* conferência */
+.conf{display:grid;gap:24px}
+.conf-grupo{display:grid;gap:8px}
+.conf-lista{list-style:none;padding:0;display:grid;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:center;padding:6px 8px 6px 4px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.crow.sel{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.crow.ok{background:var(--ok-bg)}
+.crow.erro{background:var(--bad-bg)}
+.crow-sel{all:unset;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:6px 9px;align-items:center;padding:6px 8px;cursor:pointer;border-radius:6px;min-width:0;font-size:.94rem}
+.crow-sel:focus-visible{outline:3px solid var(--brand)}
+.crow-sel .sw{margin:0}
+.opc{font:700 .68rem/1 var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line-2);border-radius:4px;padding:3px 5px}
+.acoes{display:flex;gap:6px}
+.mini{font:700 .8rem/1 var(--f-body);padding:8px 10px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface);color:var(--fg);cursor:pointer}
+.mini:hover{background:var(--surface-2)}
+.mini.sim[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.mini.nao[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.dica-erro{grid-column:1/-1;font-size:.88rem;color:var(--bad);padding:0 8px 6px}
+.conf-placar{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:700 .8rem/1 var(--f-body);padding:7px 10px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.chip.erro{background:var(--bad-bg);color:var(--bad)}
+.validado{border:1.5px solid var(--ok);background:var(--ok-bg);border-radius:var(--r);padding:16px 18px;display:grid;gap:8px}
+.validado h3{color:var(--ok)}
+.chk{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer}
+.chk.feito{background:var(--ok-bg);border-color:transparent}
+.chks{display:grid;gap:6px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* base da página quando aberta direto no navegador */
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap topo-in">
+    <div class="topo-txt">
+      <p class="eyebrow">Projeto Passe · terminal da catraca · ESP32</p>
+      <h1>Montagem do terminal</h1>
+      <p class="lead">Guia de bancada para montar o terminal uma peça por vez, com um teste de um minuto no fim de cada etapa e uma conferência fio a fio antes de ligar no sistema.</p>
+    </div>
+    <div class="placar" aria-live="polite">
+      <div class="placar-num"><span id="pg-feito">0</span> <small>de <span id="pg-total">0</span> itens</small></div>
+      <div class="barra"><span id="pg-barra"></span></div>
+      <p class="placar-leg">O progresso fica salvo só neste navegador.</p>
+      <button id="zerar" class="btn-link" type="button">Recomeçar do zero</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap layout">
+  <nav class="trilha" aria-label="Etapas do guia">
+    <ol>
+      <li><a href="#inicio" data-ir="inicio"><span class="num q">i</span><span>Antes de começar</span><span class="st" data-st="inicio"></span></a></li>
+      <li><a href="#pecas" data-ir="pecas"><span class="num q">≡</span><span>Peças</span><span class="st" data-st="pecas"></span></a></li>
+      <li class="sep">Montagem</li>
+      <li><a href="#etapa-1" data-ir="etapa-1"><span class="num">1</span><span>ESP32 no computador</span><span class="st" data-st="etapa-1"></span></a></li>
+      <li><a href="#etapa-2" data-ir="etapa-2"><span class="num">2</span><span>LEDs</span><span class="st" data-st="etapa-2"></span></a></li>
+      <li><a href="#etapa-3" data-ir="etapa-3"><span class="num">3</span><span>Buzzer</span><span class="st" data-st="etapa-3"></span></a></li>
+      <li><a href="#etapa-4" data-ir="etapa-4"><span class="num">4</span><span>Relé</span><span class="st" data-st="etapa-4"></span></a></li>
+      <li><a href="#etapa-5" data-ir="etapa-5"><span class="num">5</span><span>Display</span><span class="st" data-st="etapa-5"></span></a></li>
+      <li><a href="#etapa-6" data-ir="etapa-6"><span class="num">6</span><span>Leitor NFC</span><span class="st" data-st="etapa-6"></span></a></li>
+      <li class="sep">Validar</li>
+      <li><a href="#conferir" data-ir="conferir"><span class="num q">✓</span><span>Conferência final</span><span class="st" data-st="conferir"></span></a></li>
+      <li><a href="#sistema" data-ir="sistema"><span class="num q">↗</span><span>Ligar no sistema</span><span class="st" data-st="sistema"></span></a></li>
+    </ol>
+  </nav>
+
+  <main id="principal">
+
+<!-- ======================= INÍCIO ======================= -->
+<section class="vista" data-vista="inicio">
+  <div class="inicio-grid">
+    <figure class="diagrama" data-diagrama="tudo">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span>Mapa completo, com todas as ligações prontas. Passe o mouse ou toque num fio para ver de onde ele sai e para onde vai.</span></figcaption>
+    </figure>
+    <div class="bloco">
+      <h2>O que você vai montar</h2>
+      <p>O terminal fica na catraca. Ele mostra um QR Code que troca a cada 10 segundos, lê o chaveiro NFC do morador e aciona o relé que libera a passagem. Quem decide se libera é sempre o servidor: o ESP32 só mostra, lê e obedece.</p>
+      <dl class="resumo">
+        <div><dt>ESP32</dt><dd>O cérebro. Tem Wi-Fi, conversa com o servidor e comanda as outras peças.</dd></div>
+        <div><dt>Display</dt><dd>Mostra o QR Code e as telas de liberado e de negado.</dd></div>
+        <div><dt>Leitor NFC</dt><dd>Lê o chaveiro ou o cartão do morador.</dd></div>
+        <div><dt>Relé</dt><dd>A chave que abriria a catraca. Na demonstração, o clique dele mostra a abertura.</dd></div>
+        <div><dt>LEDs e buzzer</dt><dd>Avisam o resultado: verde e 1 bipe libera, vermelho e 2 bipes nega.</dd></div>
+        <div><dt>Protoboard</dt><dd>Segura os LEDs e o buzzer, e é onde se encontram os fios que precisam ser divididos.</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="bloco">
+    <h2>Como usar este guia</h2>
+    <ol class="como">
+      <li><b>Uma peça por vez.</b> São 6 etapas e cada uma termina com um teste rápido. Só passe para a próxima quando o teste der certo: se algo falhar, você já sabe que o problema está na última peça.</li>
+      <li><b>Marque cada fio quando ele estiver no lugar.</b> No desenho, o fio tracejado fica contínuo.</li>
+      <li><b>No fim, confira e ligue no sistema.</b> A conferência passa por cada pino do ESP32, e o último passo testa o QR e a tag com o servidor de verdade.</li>
+    </ol>
+  </div>
+
+  <div class="perigo-box">
+    <span class="selo">Pode queimar peça</span>
+    <h3>Quatro regras para seguir o tempo todo</h3>
+    <ol class="regras">
+      <li><b>Tire o USB antes de colocar ou tirar qualquer fio.</b> Ligue de novo só para testar.</li>
+      <li><b>Display e leitor NFC só no 3V3.</b> O pino VIN tem 5 V e queima o leitor RC522.</li>
+      <li><b>Nunca ligue 3V3 ou VIN direto no GND.</b> Isso é curto-circuito: a placa esquenta e pode queimar. Se algo esquentar ou cheirar a queimado, tire o USB na hora.</li>
+      <li><b>Relé só pelo módulo</b>, a plaquinha com os pinos VCC, GND e IN. Um relé solto ligado direto no pino do ESP32 queima o pino.</li>
+    </ol>
+  </div>
+
+  <div class="duas">
+    <div>
+      <h2>Como a protoboard funciona</h2>
+      <p>Os furos são ligados por dentro, em grupos. <b>Cada coluna numerada tem 5 furos ligados entre si na metade de cima</b>, e outros 5 na metade de baixo. O canal do meio separa as duas metades.</p>
+      <p>Os <b>trilhos</b> das bordas, com a faixa azul (−) e a vermelha (+), ligam a linha inteira. Em muitas protoboards de 830 furos o trilho é cortado no meio. Neste guia tudo fica entre as colunas 1 e 30, então o corte não atrapalha.</p>
+      <p>Por isso o guia fala só em <span class="furo">coluna 15</span>: qualquer furo da coluna 15 na metade de cima serve. A letra da fileira não importa.</p>
+      <p class="muted">Na sua protoboard a faixa azul pode estar embaixo da vermelha. Siga a cor e o sinal impressos, não a posição do desenho.</p>
+    </div>
+    <figure class="mini-bb">
+      <svg id="mini-bb" viewBox="0 0 430 372" role="img" aria-label="Protoboard de exemplo: toque num furo para ver o grupo ligado a ele"></svg>
+      <figcaption id="mini-bb-leg">Toque num furo para ver quais estão ligados a ele.</figcaption>
+    </figure>
+  </div>
+
+  <div class="duas">
+    <div>
+      <h2>Fios e pontas</h2>
+      <p>Ponta <b>macho</b> tem um pino; ponta <b>fêmea</b> tem um buraquinho. O ESP32 e os módulos têm pinos, então o fio que vai neles precisa de ponta fêmea. Na protoboard entra ponta macho.</p>
+      <p><b>O ESP32 fica fora da protoboard.</b> Ele é largo: numa protoboard só, sobra furo de um lado e falta do outro. Os fios encaixam direto nos pinos dele. Deixe a placa apoiada nos próprios conectores, com o USB virado para você como no desenho, e prenda o cabo com fita para ele não puxar a placa.</p>
+      <p class="muted">Tem duas protoboards? Dá para encaixar o ESP32 entre elas, uma fileira de pinos em cada, e usar fios macho nos pinos dele. As ligações continuam as mesmas.</p>
+    </div>
+    <div>
+      <h3>Cores dos fios</h3>
+      <p class="muted">A cor não muda nada na eletricidade, ela só ajuda a conferir. Se faltar alguma cor no kit, use outra e anote.</p>
+      <ul class="cores">
+        <li><span class="sw" style="--c:var(--w-vermelho)"></span><span><b>Vermelho</b>3V3, a energia de 3,3 V</span></li>
+        <li><span class="sw" style="--c:var(--w-laranja)"></span><span><b>Laranja</b>VIN, 5 V, só para o relé</span></li>
+        <li><span class="sw" style="--c:var(--w-preto)"></span><span><b>Preto</b>GND, o negativo</span></li>
+        <li><span class="sw" style="--c:var(--w-amarelo)"></span><span><b>Amarelo</b>SCK, coluna 9</span></li>
+        <li><span class="sw" style="--c:var(--w-azul)"></span><span><b>Azul</b>MOSI, coluna 12</span></li>
+        <li><span class="sw" style="--c:var(--w-verde)"></span><span><b>Verde</b>MISO do leitor e LED verde</span></li>
+        <li><span class="sw" style="--c:var(--w-branco)"></span><span><b>Branco</b>CS do display e LED vermelho</span></li>
+        <li><span class="sw" style="--c:var(--w-cinza)"></span><span><b>Cinza</b>DC do display e buzzer</span></li>
+        <li><span class="sw" style="--c:var(--w-marrom)"></span><span><b>Marrom</b>reset do display e do leitor</span></li>
+        <li><span class="sw" style="--c:var(--w-roxo)"></span><span><b>Roxo</b>SDA do leitor e IN do relé</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <nav class="passos"><span></span><a class="btn btn-pri" href="#pecas">Separar as peças →</a></nav>
+</section>
+
+<!-- ======================= PEÇAS ======================= -->
+<section class="vista" data-vista="pecas" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Antes de montar</p>
+    <h2>Peças</h2>
+    <p class="lead">Separe tudo na mesa e marque o que tiver. Se alguma peça for diferente da descrita, pare e avise a equipe antes de montar: às vezes basta mudar uma linha do firmware, às vezes a peça não serve.</p>
+  </header>
+  <div class="pecas">
+    <article class="pc" data-pc="pc-esp">
+      <p class="mod">ESP32 DevKit V1 · 30 pinos</p>
+      <h3>Placa ESP32</h3>
+      <p>Na tampinha de metal tem que estar escrito <b>ESP32-WROOM-32</b>. A versão de 38 pinos também serve: os nomes são os mesmos, só muda a posição.</p>
+      <p>Os pinos podem estar escritos <span class="pin">D18</span>, <span class="pin">G18</span>, <span class="pin">IO18</span> ou só <span class="pin">18</span>. É o mesmo pino.</p>
+      <p class="alerta">Se estiver escrito WROVER, S2, S3, C3 ou ESP8266, ou se for um Arduino, a pinagem muda: avise a equipe.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-esp"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-tft">
+      <p class="mod">TFT 1,54" · ST7789 · 240×240</p>
+      <h3>Display</h3>
+      <p>Tem 8 pinos, nesta ordem na maioria dos modelos: <span class="pin">GND</span> <span class="pin">VCC</span> <span class="pin">SCL</span> <span class="pin">SDA</span> <span class="pin">RES</span> <span class="pin">DC</span> <span class="pin">CS</span> <span class="pin">BLK</span>.</p>
+      <p class="alerta">Precisa ter o pino CS. Display de 1,3" sem CS, OLED pequeno ou LCD de duas linhas não servem para o QR.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-tft"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-nfc">
+      <p class="mod">RFID RC522 · 13,56 MHz</p>
+      <h3>Leitor NFC</h3>
+      <p>Placa azul com 8 pinos: <span class="pin">SDA</span> <span class="pin">SCK</span> <span class="pin">MOSI</span> <span class="pin">MISO</span> <span class="pin">IRQ</span> <span class="pin">GND</span> <span class="pin">RST</span> <span class="pin">3.3V</span>. Costuma vir com um cartão branco e um chaveiro.</p>
+      <p class="alerta">Se os pinos vieram soltos no saquinho, eles precisam ser soldados. Encostado sem solda dá mau contato.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-nfc"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-rele">
+      <p class="mod">Relé 1 canal · 5 V · com optoacoplador</p>
+      <h3>Módulo relé</h3>
+      <p>Tem um cubo azul escrito SRD-05VDC, 3 pinos de entrada (<span class="pin">VCC</span> <span class="pin">GND</span> <span class="pin">IN</span>, às vezes <span class="pin">DC+</span> <span class="pin">DC−</span> <span class="pin">IN</span>) e 3 parafusos de saída.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-rele"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-buzz">
+      <p class="mod">Buzzer ativo · 5 V</p>
+      <h3>Buzzer</h3>
+      <svg class="ilu" viewBox="0 0 240 92" role="img" aria-label="Buzzer visto por baixo: o ativo é fechado, o passivo mostra a placa verde">
+        <circle cx="56" cy="44" r="34" fill="var(--buzzer)"/><circle cx="56" cy="44" r="26" fill="var(--buzzer)" stroke="var(--line-2)" stroke-width="1.5"/>
+        <circle cx="44" cy="44" r="3" fill="var(--leg)"/><circle cx="68" cy="44" r="3" fill="var(--leg)"/>
+        <text x="56" y="90" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ok)" font-family="var(--f-body)">ativo: fechado</text>
+        <circle cx="180" cy="44" r="34" fill="var(--buzzer)"/><circle cx="180" cy="44" r="25" fill="var(--buzzer-pcb)"/>
+        <circle cx="168" cy="44" r="3" fill="var(--leg)"/><circle cx="192" cy="44" r="3" fill="var(--leg)"/>
+        <text x="180" y="90" text-anchor="middle" font-size="12" font-weight="700" fill="var(--bad)" font-family="var(--f-body)">passivo: placa verde</text>
+      </svg>
+      <p>Vire e olhe por baixo. O <b>ativo</b>, que é o certo, é fechado com resina preta e apita sozinho quando recebe energia. No passivo dá para ver uma plaquinha verde.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-buzz"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-led">
+      <p class="mod">LED 5 mm · verde e vermelho</p>
+      <h3>Dois LEDs</h3>
+      <svg class="ilu" viewBox="0 0 240 110" role="img" aria-label="LED com a perna longa positiva e a curta negativa">
+        <path d="M86 50 V22 a24 24 0 0 1 48 0 V50 Z" fill="var(--led-vermelho)"/>
+        <rect x="80" y="48" width="60" height="7" rx="2" fill="var(--led-vermelho)"/>
+        <line x1="98" y1="55" x2="98" y2="106" stroke="var(--leg)" stroke-width="3"/>
+        <line x1="122" y1="55" x2="122" y2="88" stroke="var(--leg)" stroke-width="3"/>
+        <text x="90" y="100" text-anchor="end" font-size="12" font-weight="700" fill="var(--fg)" font-family="var(--f-body)">+ longa</text>
+        <text x="130" y="86" font-size="12" font-weight="700" fill="var(--fg)" font-family="var(--f-body)">− curta</text>
+      </svg>
+      <p>A perna <b>longa é o +</b>. Se as pernas já foram cortadas, o lado com a borda reta no plástico é o −.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-led"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-res">
+      <p class="mod">2 resistores · 220 Ω</p>
+      <h3>Resistores</h3>
+      <svg class="ilu" viewBox="0 0 240 44" role="img" aria-label="Resistor de 220 ohms com faixas vermelho, vermelho, marrom e dourado">
+        <line x1="6" y1="22" x2="234" y2="22" stroke="var(--leg)" stroke-width="3"/>
+        <rect x="74" y="8" width="92" height="28" rx="12" fill="var(--res-body)" stroke="var(--res-edge)"/>
+        <rect x="88" y="8" width="8" height="28" fill="var(--w-vermelho)"/><rect x="104" y="8" width="8" height="28" fill="var(--w-vermelho)"/>
+        <rect x="120" y="8" width="8" height="28" fill="var(--w-marrom)"/><rect x="144" y="8" width="8" height="28" fill="var(--gold)"/>
+      </svg>
+      <p>Faixas <b>vermelho, vermelho, marrom</b> (e dourado). Com 5 faixas: vermelho, vermelho, preto, preto, marrom. Resistor não tem lado certo.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-res"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-bb">
+      <p class="mod">Protoboard 830 furos</p>
+      <h3>Protoboard</h3>
+      <p>A grande, com trilhos nas bordas. Só a metade esquerda (colunas 1 a 30) é usada.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-bb"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-usb">
+      <p class="mod">Micro-USB ou USB-C, conforme a placa</p>
+      <h3>Cabo USB de dados</h3>
+      <p>Para saber se é de dados, ligue um celular no computador com ele: se der para ver os arquivos, serve. Cabo só de carga não grava a placa.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-usb"> Tenho</label>
+    </article>
+    <article class="pc" data-pc="pc-tag">
+      <p class="mod">MIFARE · 13,56 MHz</p>
+      <h3>Tag ou cartão NFC</h3>
+      <p>O chaveiro ou cartão que vem com o RC522. Chaveiros de 125 kHz, comuns em portaria, não são lidos por ele.</p>
+      <label class="tenho"><input type="checkbox" data-item="pc-tag"> Tenho</label>
+    </article>
+  </div>
+
+  <div class="bloco">
+    <h3>Quantos fios separar</h3>
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>Tipo</th><th>Quantos</th><th>Onde vai</th></tr></thead>
+        <tbody>
+          <tr><td>Macho-fêmea</td><td class="n">16</td><td>de um pino (ESP32 ou módulo) até a protoboard</td></tr>
+          <tr><td>Fêmea-fêmea</td><td class="n">9</td><td>direto de um pino do ESP32 até um pino de módulo</td></tr>
+          <tr><td>Macho-macho</td><td class="n">3</td><td>pontes curtas dentro da protoboard</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Faltou fêmea-fêmea? Encaixe dois macho-fêmea na mesma coluna livre da metade de baixo da protoboard (fileiras f a j): os dois viram um fio só.</p>
+  </div>
+
+  <nav class="passos"><a class="volta" href="#inicio">← Antes de começar</a><a class="btn btn-pri" href="#etapa-1">Etapa 1: ESP32 no computador →</a></nav>
+</section>
+
+<!-- ======================= ETAPA 1 ======================= -->
+<section class="vista" data-vista="etapa-1" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Etapa 1 de 6 · uns 15 minutos</p>
+    <h2>ESP32 no computador</h2>
+    <p class="lead">Antes de ligar qualquer peça, confira se o computador conversa com a placa. Aqui você grava o <b>teste de bancada</b>, um firmware que testa cada peça pelo monitor serial. Ele fica na placa até o fim da montagem.</p>
+  </header>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="1">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span>Nesta etapa vai só o cabo USB. Os botões <b>EN</b> e <b>BOOT</b> ficam ao lado do conector.</span></figcaption>
+    </figure>
+    <div class="lado">
+      <h3>Prepare</h3>
+      <ol class="lista" data-lista="1"></ol>
+    </div>
+  </div>
+
+  <div class="bloco">
+    <h3>Gravar o teste de bancada</h3>
+    <ol class="passo-a-passo">
+      <li>Ligue o ESP32 no computador pelo cabo USB.</li>
+      <li>No VS Code, abra a pasta <code>firmware</code> do repositório (Arquivo → Abrir pasta).</li>
+      <li>Clique no ícone do PlatformIO, a cabeça de formiga na barra da esquerda. Em <b>Project Tasks</b>, abra <b>teste</b> e clique em <b>Upload and Monitor</b>.</li>
+      <li>Se a gravação parar em <code>Connecting...</code>, segure o botão <b>BOOT</b> da placa até aparecer <code>Writing at</code>, e então solte.</li>
+      <li>Com o monitor aberto, aperte o botão <b>EN</b> da placa para ver as mensagens desde o começo.</li>
+    </ol>
+    <p class="muted">Prefere o terminal? Dá no mesmo:</p>
+    <div class="term"><div class="term-cab"><span>terminal</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">cd firmware
+pio run -e teste -t upload
+pio device monitor</pre></div>
+  </div>
+
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Teste da etapa</p><h3>O monitor serial tem que mostrar isto</h3></div>
+    <div class="term"><div class="term-cab"><span>monitor serial · 115200</span></div><pre class="serial"><span class="k">Placa ok: o ESP32 ligou e o Serial funciona.</span>
+[5] Leitor NFC NAO encontrado (resposta 0x00).
+    Confira SDA->D32, SCK->D18, MOSI->D23, MISO->D19, RST->D13, 3.3V e GND.
+
+===== Teste de bancada do terminal Passe =====
+Digite o numero do teste:
+  1  LEDs        (verde e vermelho piscam 3 vezes)
+  2  Buzzer      (3 bipes)
+  3  Rele        (liga e desliga 3 vezes, com clique)
+  4  Display     (tela verde, tela vermelha e um QR de teste)
+  5  Leitor NFC  (procura o chip; depois encoste uma tag)
+  0  Todos em sequencia</pre></div>
+    <ul class="espera">
+      <li>O aviso <b>Leitor NFC NAO encontrado</b> é normal agora: o leitor só entra na etapa 6. A resposta pode ser 0x00 ou 0xFF.</li>
+      <li>Se a sua placa tiver um LED azul, ele pisca 3 vezes quando ela liga.</li>
+      <li>Nas próximas etapas, clique dentro do monitor e aperte a tecla do número do teste. Não precisa de Enter.</li>
+    </ul>
+    <div class="resultado" data-resultado="1"><span>Deu certo?</span><button class="btn" type="button" data-res="ok">Funcionou</button><button class="btn" type="button" data-res="falha">Não funcionou</button></div>
+    <details class="problemas" data-problemas="1">
+      <summary>Não funcionou? Veja as causas mais comuns</summary>
+      <dl>
+        <dt>A porta USB da placa não aparece</dt><dd>Quase sempre é o cabo: troque por um que transfira arquivos. Depois tente outra porta do computador. No Windows, instale o driver do chip ao lado do conector (CP2102 ou CH340).</dd>
+        <dt>Linux: “Permission denied” em /dev/ttyUSB0</dt><dd>Rode <code>sudo usermod -aG dialout $USER</code>, saia da sessão e entre de novo.</dd>
+        <dt>Ubuntu: a porta aparece e some em seguida</dt><dd>O pacote brltty pega as placas com chip CH340. Remova com <code>sudo apt remove brltty</code> e ligue a placa de novo.</dd>
+        <dt>A gravação para em “Connecting...”</dt><dd>Segure o botão BOOT da placa enquanto aparecem os pontinhos e solte quando começar o “Writing at”.</dd>
+        <dt>O monitor fica vazio ou mostra símbolos estranhos</dt><dd>Aperte o botão EN para reiniciar a placa. A velocidade tem que ser 115200, que já vem configurada no <code>platformio.ini</code>.</dd>
+      </dl>
+    </details>
+  </div>
+  <nav class="passos"><a class="volta" href="#pecas">← Peças</a><a class="btn btn-pri" href="#etapa-2">Etapa 2: LEDs →</a></nav>
+</section>
+
+<!-- ======================= ETAPA 2 ======================= -->
+<section class="vista" data-vista="etapa-2" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Etapa 2 de 6 · uns 15 minutos</p>
+    <h2>LEDs</h2>
+    <p class="lead">O LED verde acende quando a catraca libera e o vermelho quando nega. Cada LED passa por um resistor de 220 Ω, que segura a corrente para o LED e o pino não queimarem. Tire o USB antes de começar.</p>
+  </header>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="2">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span class="leg"><i class="tr"></i>falta ligar</span><span class="leg"><i></i>ligado</span><span>Toque num fio para ver de onde ele sai.</span></figcaption>
+    </figure>
+    <div class="lado">
+      <h3>Ligue nesta ordem</h3>
+      <ol class="lista" data-lista="2"></ol>
+      <div class="nota-box"><h4>Perna longa, lado do resistor</h4><p>O + do LED (perna longa) fica na coluna do resistor. A perna curta vai na coluna ao lado, que tem a ponte até o trilho −. LED virado não queima, só não acende.</p></div>
+    </div>
+  </div>
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Teste da etapa</p><h3>Ligue o USB e aperte <kbd>1</kbd> no monitor</h3></div>
+    <ul class="espera"><li>O LED verde e o vermelho piscam, um de cada vez, 3 vezes.</li></ul>
+    <div class="resultado" data-resultado="2"><span>Deu certo?</span><button class="btn" type="button" data-res="ok">Funcionou</button><button class="btn" type="button" data-res="falha">Não funcionou</button></div>
+    <details class="problemas" data-problemas="2">
+      <summary>Não funcionou? Veja as causas mais comuns</summary>
+      <dl>
+        <dt>Nenhum LED acende</dt><dd>Confira o fio preto do GND até o trilho −, e as duas pontes curtas (colunas 20 e 28 até o trilho −).</dd>
+        <dt>Um LED não acende</dt><dd>Ele deve estar virado. A perna longa fica do lado do resistor: coluna 19 no vermelho, coluna 27 no verde. Gire o LED e teste de novo.</dd>
+        <dt>Acende o LED errado</dt><dd>Os fios do D25 e do D27 estão trocados. O D25 é o verde (coluna 23), o D27 é o vermelho (coluna 15).</dd>
+        <dt>Acende fraquinho ou fica sempre aceso</dt><dd>Alguma perna está encostando em outra, ou o resistor está fora da coluna certa.</dd>
+      </dl>
+    </details>
+  </div>
+  <nav class="passos"><a class="volta" href="#etapa-1">← Etapa 1</a><a class="btn btn-pri" href="#etapa-3">Etapa 3: Buzzer →</a></nav>
+</section>
+
+<!-- ======================= ETAPA 3 ======================= -->
+<section class="vista" data-vista="etapa-3" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Etapa 3 de 6 · uns 5 minutos</p>
+    <h2>Buzzer</h2>
+    <p class="lead">O buzzer dá um bipe quando libera e dois quando nega. Precisa ser o buzzer <b>ativo</b>, aquele que apita sozinho quando recebe energia.</p>
+  </header>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="3">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span class="leg"><i class="tr"></i>falta ligar</span><span class="leg"><i></i>ligado</span><span class="leg"><i class="ap"></i>etapas anteriores</span></figcaption>
+    </figure>
+    <div class="lado">
+      <h3>Ligue nesta ordem</h3>
+      <ol class="lista" data-lista="3"></ol>
+    </div>
+  </div>
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Teste da etapa</p><h3>Ligue o USB e aperte <kbd>2</kbd> no monitor</h3></div>
+    <ul class="espera"><li>O buzzer dá 3 bipes curtos.</li><li>Aperte <kbd>1</kbd> também: os LEDs têm que continuar funcionando.</li></ul>
+    <div class="resultado" data-resultado="3"><span>Deu certo?</span><button class="btn" type="button" data-res="ok">Funcionou</button><button class="btn" type="button" data-res="falha">Não funcionou</button></div>
+    <details class="problemas" data-problemas="3">
+      <summary>Não funcionou? Veja as causas mais comuns</summary>
+      <dl>
+        <dt>Só um clique baixinho, sem apito</dt><dd>O buzzer é passivo. Troque por um ativo. Se não tiver, avise a equipe, porque o firmware precisaria mudar.</dd>
+        <dt>Silêncio total</dt><dd>Confira se o + está na coluna 2, a do fio cinza, e se a ponte da coluna 5 chega no trilho −. Se estiver ao contrário, gire o buzzer.</dd>
+        <dt>Apita baixo</dt><dd>É normal. O buzzer é de 5 V e aqui recebe 3,3 V. Dá para ouvir na apresentação.</dd>
+      </dl>
+    </details>
+  </div>
+  <nav class="passos"><a class="volta" href="#etapa-2">← Etapa 2</a><a class="btn btn-pri" href="#etapa-4">Etapa 4: Relé →</a></nav>
+</section>
+
+<!-- ======================= ETAPA 4 ======================= -->
+<section class="vista" data-vista="etapa-4" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Etapa 4 de 6 · uns 10 minutos</p>
+    <h2>Relé</h2>
+    <p class="lead">O relé é a chave que abriria a catraca de verdade: um interruptor movido a eletroímã. Ele precisa de 5 V, por isso usa o pino VIN. Na demonstração, o clique e a luz do módulo mostram a catraca abrindo.</p>
+  </header>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="4">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span class="leg"><i class="tr"></i>falta ligar</span><span class="leg"><i></i>ligado</span><span>Os três fios vão direto do ESP32 ao relé, sem passar pela protoboard.</span></figcaption>
+    </figure>
+    <div class="lado">
+      <h3>Ligue nesta ordem</h3>
+      <ol class="lista" data-lista="4"></ol>
+      <div class="perigo-box"><span class="selo">Pode queimar peça</span><p><b>O VIN tem 5 V.</b> O fio laranja vai só no VCC do relé. Nenhuma outra peça pode ser ligada no VIN.</p></div>
+    </div>
+  </div>
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Teste da etapa</p><h3>Ligue o USB e aperte <kbd>3</kbd> no monitor</h3></div>
+    <ul class="espera"><li>O relé dá 3 cliques, com 1 segundo entre ligar e desligar.</li><li>A luz do módulo acende e apaga junto com o clique, e o monitor mostra “ligado” e “desligado”.</li></ul>
+    <div class="resultado" data-resultado="4"><span>Deu certo?</span><button class="btn" type="button" data-res="ok">Funcionou</button><button class="btn" type="button" data-res="falha">Não funcionou</button></div>
+    <details class="problemas" data-problemas="4">
+      <summary>Não funcionou? Veja as causas mais comuns</summary>
+      <dl>
+        <dt>Não clica e a luz do módulo não acende</dt><dd>Confira o fio laranja (VIN → VCC) e o preto (GND → GND). O VIN só tem energia com o USB ligado.</dd>
+        <dt>A luz acende, mas não clica</dt><dd>O relé está recebendo pouca energia. Troque o cabo ou a porta USB, e confira o fio laranja.</dd>
+        <dt>Fica ligado o tempo todo e nunca desliga</dt><dd>Alguns módulos de 5 V não desligam com os 3,3 V do ESP32. Se o seu tiver um jumper escrito JD-VCC: tire o jumper, ligue o pino JD-VCC no VIN e o VCC (o que fica ao lado do IN) no 3V3. Se tiver um jumper escrito H e L, coloque em L.</dd>
+        <dt>Funciona ao contrário: fica ligado e desliga no teste</dt><dd>O módulo liga com sinal alto. Em <code>firmware/include/config.h</code>, troque para <code>RELE_LIGADO HIGH</code> e <code>RELE_DESLIGADO LOW</code> e grave o teste de novo.</dd>
+      </dl>
+    </details>
+  </div>
+  <nav class="passos"><a class="volta" href="#etapa-3">← Etapa 3</a><a class="btn btn-pri" href="#etapa-5">Etapa 5: Display →</a></nav>
+</section>
+
+<!-- ======================= ETAPA 5 ======================= -->
+<section class="vista" data-vista="etapa-5" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Etapa 5 de 6 · uns 20 minutos</p>
+    <h2>Display</h2>
+    <p class="lead">O display mostra o QR Code que o morador lê com o app, e as telas de liberado e negado. Ele conversa com o ESP32 por SPI, a mesma linha que o leitor NFC vai usar. Por isso os sinais SCK e MOSI passam pelas colunas 9 e 12 da protoboard, de onde saem para os dois.</p>
+  </header>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="5">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span class="leg"><i class="tr"></i>falta ligar</span><span class="leg"><i></i>ligado</span><span class="leg"><i class="ap"></i>etapas anteriores</span></figcaption>
+    </figure>
+    <div class="lado">
+      <h3>Ligue nesta ordem</h3>
+      <ol class="lista" data-lista="5"></ol>
+      <div class="nota-box"><h4>Do display saem 8 fios</h4><p>Cinco vão para a protoboard (GND, VCC, SCL, SDA e BLK) e três vão direto nos pinos do ESP32 (RES, DC e CS).</p></div>
+    </div>
+  </div>
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Teste da etapa</p><h3>Ligue o USB e aperte <kbd>4</kbd> no monitor</h3></div>
+    <ul class="espera">
+      <li>Tela verde com “OK” e “Pode passar”, por 2 segundos.</li>
+      <li>Tela vermelha com “X” e “Acesso negado”, por 2 segundos.</li>
+      <li>Um QR Code preto em fundo branco, com um rodapé azul.</li>
+      <li>Aponte a câmera do celular para o QR: tem que aparecer <b>PASSE TESTE OK</b>.</li>
+    </ul>
+    <div class="resultado" data-resultado="5"><span>Deu certo?</span><button class="btn" type="button" data-res="ok">Funcionou</button><button class="btn" type="button" data-res="falha">Não funcionou</button></div>
+    <details class="problemas" data-problemas="5">
+      <summary>Não funcionou? Veja as causas mais comuns</summary>
+      <dl>
+        <dt>A tela continua preta</dt><dd>A luz de fundo não acendeu. Confira VCC e BLK no trilho +, GND no trilho −, e se o fio vermelho do 3V3 chega no trilho +.</dd>
+        <dt>A luz acende, mas a tela fica branca ou sem imagem</dt><dd>A energia está ok; o problema está nos sinais. Confira CS → D5, DC → RX2, RES → TX2, SCL na coluna 9, SDA na coluna 12, e se o D18 e o D23 estão nessas mesmas colunas.</dd>
+        <dt>A imagem sai cortada ou fora do lugar</dt><dd>O display deve ser de 240×320. Em <code>firmware/include/config.h</code>, troque <code>TFT_ALTURA</code> para 320 e grave de novo.</dd>
+        <dt>Cores estranhas ou só chuvisco</dt><dd>O display pode ter outro chip (ILI9341 ou ST7735). Avise a equipe com uma foto da parte de trás.</dd>
+        <dt>O celular não lê o QR</dt><dd>Afaste o celular uns 20 cm, evite reflexo de lâmpada na tela e espere o foco.</dd>
+      </dl>
+    </details>
+  </div>
+  <nav class="passos"><a class="volta" href="#etapa-4">← Etapa 4</a><a class="btn btn-pri" href="#etapa-6">Etapa 6: Leitor NFC →</a></nav>
+</section>
+
+<!-- ======================= ETAPA 6 ======================= -->
+<section class="vista" data-vista="etapa-6" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Etapa 6 de 6 · uns 20 minutos</p>
+    <h2>Leitor NFC</h2>
+    <p class="lead">O leitor RC522 lê o chaveiro ou o cartão do morador e manda o código para o servidor. Ele divide as colunas 9 e 12 com o display e tem o próprio fio de seleção, o SDA, no D32.</p>
+  </header>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="6">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span class="leg"><i class="tr"></i>falta ligar</span><span class="leg"><i></i>ligado</span><span class="leg"><i class="ap"></i>etapas anteriores</span></figcaption>
+    </figure>
+    <div class="lado">
+      <div class="perigo-box"><span class="selo">Pode queimar peça</span><p><b>O RC522 é só 3,3 V.</b> O pino 3.3V dele vai no trilho +. No VIN (5 V) ele queima.</p></div>
+      <h3>Ligue nesta ordem</h3>
+      <ol class="lista" data-lista="6"></ol>
+    </div>
+  </div>
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Teste da etapa</p><h3>Ligue o USB e aperte <kbd>5</kbd> no monitor</h3></div>
+    <div class="term"><div class="term-cab"><span>monitor serial · 115200</span></div><pre class="serial"><span class="k">[5] Leitor NFC encontrado (versao 0x92). Encoste uma tag no leitor.</span>
+Tag 04A1B2C3 lida. Anote esse codigo para cadastrar a tag no sistema.</pre></div>
+    <ul class="espera">
+      <li>O número da versão pode ser outro, como 0x91 ou 0x88. Só 0x00 e 0xFF indicam problema.</li>
+      <li>Encoste a tag no leitor: aparece o código dela, com 1 bipe e o LED verde. O seu código vai ser diferente do exemplo. <b>Anote</b>: ele é usado para cadastrar a tag de um morador no sistema.</li>
+      <li>Aperte <kbd>4</kbd> de novo: o display tem que continuar funcionando com o leitor ligado, porque os dois dividem fios.</li>
+    </ul>
+    <div class="resultado" data-resultado="6"><span>Deu certo?</span><button class="btn" type="button" data-res="ok">Funcionou</button><button class="btn" type="button" data-res="falha">Não funcionou</button></div>
+    <details class="problemas" data-problemas="6">
+      <summary>Não funcionou? Veja as causas mais comuns</summary>
+      <dl>
+        <dt>“Leitor NFC NAO encontrado”</dt><dd>Confira o 3.3V no trilho +, o GND no trilho −, SDA → D32, MISO → D19, SCK na coluna 9 e MOSI na coluna 12. Os pinos do leitor precisam estar soldados.</dd>
+        <dt>Encontrado, mas não lê a tag</dt><dd>Encoste a tag bem no centro do leitor, longe de metal. Só tags de 13,56 MHz (MIFARE) funcionam; chaveiros de 125 kHz não são lidos.</dd>
+        <dt>O display parou depois que o leitor entrou</dt><dd>Algum fio das colunas 9 e 12 saiu do lugar, ou o CS do display (D5) e o SDA do leitor (D32) estão trocados.</dd>
+        <dt>O código muda a cada leitura</dt><dd>Acontece com celular e cartão de banco, que geram código aleatório. Use as tags do kit.</dd>
+      </dl>
+    </details>
+  </div>
+  <nav class="passos"><a class="volta" href="#etapa-5">← Etapa 5</a><a class="btn btn-pri" href="#conferir">Conferência final →</a></nav>
+</section>
+
+<!-- ======================= CONFERIR ======================= -->
+<section class="vista" data-vista="conferir" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Validar · uns 15 minutos</p>
+    <h2>Conferência final</h2>
+    <p class="lead">Antes de deixar a montagem pronta para a apresentação, confira tudo de uma vez: primeiro com o USB desligado, depois fio a fio e por fim o teste completo. Toque numa linha para ver o fio no desenho e siga ele com o dedo, de uma ponta até a outra.</p>
+    <div class="conf-placar" id="conf-placar"></div>
+  </header>
+  <div class="validado" id="validado" hidden>
+    <h3>Montagem validada</h3>
+    <p>Todas as conferências e os testes das 6 etapas passaram. Agora é gravar o firmware de verdade e ligar no sistema.</p>
+    <p><a class="btn btn-pri" href="#sistema">Ligar no sistema →</a></p>
+  </div>
+  <div class="etapa-grid">
+    <figure class="diagrama" data-diagrama="conferir">
+      <div class="dg-scroll"></div><div class="tip" hidden></div>
+      <figcaption><span>O fio da linha selecionada fica em destaque.</span></figcaption>
+    </figure>
+    <div class="conf" id="conf"></div>
+  </div>
+  <nav class="passos"><a class="volta" href="#etapa-6">← Etapa 6</a><a class="btn btn-pri" href="#sistema">Ligar no sistema →</a></nav>
+</section>
+
+<!-- ======================= SISTEMA ======================= -->
+<section class="vista" data-vista="sistema" hidden>
+  <header class="vista-cab">
+    <p class="eyebrow">Validar · uns 30 minutos</p>
+    <h2>Ligar no sistema</h2>
+    <p class="lead">Com a montagem conferida, troque o teste de bancada pelo firmware de verdade. O ESP32 entra no Wi-Fi, pede o QR para a API rodando no seu computador e recebe as decisões pelo broker MQTT.</p>
+  </header>
+
+  <div class="duas">
+    <div>
+      <h3>1. Rede</h3>
+      <p>Use o roteador do celular (hotspot) e ligue o computador nele. A rede tem que ser <b>2,4 GHz</b>, porque o ESP32 não conecta em 5 GHz. A rede da faculdade não serve: ela isola os aparelhos entre si.</p>
+      <p>Descubra o IP do computador nessa rede. No Linux: <code>hostname -I</code>. No Windows: <code>ipconfig</code>, linha “Endereço IPv4”. No Windows, rode uma vez, como administrador, o <code>scripts\preparar-rede-windows.ps1</code>, que libera as portas 3000 e 1883.</p>
+    </div>
+    <div>
+      <h3>2. Banco, broker e API</h3>
+      <div class="term"><div class="term-cab"><span>terminal · raiz do repositório</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">docker compose -f docker-compose.dev.yml up -d database mqtt
+cd backend &amp;&amp; npm run dev</pre></div>
+      <p>No celular, ligado no mesmo hotspot, abra <code>http://IP-DO-PC:3000/health</code>. Se abrir, o ESP32 também vai alcançar a API.</p>
+    </div>
+  </div>
+
+  <div class="duas">
+    <div>
+      <h3>3. Credenciais do terminal</h3>
+      <p>Em <code>firmware/include/credenciais.h</code> (se não existir, copie do <code>credenciais.exemplo.h</code>), preencha a rede e o IP do computador:</p>
+      <div class="term"><div class="term-cab"><span>credenciais.h</span></div><pre class="serial">#define WIFI_SSID  "nome-do-hotspot"
+#define WIFI_SENHA "senha-do-hotspot"
+#define API_URL    "http://192.168.43.10:3000"  <span class="d">// IP do PC, sem barra no fim</span>
+#define MQTT_HOST  "192.168.43.10"              <span class="d">// o mesmo IP</span></pre></div>
+      <p class="muted">Deixe o <code>TERMINAL_ID</code> e a <code>TERMINAL_KEY</code> do exemplo: eles são do terminal de demonstração da Catraca 1, que vem no seed do banco.</p>
+    </div>
+    <div>
+      <h3>4. Gravar o firmware de verdade</h3>
+      <p>No PlatformIO, em <b>Project Tasks</b>, abra <b>tft</b> e clique em <b>Upload and Monitor</b>. Ou no terminal:</p>
+      <div class="term"><div class="term-cab"><span>terminal</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">cd firmware
+pio run -e tft -t upload
+pio device monitor</pre></div>
+      <div class="term"><div class="term-cab"><span>monitor serial · tem que aparecer</span></div><pre class="serial">........
+<span class="k">Wi-Fi ok, IP 192.168.43.57</span>
+<span class="k">MQTT conectado, ouvindo passe/terminais/00000000-0000-4000-8000-000000000005/decisoes</span></pre></div>
+    </div>
+  </div>
+
+  <div class="bloco">
+    <h3>5. Validação final</h3>
+    <div class="chks">
+      <label class="chk"><input type="checkbox" data-item="s-tela"><span class="txt"><span class="t1">O display mostra “Conectando” e depois o QR com o rodapé azul</span><span class="t2">O QR troca sozinho a cada 10 segundos, mais ou menos.</span></span></label>
+      <label class="chk"><input type="checkbox" data-item="s-mqtt"><span class="txt"><span class="t1">O monitor mostra “Wi-Fi ok” e “MQTT conectado”</span></span></label>
+      <label class="chk"><input type="checkbox" data-item="s-online"><span class="txt"><span class="t1">O terminal aparece online</span><span class="t2">Em <code>backend</code>, rode <code>node scripts/provisionar-terminal.mjs</code>: ele lista os terminais com online ou offline. O primeiro sinal chega em até 30 segundos.</span></span></label>
+      <label class="chk"><input type="checkbox" data-item="s-app"><span class="txt"><span class="t1">Ler o QR com o app libera</span><span class="t2">Tela verde “Pode passar”, LED verde, clique do relé e 1 bipe.</span></span></label>
+      <label class="chk"><input type="checkbox" data-item="s-negado"><span class="txt"><span class="t1">Uma tag que não está cadastrada é negada</span><span class="t2">Tela vermelha “Acesso negado”, LED vermelho e 2 bipes.</span></span></label>
+      <label class="chk"><input type="checkbox" data-item="s-tag"><span class="txt"><span class="t1">Uma tag cadastrada para um morador libera</span><span class="t2">O cadastro da tag usa o código anotado na etapa 6 (rota <code>POST /users/:id/tags</code> da API).</span></span></label>
+    </div>
+  </div>
+
+  <div class="teste">
+    <div class="teste-cab"><p class="eyebrow">Se algo travar</p><h3>Problemas comuns ao ligar no sistema</h3></div>
+    <dl class="problemas" style="display:grid;gap:14px">
+      <div><dt>O monitor fica só em “........”</dt><dd>O ESP32 não achou a rede. Confira o nome e a senha no <code>credenciais.h</code> e se o hotspot está em 2,4 GHz.</dd></div>
+      <div><dt>Tela “Sem servidor / Tentando de novo...”</dt><dd>O ESP32 não alcança a API. Confira o IP no <code>API_URL</code>, se a API está rodando e se o <code>/health</code> abre no celular. No Windows, confira o firewall com o script de rede.</dd></div>
+      <div><dt>Tela “Sem servidor / Chave do terminal recusada”</dt><dd>O <code>TERMINAL_ID</code> ou a <code>TERMINAL_KEY</code> não batem com o banco. Rode <code>npm run db:seed</code> no backend para voltar a chave de demonstração.</dd></div>
+      <div><dt>“MQTT falhou (estado -2)”</dt><dd>O broker está fora do ar ou a porta 1883 está bloqueada. O terminal continua funcionando pela consulta HTTP a cada 2 segundos, só um pouco mais devagar.</dd></div>
+      <div><dt>“MQTT falhou (estado 4)” ou “(estado 5)”</dt><dd>Usuário ou senha do broker. Depois de provisionar um terminal, reinicie o broker: <code>docker compose -f docker-compose.dev.yml restart mqtt</code>.</dd></div>
+      <div><dt>O app nega dizendo que está longe</dt><dd>A API exige o celular a até 100 m da catraca. Ajuste a posição da catraca com o <code>provisionar-terminal.mjs</code> (opções <code>--lat</code> e <code>--lng</code>), como explica o <code>docs/terminal-iot.md</code>.</dd></div>
+    </dl>
+  </div>
+  <nav class="passos"><a class="volta" href="#conferir">← Conferência final</a><a class="volta" href="#inicio">Voltar ao início</a></nav>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+
+  /* ---------- textos dos itens ---------- */
+  function P(t) { return '<span class="pin">' + t + '</span>'; }
+  function C(n) { return '<span class="furo">coluna ' + n + '</span>'; }
+  var TM = '<span class="trilho mais">trilho +</span>';
+  var TG = '<span class="trilho menos">trilho −</span>';
+
+  var ITENS = [
+    { id: 'e1-cabo', etapa: 1, tipo: 'acao', txt: 'Cabo USB <b>de dados</b> ligado no ESP32 e no computador', nota: 'Cabo que só carrega celular não grava a placa. Se o computador não reconhecer, troque o cabo antes de qualquer outra coisa.' },
+    { id: 'e1-driver', etapa: 1, tipo: 'acao', txt: 'Computador reconhece a placa', nota: 'Aparece uma porta nova: COM3, /dev/ttyUSB0 ou parecida. O chip ao lado do conector diz o driver: CP2102 ou CH340. No Linux os dois já vêm instalados.' },
+    { id: 'e1-pio', etapa: 1, tipo: 'acao', txt: 'VS Code com a extensão <b>PlatformIO IDE</b>', nota: 'Instale pela aba de extensões do VS Code. Na primeira vez ele baixa as ferramentas do ESP32 e demora alguns minutos.' },
+    { id: 'e1-grava', etapa: 1, tipo: 'acao', txt: 'Teste de bancada gravado e monitor serial aberto', nota: 'O passo a passo está logo abaixo.' },
+
+    { id: 'w-gnd', etapa: 2, tipo: 'fio', cor: 'preto', txt: P('GND') + ' do lado do 3V3 → ' + TG, nota: 'Entra na ponta esquerda do trilho azul e leva o GND para toda a protoboard.' },
+    { id: 'w-ledr', etapa: 2, tipo: 'fio', cor: 'branco', txt: P('D27') + ' → ' + C(15), nota: 'Qualquer furo da coluna 15 na metade de cima.' },
+    { id: 'p-resr', etapa: 2, tipo: 'peca', txt: 'Resistor 220 Ω da ' + C(15) + ' até a ' + C(19), nota: 'Faixas vermelho, vermelho, marrom. Resistor não tem lado certo.' },
+    { id: 'p-ledr', etapa: 2, tipo: 'peca', txt: 'LED vermelho: perna longa na ' + C(19) + ', curta na ' + C(20) },
+    { id: 'b-ledr', etapa: 2, tipo: 'fio', cor: 'preto', txt: 'Ponte curta: ' + C(20) + ' → ' + TG, nota: 'Fio macho-macho.' },
+    { id: 'w-ledv', etapa: 2, tipo: 'fio', cor: 'verde', txt: P('D25') + ' → ' + C(23), nota: 'Qualquer furo da coluna 23 na metade de cima.' },
+    { id: 'p-resv', etapa: 2, tipo: 'peca', txt: 'Resistor 220 Ω da ' + C(23) + ' até a ' + C(27) },
+    { id: 'p-ledv', etapa: 2, tipo: 'peca', txt: 'LED verde: perna longa na ' + C(27) + ', curta na ' + C(28) },
+    { id: 'b-ledv', etapa: 2, tipo: 'fio', cor: 'preto', txt: 'Ponte curta: ' + C(28) + ' → ' + TG, nota: 'Fio macho-macho.' },
+
+    { id: 'w-buzz', etapa: 3, tipo: 'fio', cor: 'cinza', txt: P('D4') + ' → ' + C(2) },
+    { id: 'p-buzz', etapa: 3, tipo: 'peca', txt: 'Buzzer: perna <b>+</b> na ' + C(2) + ', perna <b>−</b> na ' + C(5), nota: 'O + vem marcado em cima do buzzer ou no adesivo, e costuma ser a perna mais longa. Tire o adesivo só depois do teste.' },
+    { id: 'b-buzz', etapa: 3, tipo: 'fio', cor: 'preto', txt: 'Ponte curta: ' + C(5) + ' → ' + TG },
+
+    { id: 'w-rvcc', etapa: 4, tipo: 'fio', cor: 'laranja', perigo: true, txt: P('VIN') + ' → ' + P('VCC') + ' do relé', nota: 'No relé pode estar escrito DC+. <b>O VIN tem 5 V: este é o único fio que vai nele.</b>' },
+    { id: 'w-rgnd', etapa: 4, tipo: 'fio', cor: 'preto', txt: P('GND') + ' do lado do VIN → ' + P('GND') + ' do relé', nota: 'No relé pode estar escrito DC−.' },
+    { id: 'w-rin', etapa: 4, tipo: 'fio', cor: 'roxo', txt: P('D26') + ' → ' + P('IN') + ' do relé' },
+    { id: 'e4-saida', etapa: 4, tipo: 'acao', txt: 'Nada nos parafusos do relé (NO, COM, NC)', nota: 'É a saída que ligaria uma trava de verdade. Na demonstração não precisa.' },
+
+    { id: 'w-3v3', etapa: 5, tipo: 'fio', cor: 'vermelho', perigo: true, txt: P('3V3') + ' → ' + TM, nota: 'A partir daqui o trilho + tem 3,3 V. <b>Nunca ligue o VIN nele.</b>' },
+    { id: 'w-sck', etapa: 5, tipo: 'fio', cor: 'amarelo', txt: P('D18') + ' → ' + C(9), nota: 'A coluna 9 vira o SCK, o relógio da comunicação. Display e leitor pegam o sinal daqui.' },
+    { id: 'w-mosi', etapa: 5, tipo: 'fio', cor: 'azul', txt: P('D23') + ' → ' + C(12), nota: 'A coluna 12 vira o MOSI, por onde saem os dados. Também é dividida com o leitor.' },
+    { id: 't-gnd', etapa: 5, tipo: 'fio', cor: 'preto', txt: 'Display ' + P('GND') + ' → ' + TG },
+    { id: 't-vcc', etapa: 5, tipo: 'fio', cor: 'vermelho', txt: 'Display ' + P('VCC') + ' → ' + TM },
+    { id: 't-scl', etapa: 5, tipo: 'fio', cor: 'amarelo', txt: 'Display ' + P('SCL') + ' → ' + C(9), nota: 'No display, SCL é o SCK. Não é I2C, mesmo com esse nome.' },
+    { id: 't-sda', etapa: 5, tipo: 'fio', cor: 'azul', txt: 'Display ' + P('SDA') + ' → ' + C(12), nota: 'No display, SDA é o MOSI.' },
+    { id: 't-res', etapa: 5, tipo: 'fio', cor: 'marrom', txt: 'Display ' + P('RES') + ' → ' + P('TX2') + ' do ESP32', nota: 'TX2 é o pino 17. Algumas placas escrevem 17, G17 ou IO17.' },
+    { id: 't-dc', etapa: 5, tipo: 'fio', cor: 'cinza', txt: 'Display ' + P('DC') + ' → ' + P('RX2') + ' do ESP32', nota: 'RX2 é o pino 16.' },
+    { id: 't-cs', etapa: 5, tipo: 'fio', cor: 'branco', txt: 'Display ' + P('CS') + ' → ' + P('D5') + ' do ESP32' },
+    { id: 't-blk', etapa: 5, tipo: 'fio', cor: 'vermelho', txt: 'Display ' + P('BLK') + ' → ' + TM, nota: 'É a luz de fundo, sempre acesa. Pode estar escrito BL ou LED.' },
+
+    { id: 'n-33', etapa: 6, tipo: 'fio', cor: 'vermelho', perigo: true, txt: 'Leitor ' + P('3.3V') + ' → ' + TM, nota: '<b>Só 3,3 V. No VIN (5 V) o RC522 queima.</b>' },
+    { id: 'n-gnd', etapa: 6, tipo: 'fio', cor: 'preto', txt: 'Leitor ' + P('GND') + ' → ' + TG },
+    { id: 'n-sck', etapa: 6, tipo: 'fio', cor: 'amarelo', txt: 'Leitor ' + P('SCK') + ' → ' + C(9) },
+    { id: 'n-mosi', etapa: 6, tipo: 'fio', cor: 'azul', txt: 'Leitor ' + P('MOSI') + ' → ' + C(12) },
+    { id: 'n-miso', etapa: 6, tipo: 'fio', cor: 'verde', txt: 'Leitor ' + P('MISO') + ' → ' + P('D19') + ' do ESP32', nota: 'Por esse fio o leitor responde. Só ele usa: o display não tem MISO.' },
+    { id: 'n-sda', etapa: 6, tipo: 'fio', cor: 'roxo', txt: 'Leitor ' + P('SDA') + ' → ' + P('D32') + ' do ESP32', nota: 'No RC522, SDA é o pino que chama o leitor para a conversa. Também não é I2C.' },
+    { id: 'n-rst', etapa: 6, tipo: 'fio', cor: 'marrom', txt: 'Leitor ' + P('RST') + ' → ' + P('D13') + ' do ESP32' },
+    { id: 'n-irq', etapa: 6, tipo: 'acao', txt: 'Leitor ' + P('IRQ') + ': fica solto', nota: 'O firmware não usa esse pino.' }
+  ];
+  var ITEM = {};
+  ITENS.forEach(function (i) { ITEM[i.id] = i; });
+
+  var DICA = 'Siga o fio com o dedo, de uma ponta até a outra. Se ele estiver em outro lugar, tire o USB e corrija antes de continuar.';
+  var CONF = [
+    { grupo: 'Com o USB desligado', id: 'k-curto', txt: 'Nenhum fio vermelho encosta em fio preto, e nada liga o trilho + no trilho −.', dica: 'Se o 3V3 ou o VIN estiverem ligados no GND, é curto. Tire o fio antes de ligar o USB.' },
+    { id: 'k-5v', txt: 'O fio laranja (' + P('VIN') + ', 5 V) vai só no VCC do relé.', dica: 'Se o VIN chegar no trilho + ou no leitor, ele queima o RC522. Corrija antes de ligar.' },
+    { id: 'k-3v3', txt: 'Display e leitor NFC estão no ' + TM + ', que recebe o ' + P('3V3') + '.' },
+    { id: 'k-pernas', txt: 'Nenhuma perna de LED, resistor ou buzzer encosta em outra.' },
+    { id: 'k-mesa', txt: 'O ESP32 não está em cima de nada de metal (os pinos ficam por baixo).' },
+    { id: 'k-multi', opcional: true, txt: 'Com multímetro, no modo que apita: uma ponta no 3V3 e outra no GND. Não pode apitar.', dica: 'Apitou: tem um curto. Procure um fio do trilho + encostando no trilho −.' },
+
+    { grupo: 'Pinos do lado do VIN', id: 'c-d32', pino: 'D32', cor: 'roxo', txt: '→ SDA do leitor NFC', fios: ['n-sda'] },
+    { id: 'c-d25', pino: 'D25', cor: 'verde', txt: '→ coluna 23 (LED verde)', fios: ['w-ledv', 'p-resv', 'p-ledv', 'b-ledv'] },
+    { id: 'c-d26', pino: 'D26', cor: 'roxo', txt: '→ IN do relé', fios: ['w-rin'] },
+    { id: 'c-d27', pino: 'D27', cor: 'branco', txt: '→ coluna 15 (LED vermelho)', fios: ['w-ledr', 'p-resr', 'p-ledr', 'b-ledr'] },
+    { id: 'c-d13', pino: 'D13', cor: 'marrom', txt: '→ RST do leitor NFC', fios: ['n-rst'] },
+    { id: 'c-gnde', pino: 'GND', cor: 'preto', txt: '→ GND do relé', fios: ['w-rgnd'] },
+    { id: 'c-vin', pino: 'VIN', cor: 'laranja', txt: '→ VCC do relé, e mais nada', fios: ['w-rvcc'] },
+
+    { grupo: 'Pinos do lado do 3V3', id: 'c-d23', pino: 'D23', cor: 'azul', txt: '→ coluna 12 (MOSI)', fios: ['w-mosi'] },
+    { id: 'c-d19', pino: 'D19', cor: 'verde', txt: '→ MISO do leitor NFC', fios: ['n-miso'] },
+    { id: 'c-d18', pino: 'D18', cor: 'amarelo', txt: '→ coluna 9 (SCK)', fios: ['w-sck'] },
+    { id: 'c-d5', pino: 'D5', cor: 'branco', txt: '→ CS do display', fios: ['t-cs'] },
+    { id: 'c-tx2', pino: 'TX2', cor: 'marrom', txt: '→ RES do display', fios: ['t-res'], dica: 'TX2 e RX2 são fáceis de trocar: o RES vai no TX2 (17) e o DC no RX2 (16).' },
+    { id: 'c-rx2', pino: 'RX2', cor: 'cinza', txt: '→ DC do display', fios: ['t-dc'], dica: 'TX2 e RX2 são fáceis de trocar: o RES vai no TX2 (17) e o DC no RX2 (16).' },
+    { id: 'c-d4', pino: 'D4', cor: 'cinza', txt: '→ coluna 2 (buzzer +)', fios: ['w-buzz', 'p-buzz', 'b-buzz'] },
+    { id: 'c-gndd', pino: 'GND', cor: 'preto', txt: '→ trilho −', fios: ['w-gnd'] },
+    { id: 'c-3v3', pino: '3V3', cor: 'vermelho', txt: '→ trilho +', fios: ['w-3v3'] },
+
+    { grupo: 'Protoboard', id: 'c-col9', txt: C(9) + ' tem 3 fios amarelos: D18, SCL do display e SCK do leitor.', fios: ['w-sck', 't-scl', 'n-sck'] },
+    { id: 'c-col12', txt: C(12) + ' tem 3 fios azuis: D23, SDA do display e MOSI do leitor.', fios: ['w-mosi', 't-sda', 'n-mosi'] },
+    { id: 'c-tm', txt: 'O ' + TM + ' tem 4 fios: 3V3, VCC e BLK do display e 3.3V do leitor.', fios: ['w-3v3', 't-vcc', 't-blk', 'n-33'] },
+    { id: 'c-tg', txt: 'O ' + TG + ' tem 6 fios: GND do ESP32, do display e do leitor, e as 3 pontes curtas.', fios: ['w-gnd', 't-gnd', 'n-gnd', 'b-ledr', 'b-ledv', 'b-buzz'] },
+
+    { grupo: 'Teste completo, com o USB ligado', id: 'f-calor', txt: 'Liguei o USB e nada esquentou nem cheirou a queimado.', dica: 'Tire o USB na hora e procure um curto entre o trilho + e o trilho −, ou o VIN encostando em algo.' },
+    { id: 'f-zero', txt: 'Apertei <kbd>0</kbd>: os LEDs piscam, o buzzer dá 3 bipes e o relé dá 3 cliques.', dica: 'Volte ao teste da etapa da peça que falhou.' },
+    { id: 'f-tela', txt: 'O display mostra a tela verde, a vermelha e o QR, e a câmera lê PASSE TESTE OK.', dica: 'Veja os problemas da etapa 5.' },
+    { id: 'f-nfc', txt: 'O monitor mostra “Leitor NFC encontrado” e a tag aparece com bipe e LED verde.', dica: 'Veja os problemas da etapa 6.' }
+  ];
+  (function () { var g = ''; CONF.forEach(function (c) { if (c.grupo) g = c.grupo; else c.grupo = g; }); })();
+
+  /* ---------- geometria do desenho ---------- */
+  var ESQ = ['EN', 'VP', 'VN', 'D34', 'D35', 'D32', 'D33', 'D25', 'D26', 'D27', 'D14', 'D12', 'D13', 'GND', 'VIN'];
+  var DIR = ['D23', 'D22', 'TX0', 'RX0', 'D21', 'D19', 'D18', 'D5', 'TX2', 'RX2', 'D4', 'D2', 'D15', 'GND', '3V3'];
+  var NUM = { TX2: '17', RX2: '16', TX0: '1', RX0: '3' };
+  var TFT = ['GND', 'VCC', 'SCL', 'SDA', 'RES', 'DC', 'CS', 'BLK'];
+  var NFC = ['SDA', 'SCK', 'MOSI', 'MISO', 'IRQ', 'GND', 'RST', '3.3V'];
+  var RELE = ['VCC', 'GND', 'IN'];
+  var DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0], ul: [-0.74, -0.67], ur: [0.74, -0.67] };
+  var BY = { '-': 631, '+': 649, a: 688, b: 706, c: 724, d: 742, e: 760, f: 796, g: 814, h: 832, i: 850, j: 868 };
+  function py(i) { return 380 + 28 * i; }
+  function bx(c) { return 680 + 18 * (c - 1); }
+
+  function ponto(ref) {
+    var p = ref.split(':');
+    if (p[0] === 'esp') {
+      var lista = p[1] === 'L' ? ESQ : DIR;
+      return { x: p[1] === 'L' ? 452 : 588, y: py(lista.indexOf(p[2])), d: p[1] === 'L' ? DIRS.left : DIRS.right };
+    }
+    if (p[0] === 'tft') return { x: 645 + 24 * TFT.indexOf(p[1]), y: 232, d: DIRS.down };
+    if (p[0] === 'nfc') return { x: 920 + 30 * NFC.indexOf(p[1]), y: 222, d: DIRS.down };
+    if (p[0] === 'rele') return { x: 95 + 40 * RELE.indexOf(p[1]), y: 290, d: DIRS.down };
+    if (p[1] === '-' || p[1] === '+') return { x: bx(+p[2]), y: BY[p[1]], d: DIRS.up };
+    var m = /^(\d+)([a-j])$/.exec(p[1]);
+    return { x: bx(+m[1]), y: BY[m[2]], d: DIRS.up };
+  }
+
+  var GEO = {
+    'w-gnd': { a: 'esp:R:GND', b: 'bb:-:1', db: 'left' },
+    'w-ledr': { a: 'esp:L:D27', b: 'bb:15e', db: 'down', via: [[420, 656], [420, 890], [470, 934], [880, 934]] },
+    'b-ledr': { a: 'bb:20a', b: 'bb:-:21', ponte: true },
+    'w-ledv': { a: 'esp:L:D25', b: 'bb:23e', db: 'down', via: [[406, 604], [406, 904], [462, 950], [1030, 950]] },
+    'b-ledv': { a: 'bb:28a', b: 'bb:-:29', ponte: true },
+    'w-buzz': { a: 'esp:R:D4', b: 'bb:2a', db: 'up' },
+    'b-buzz': { a: 'bb:5a', b: 'bb:-:6', ponte: true },
+    'w-rvcc': { a: 'esp:L:VIN', b: 'rele:VCC' },
+    'w-rgnd': { a: 'esp:L:GND', b: 'rele:GND' },
+    'w-rin': { a: 'esp:L:D26', b: 'rele:IN' },
+    'w-3v3': { a: 'esp:R:3V3', b: 'bb:+:1', db: 'left' },
+    'w-sck': { a: 'esp:R:D18', b: 'bb:9a', db: 'up' },
+    'w-mosi': { a: 'esp:R:D23', b: 'bb:12a', db: 'up' },
+    't-gnd': { a: 'tft:GND', b: 'bb:-:3', db: 'up' },
+    't-vcc': { a: 'tft:VCC', b: 'bb:+:4', db: 'up' },
+    't-scl': { a: 'tft:SCL', b: 'bb:9b', db: 'ul' },
+    't-sda': { a: 'tft:SDA', b: 'bb:12b', db: 'ul' },
+    't-res': { a: 'esp:R:TX2', b: 'tft:RES' },
+    't-dc': { a: 'esp:R:RX2', b: 'tft:DC' },
+    't-cs': { a: 'esp:R:D5', b: 'tft:CS' },
+    't-blk': { a: 'tft:BLK', b: 'bb:+:14', db: 'up' },
+    'n-33': { a: 'nfc:3.3V', b: 'bb:+:30', db: 'up' },
+    'n-gnd': { a: 'nfc:GND', b: 'bb:-:25', db: 'up' },
+    'n-sck': { a: 'nfc:SCK', b: 'bb:9c', db: 'ur' },
+    'n-mosi': { a: 'nfc:MOSI', b: 'bb:12c', db: 'ur' },
+    'n-miso': { a: 'esp:R:D19', b: 'nfc:MISO' },
+    'n-sda': { a: 'esp:L:D32', b: 'nfc:SDA', via: [[404, 498], [404, 302], [468, 280], [872, 280]] },
+    'n-rst': { a: 'esp:L:D13', b: 'nfc:RST', via: [[392, 694], [392, 300], [456, 264], [1050, 264]] }
+  };
+  var PECAS = [
+    { id: 'p-resr', tipo: 'res', c1: 15, c2: 19 },
+    { id: 'p-ledr', tipo: 'led', an: 19, ca: 20, cor: 'var(--led-vermelho)' },
+    { id: 'p-resv', tipo: 'res', c1: 23, c2: 27 },
+    { id: 'p-ledv', tipo: 'led', an: 27, ca: 28, cor: 'var(--led-verde)' },
+    { id: 'p-buzz', tipo: 'buz', mais: 2, menos: 5 }
+  ];
+  var VB = { '1': '330 280 400 712', '2': '370 290 870 702', '3': '370 290 870 702', '4': '24 86 640 906' };
+  var VB_TUDO = '24 10 1214 980';
+
+  function f1(n) { return Math.round(n * 10) / 10; }
+  function fp(p) { return f1(p[0]) + ',' + f1(p[1]); }
+
+  function caminho(A, da, B, db, via) {
+    var s = 16;
+    var A1 = [A.x + da[0] * s, A.y + da[1] * s];
+    var B1 = [B.x + db[0] * s, B.y + db[1] * s];
+    var pts = [A1].concat(via || [], [B1]);
+    var d = 'M' + A.x + ',' + A.y + ' L' + fp(A1);
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p1 = pts[i], p2 = pts[i + 1];
+      var L = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+      var k = Math.min(Math.max(L * 0.42, 24), 190);
+      var c1, c2;
+      if (i === 0) c1 = [p1[0] + da[0] * k, p1[1] + da[1] * k];
+      else { var p0 = pts[i - 1]; c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6]; }
+      if (i === pts.length - 2) c2 = [p2[0] + db[0] * k, p2[1] + db[1] * k];
+      else { var p3 = pts[i + 2]; c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6]; }
+      d += ' C' + fp(c1) + ' ' + fp(c2) + ' ' + fp(p2);
+    }
+    return d + ' L' + B.x + ',' + B.y;
+  }
+  function ponte(A, B) {
+    return 'M' + A.x + ',' + A.y + ' C' + A.x + ',' + (A.y - 30) + ' ' + B.x + ',' + (B.y - 26) + ' ' + B.x + ',' + B.y;
+  }
+
+  /* ---------- componentes ---------- */
+  function svgEsp(usados) {
+    var s = '<g class="comp esp">';
+    s += '<line x1="520" y1="862" x2="520" y2="985" stroke="var(--muted)" stroke-width="7" stroke-linecap="round"/>';
+    s += '<text x="534" y="978" class="t-usb">USB → computador</text>';
+    s += '<rect x="440" y="300" width="160" height="540" rx="8" fill="var(--pcb)" stroke="var(--pcb-edge)" stroke-width="2"/>';
+    s += '<path d="M466 306 h12 v8 h12 v-8 h12 v8 h12 v-8 h12 v8 h12 v-8 h12 v8" fill="none" stroke="var(--gold)" stroke-width="2"/>';
+    s += '<rect x="458" y="318" width="124" height="44" rx="3" fill="var(--metal)"/>';
+    s += '<text x="520" y="344" text-anchor="middle" class="t-metal">ESP32-WROOM-32</text>';
+    s += '<rect x="444" y="366" width="16" height="420" rx="2" fill="var(--pcb-edge)"/><rect x="580" y="366" width="16" height="420" rx="2" fill="var(--pcb-edge)"/>';
+    function pino(lado, nome, i) {
+      var x = lado === 'L' ? 452 : 588, y = py(i);
+      var est = usados[lado + ':' + nome] || 'livre';
+      var r = '<rect x="' + (x - 4) + '" y="' + (y - 4) + '" width="8" height="8" rx="1.5" fill="var(--gold)"/>';
+      if (est === 'agora') r += '<circle class="anel" cx="' + x + '" cy="' + y + '" r="8.5"/>';
+      var n = NUM[nome] ? '<tspan class="t-n">' + NUM[nome] + ' </tspan>' : '';
+      if (lado === 'L') r += '<text x="466" y="' + (y + 4) + '" class="t-pin ' + est + '">' + nome + (NUM[nome] ? '<tspan class="t-n"> ' + NUM[nome] + '</tspan>' : '') + '</text>';
+      else r += '<text x="574" y="' + (y + 4) + '" text-anchor="end" class="t-pin ' + est + '">' + n + nome + '</text>';
+      return r;
+    }
+    ESQ.forEach(function (n, i) { s += pino('L', n, i); });
+    DIR.forEach(function (n, i) { s += pino('R', n, i); });
+    s += '<text transform="translate(526 600) rotate(-90)" text-anchor="middle" class="t-sub">ESP32 DevKit V1</text>';
+    s += '<rect x="466" y="800" width="18" height="13" rx="2" fill="var(--metal)"/><text x="475" y="828" text-anchor="middle" class="t-sub">EN</text>';
+    s += '<rect x="556" y="800" width="18" height="13" rx="2" fill="var(--metal)"/><text x="565" y="828" text-anchor="middle" class="t-sub">BOOT</text>';
+    s += '<circle cx="520" cy="806" r="3.5" fill="var(--nfc-coil)"/>';
+    s += '<rect x="500" y="834" width="40" height="28" rx="3" fill="var(--metal)" stroke="var(--metal-ink)"/>';
+    return s + '</g>';
+  }
+
+  function rotulo(x, y, txt) { return '<text x="' + x + '" y="' + y + '" text-anchor="middle" class="t-fant">' + txt + '</text>'; }
+
+  function svgRele(cls) {
+    var s = '<g class="comp ' + cls + '">';
+    s += '<rect x="40" y="100" width="220" height="196" rx="6" fill="var(--rele-pcb)" stroke="var(--pcb-edge)" stroke-width="2"/>';
+    s += '<rect x="66" y="108" width="168" height="26" rx="3" fill="var(--borne)"/>';
+    [100, 150, 200].forEach(function (x) { s += '<circle cx="' + x + '" cy="121" r="8" fill="var(--metal)"/><line x1="' + (x - 5) + '" y1="121" x2="' + (x + 5) + '" y2="121" stroke="var(--metal-ink)" stroke-width="2"/>'; });
+    s += '<text x="100" y="150" text-anchor="middle" class="t-mod">NO</text><text x="150" y="150" text-anchor="middle" class="t-mod">COM</text><text x="200" y="150" text-anchor="middle" class="t-mod">NC</text>';
+    s += '<rect x="66" y="160" width="120" height="74" rx="4" fill="var(--rele-cubo)"/>';
+    s += '<text x="126" y="194" text-anchor="middle" class="t-mod">SRD-05VDC</text><text x="126" y="210" text-anchor="middle" class="t-sub">relé</text>';
+    s += '<circle cx="222" cy="182" r="5" fill="var(--led-vermelho)"/><text x="222" y="204" text-anchor="middle" class="t-sub">luz</text>';
+    s += '<text x="150" y="254" text-anchor="middle" class="t-nome">Módulo relé · 5 V</text>';
+    RELE.forEach(function (n, i) { var x = 95 + 40 * i; s += '<rect x="' + (x - 4) + '" y="286" width="8" height="8" rx="1.5" fill="var(--gold)"/><text x="' + x + '" y="278" text-anchor="middle" class="t-mod">' + n + '</text>'; });
+    s += '</g>';
+    if (cls === 'fantasma') s += rotulo(150, 200, 'relé · etapa 4');
+    return s;
+  }
+
+  function svgTft(cls) {
+    var s = '<g class="comp ' + cls + '">';
+    s += '<rect x="620" y="24" width="220" height="214" rx="6" fill="var(--tft-pcb)" stroke="var(--pcb-edge)" stroke-width="2"/>';
+    s += '<rect x="650" y="36" width="160" height="160" rx="3" fill="var(--screen)"/>';
+    s += '<text x="730" y="110" text-anchor="middle" class="t-nome">Display 1,54"</text><text x="730" y="128" text-anchor="middle" class="t-sub">ST7789 · 240×240</text>';
+    TFT.forEach(function (n, i) { var x = 645 + 24 * i; s += '<rect x="' + (x - 4) + '" y="228" width="8" height="8" rx="1.5" fill="var(--gold)"/><text x="' + x + '" y="218" text-anchor="middle" class="t-mod">' + n + '</text>'; });
+    s += '</g>';
+    if (cls === 'fantasma') s += rotulo(730, 160, 'display · etapa 5');
+    return s;
+  }
+
+  function svgNfc(cls) {
+    var s = '<g class="comp ' + cls + '">';
+    s += '<rect x="880" y="24" width="310" height="204" rx="6" fill="var(--nfc-pcb)" stroke="var(--pcb-edge)" stroke-width="2"/>';
+    [0, 9, 18].forEach(function (o) { s += '<rect x="' + (900 + o) + '" y="' + (38 + o) + '" width="' + (190 - 2 * o) + '" height="' + (146 - 2 * o) + '" rx="' + (16 - o / 2) + '" fill="none" stroke="var(--nfc-coil)" stroke-width="2.5"/>'; });
+    s += '<rect x="1112" y="70" width="44" height="44" rx="3" fill="var(--screen)"/>';
+    s += '<text x="995" y="106" text-anchor="middle" class="t-nome">Leitor RC522</text><text x="995" y="124" text-anchor="middle" class="t-sub">13,56 MHz</text>';
+    NFC.forEach(function (n, i) { var x = 920 + 30 * i; s += '<rect x="' + (x - 4) + '" y="218" width="8" height="8" rx="1.5" fill="var(--gold)"/><text x="' + x + '" y="208" text-anchor="middle" class="t-mod">' + n + '</text>'; });
+    s += '</g>';
+    if (cls === 'fantasma') s += rotulo(1035, 160, 'leitor NFC · etapa 6');
+    return s;
+  }
+
+  function svgBb(cls) {
+    var s = '<g class="comp ' + cls + '">';
+    s += '<rect x="630" y="610" width="595" height="322" rx="6" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>';
+    s += '<line x1="672" y1="620" x2="1212" y2="620" stroke="var(--rail-blue)" stroke-width="2"/>';
+    s += '<line x1="672" y1="660" x2="1212" y2="660" stroke="var(--rail-red)" stroke-width="2"/>';
+    s += '<rect x="636" y="771" width="583" height="14" rx="2" fill="var(--board-edge)" opacity=".55"/>';
+    var furos = '';
+    for (var c = 1; c <= 30; c++) {
+      var x = bx(c);
+      ['-', '+', 'a', 'b', 'c', 'd', 'e'].forEach(function (r) { furos += '<rect x="' + (x - 2.6) + '" y="' + (BY[r] - 2.6) + '" width="5.2" height="5.2" rx="1" fill="var(--hole)"/>'; });
+    }
+    s += furos;
+    var baixo = '<g opacity=".45">';
+    for (var c2 = 1; c2 <= 30; c2++) {
+      var x2 = bx(c2);
+      ['f', 'g', 'h', 'i', 'j'].forEach(function (r) { baixo += '<rect x="' + (x2 - 2.6) + '" y="' + (BY[r] - 2.6) + '" width="5.2" height="5.2" rx="1" fill="var(--hole)"/>'; });
+      [896, 914].forEach(function (y) { baixo += '<rect x="' + (x2 - 2.6) + '" y="' + (y - 2.6) + '" width="5.2" height="5.2" rx="1" fill="var(--hole)"/>'; });
+    }
+    baixo += '<line x1="672" y1="886" x2="1212" y2="886" stroke="var(--rail-red)" stroke-width="2"/><line x1="672" y1="924" x2="1212" y2="924" stroke="var(--rail-blue)" stroke-width="2"/></g>';
+    s += baixo;
+    [1, 5, 10, 15, 20, 25, 30].forEach(function (n) { s += '<text x="' + bx(n) + '" y="677" text-anchor="middle" class="t-bb">' + n + '</text>'; });
+    'abcdefghij'.split('').forEach(function (r) { s += '<text x="656" y="' + (BY[r] + 3) + '" text-anchor="middle" class="t-bb">' + r + '</text>'; });
+    s += '<text x="1218" y="636" text-anchor="middle" class="t-rail" fill="var(--rail-blue)">−</text>';
+    s += '<text x="1218" y="654" text-anchor="middle" class="t-rail" fill="var(--rail-red)">+</text>';
+    s += '<text x="' + bx(9) + '" y="781" text-anchor="middle" class="t-tag">SCK</text>';
+    s += '<text x="' + bx(12) + '" y="781" text-anchor="middle" class="t-tag">MOSI</text>';
+    s += '</g>';
+    if (cls === 'fantasma') s += rotulo(928, 760, 'protoboard · etapa 2');
+    return s;
+  }
+
+  function svgPeca(p) {
+    if (p.tipo === 'res') {
+      var y = BY.c, x1 = bx(p.c1), x2 = bx(p.c2), m = (x1 + x2) / 2;
+      return '<line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '" stroke="var(--leg)" stroke-width="2.2"/>' +
+        '<rect x="' + (m - 18) + '" y="' + (y - 6.5) + '" width="36" height="13" rx="5.5" fill="var(--res-body)" stroke="var(--res-edge)"/>' +
+        '<rect x="' + (m - 11) + '" y="' + (y - 6.5) + '" width="3.5" height="13" fill="var(--w-vermelho)"/>' +
+        '<rect x="' + (m - 5) + '" y="' + (y - 6.5) + '" width="3.5" height="13" fill="var(--w-vermelho)"/>' +
+        '<rect x="' + (m + 1) + '" y="' + (y - 6.5) + '" width="3.5" height="13" fill="var(--w-marrom)"/>' +
+        '<rect x="' + (m + 9) + '" y="' + (y - 6.5) + '" width="3.5" height="13" fill="var(--gold)"/>';
+    }
+    if (p.tipo === 'led') {
+      var ye = BY.e, xa = bx(p.an), xc = bx(p.ca), mm = (xa + xc) / 2, cy = ye - 21;
+      return '<path d="M' + xa + ',' + ye + ' L' + xa + ',' + (ye - 5) + ' L' + (xa - 3) + ',' + (ye - 8) + ' L' + xa + ',' + (ye - 11) + ' L' + xa + ',' + (cy + 6) + '" fill="none" stroke="var(--leg)" stroke-width="2"/>' +
+        '<line x1="' + xc + '" y1="' + ye + '" x2="' + xc + '" y2="' + (cy + 6) + '" stroke="var(--leg)" stroke-width="2"/>' +
+        '<circle cx="' + mm + '" cy="' + cy + '" r="10.5" fill="' + p.cor + '" stroke="var(--w-casing)" stroke-width="1.5"/>' +
+        '<ellipse cx="' + (mm - 3.5) + '" cy="' + (cy - 3.5) + '" rx="3" ry="2.2" fill="var(--w-branco)" opacity=".7"/>' +
+        '<text x="' + (xa - 9) + '" y="' + (ye - 2) + '" text-anchor="middle" class="t-tag">+</text>';
+    }
+    var yb = BY.e, xm = bx(p.mais), xn = bx(p.menos), mb = (xm + xn) / 2, cb = yb - 18;
+    return '<circle cx="' + mb + '" cy="' + cb + '" r="25" fill="var(--buzzer)" stroke="var(--w-casing)" stroke-width="1.5"/>' +
+      '<circle cx="' + mb + '" cy="' + cb + '" r="17" fill="none" stroke="var(--hole)" stroke-width="1.5"/>' +
+      '<circle cx="' + mb + '" cy="' + cb + '" r="4" fill="var(--hole)"/>' +
+      '<text x="' + (xm + 6) + '" y="' + (cb - 6) + '" text-anchor="middle" class="t-rail" fill="var(--w-branco)">+</text>';
+  }
+
+  function svgFio(id, cls) {
+    var g = GEO[id], it = ITEM[id];
+    var A = ponto(g.a), B = ponto(g.b);
+    var da = A.d, db = g.db ? DIRS[g.db] : B.d;
+    var d = g.ponte ? ponte(A, B) : caminho(A, da, B, db, g.via);
+    var dbh = g.ponte ? DIRS.up : db;
+    function cab(Q, v) {
+      var x2 = f1(Q.x + v[0] * 12), y2 = f1(Q.y + v[1] * 12);
+      var l = 'x1="' + Q.x + '" y1="' + Q.y + '" x2="' + x2 + '" y2="' + y2 + '"';
+      return '<line ' + l + ' class="cab-c"/><line ' + l + ' class="cab"/>';
+    }
+    return '<g class="fio ' + cls + '" data-id="' + id + '"><path class="cas" d="' + d + '"/><path class="nuc" d="' + d + '" style="stroke:var(--w-' + it.cor + ')"/>' + cab(A, da) + cab(B, dbh) + '<path class="hit" d="' + d + '"/></g>';
+  }
+
+  /* ---------- estado ---------- */
+  var KEY = 'passe-montagem-v1';
+  var estado = { itens: {}, testes: {}, conf: {} };
+  try {
+    var salvo = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (salvo && typeof salvo === 'object') {
+      ['itens', 'testes', 'conf'].forEach(function (k) { if (salvo[k] && typeof salvo[k] === 'object') estado[k] = salvo[k]; });
+    }
+  } catch (e) { /* sem armazenamento: segue sem salvar */ }
+  function salvar() { try { localStorage.setItem(KEY, JSON.stringify(estado)); } catch (e) { /* ignora */ } }
+
+  /* ---------- desenho ---------- */
+  var COMP_ETAPA = { bb: 2, rele: 4, tft: 5, nfc: 6 };
+  function desenhar(fig) {
+    var modo = fig.getAttribute('data-diagrama');
+    var etapa = /^\d$/.test(modo) ? +modo : 99;
+    var todos = etapa === 99;
+    function classe(id) { var e = ITEM[id].etapa; return (todos || e === etapa) ? 'agora' : 'antes'; }
+    function falta(id) { return (!todos && ITEM[id].etapa === etapa && !estado.itens[id]) ? ' falta' : ''; }
+    function cc(k) { return (todos || COMP_ETAPA[k] <= etapa) ? '' : 'fantasma'; }
+    var usados = {};
+    Object.keys(GEO).forEach(function (id) {
+      if (ITEM[id].etapa > etapa) return;
+      [GEO[id].a, GEO[id].b].forEach(function (r) {
+        if (r.indexOf('esp:') !== 0) return;
+        var k = r.slice(4), c = classe(id);
+        if (usados[k] !== 'agora') usados[k] = c;
+      });
+    });
+    var vb = VB[modo] || VB_TUDO;
+    var s = '<svg class="dg" viewBox="' + vb + '" role="img" aria-label="Desenho das ligações' + (todos ? '' : ' da etapa ' + etapa) + '" xmlns="http://www.w3.org/2000/svg">';
+    s += svgBb(cc('bb')) + svgRele(cc('rele')) + svgTft(cc('tft')) + svgNfc(cc('nfc')) + svgEsp(usados);
+    PECAS.forEach(function (p) {
+      if (ITEM[p.id].etapa > etapa) return;
+      s += '<g class="peca ' + classe(p.id) + falta(p.id) + '" data-id="' + p.id + '">' + svgPeca(p) + '</g>';
+    });
+    var ids = Object.keys(GEO).filter(function (id) { return ITEM[id].etapa <= etapa; });
+    ids.sort(function (a, b) { return (classe(a) === 'agora') - (classe(b) === 'agora'); });
+    ids.forEach(function (id) { s += svgFio(id, classe(id) + falta(id)); });
+    s += '</svg>';
+    $('.dg-scroll', fig).innerHTML = s;
+    aplicarFoco(fig, focoBase(fig));
+  }
+
+  function focoBase(fig) {
+    if (fig.getAttribute('data-diagrama') !== 'conferir' || !confSel) return [];
+    var c = CONF.filter(function (x) { return x.id === confSel; })[0];
+    return (c && c.fios) || [];
+  }
+  function aplicarFoco(fig, ids) {
+    var svg = $('svg', fig);
+    if (!svg) return;
+    var els = $$('.fio, .peca', svg);
+    var algum = els.some(function (g) { return ids.indexOf(g.getAttribute('data-id')) >= 0; });
+    svg.classList.toggle('foco', algum);
+    els.forEach(function (g) { g.classList.toggle('on', algum && ids.indexOf(g.getAttribute('data-id')) >= 0); });
+  }
+  function textoPuro(html) { var d = document.createElement('div'); d.innerHTML = html; return d.textContent; }
+  function mostrarDica(fig, id, ev) {
+    var tip = $('.tip', fig), it = ITEM[id];
+    if (!tip || !it) return;
+    tip.innerHTML = '<b>' + textoPuro(it.txt) + '</b>' + (it.cor ? '<br>fio ' + it.cor : '');
+    tip.hidden = false;
+    var r = fig.getBoundingClientRect();
+    var x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    if (x + w > r.width - 6) x = Math.max(6, ev.clientX - r.left - w - 14);
+    if (y + h > r.height - 6) y = Math.max(6, ev.clientY - r.top - h - 14);
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+
+  /* ---------- listas ---------- */
+  function htmlItem(it) {
+    var sw = it.tipo === 'fio' ? '<span class="sw" style="--c:var(--w-' + it.cor + ')"></span>' : '<span class="sw ' + it.tipo + '"></span>';
+    var t2 = '';
+    if (it.tipo === 'fio' || it.nota) {
+      t2 = '<span class="t2">' + (it.tipo === 'fio' ? '<span class="cor">Fio ' + it.cor + '.</span> ' : '') + (it.nota || '') + '</span>';
+    }
+    return '<li class="item' + (it.perigo ? ' perigo' : '') + '" data-alvo="' + it.id + '"><label><input type="checkbox" data-item="' + it.id + '">' + sw +
+      '<span class="txt"><span class="t1">' + it.txt + '</span>' + t2 + '</span></label></li>';
+  }
+  $$('[data-lista]').forEach(function (ol) {
+    var n = +ol.getAttribute('data-lista');
+    ol.innerHTML = ITENS.filter(function (i) { return i.etapa === n; }).map(htmlItem).join('');
+  });
+
+  var confSel = null;
+  function htmlConf(c) {
+    var principal = c.pino
+      ? P(c.pino) + '<span class="sw" style="--c:var(--w-' + c.cor + ')"></span><span>' + c.txt + '</span>'
+      : '<span>' + c.txt + '</span>';
+    if (c.opcional) principal += '<span class="opc">opcional</span>';
+    return '<li class="crow" data-conf="' + c.id + '"><button type="button" class="crow-sel">' + principal + '</button>' +
+      '<span class="acoes"><button type="button" class="mini sim" data-v="ok" aria-pressed="false">Certo</button><button type="button" class="mini nao" data-v="erro" aria-pressed="false">Errado</button></span>' +
+      '<p class="dica-erro" hidden>' + (c.dica || DICA) + '</p></li>';
+  }
+  (function () {
+    var grupos = [];
+    CONF.forEach(function (c) { if (grupos.indexOf(c.grupo) < 0) grupos.push(c.grupo); });
+    $('#conf').innerHTML = grupos.map(function (g) {
+      return '<div class="conf-grupo"><h3>' + g + '</h3><ul class="conf-lista">' +
+        CONF.filter(function (c) { return c.grupo === g; }).map(htmlConf).join('') + '</ul></div>';
+    }).join('');
+  })();
+
+  /* ---------- placar ---------- */
+  var VISTA_ETAPA = { 'etapa-1': 1, 'etapa-2': 2, 'etapa-3': 3, 'etapa-4': 4, 'etapa-5': 5, 'etapa-6': 6 };
+  function atualizar() {
+    var inputs = $$('input[data-item]');
+    inputs.forEach(function (inp) {
+      var id = inp.getAttribute('data-item');
+      inp.checked = !!estado.itens[id];
+      var caixa = inp.closest('.item, .pc, .chk');
+      if (caixa) caixa.classList.toggle('feito', inp.checked);
+    });
+    var obrig = CONF.filter(function (c) { return !c.opcional; });
+    var confOk = obrig.filter(function (c) { return estado.conf[c.id] === 'ok'; }).length;
+    var feitos = inputs.filter(function (i) { return i.checked; }).length;
+    var total = inputs.length + obrig.length;
+    $('#pg-feito').textContent = feitos + confOk;
+    $('#pg-total').textContent = total;
+    $('#pg-barra').style.width = (100 * (feitos + confOk) / total).toFixed(1) + '%';
+
+    function conta(sel) {
+      var l = $$(sel);
+      return [l.filter(function (i) { return i.checked; }).length, l.length];
+    }
+    $$('[data-st]').forEach(function (el) {
+      var v = el.getAttribute('data-st'), txt = '', cls = '';
+      if (VISTA_ETAPA[v]) {
+        var n = VISTA_ETAPA[v], c = conta('[data-lista="' + n + '"] input');
+        txt = c[0] + '/' + c[1];
+        if (estado.testes[n] === 'ok') { txt = '✓ ' + txt; cls = 'ok'; }
+        else if (estado.testes[n] === 'falha') { txt = '! ' + txt; cls = 'falha'; }
+      } else if (v === 'pecas') {
+        var cp = conta('.pc input'); txt = cp[0] + '/' + cp[1]; if (cp[0] === cp[1]) cls = 'ok';
+      } else if (v === 'sistema') {
+        var cs = conta('.chk input'); txt = cs[0] + '/' + cs[1]; if (cs[0] === cs[1]) cls = 'ok';
+      } else if (v === 'conferir') {
+        var erros = CONF.filter(function (c) { return estado.conf[c.id] === 'erro'; }).length;
+        txt = confOk + '/' + obrig.length;
+        if (erros) { txt = '! ' + txt; cls = 'falha'; } else if (confOk === obrig.length) cls = 'ok';
+      }
+      el.textContent = txt;
+      el.className = 'st' + (cls ? ' ' + cls : '');
+    });
+
+    $$('[data-resultado]').forEach(function (box) {
+      var n = box.getAttribute('data-resultado');
+      $$('[data-res]', box).forEach(function (b) { b.setAttribute('aria-pressed', estado.testes[n] === b.getAttribute('data-res') ? 'true' : 'false'); });
+    });
+
+    $$('.crow').forEach(function (li) {
+      var id = li.getAttribute('data-conf'), v = estado.conf[id];
+      li.classList.toggle('ok', v === 'ok');
+      li.classList.toggle('erro', v === 'erro');
+      li.classList.toggle('sel', id === confSel);
+      $$('.mini', li).forEach(function (b) { b.setAttribute('aria-pressed', v === b.getAttribute('data-v') ? 'true' : 'false'); });
+      $('.dica-erro', li).hidden = v !== 'erro';
+    });
+    var erroN = CONF.filter(function (c) { return estado.conf[c.id] === 'erro'; }).length;
+    var faltam = obrig.length - confOk;
+    $('#conf-placar').innerHTML = '<span class="chip ok">' + confOk + ' certos</span>' +
+      (erroN ? '<span class="chip erro">' + erroN + ' com problema</span>' : '') +
+      '<span class="chip">' + faltam + ' faltam</span>';
+    var testesOk = [1, 2, 3, 4, 5, 6].every(function (n) { return estado.testes[n] === 'ok'; });
+    $('#validado').hidden = !(testesOk && confOk === obrig.length && !erroN);
+  }
+
+  /* ---------- navegação ---------- */
+  var VISTAS = $$('.vista').map(function (v) { return v.getAttribute('data-vista'); });
+  var atual = null;
+  function mostrar(nome) {
+    if (VISTAS.indexOf(nome) < 0) nome = 'inicio';
+    var mudou = atual !== null && atual !== nome;
+    atual = nome;
+    $$('.vista').forEach(function (v) { v.hidden = v.getAttribute('data-vista') !== nome; });
+    $$('.trilha a').forEach(function (a) {
+      if (a.getAttribute('data-ir') === nome) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    var vista = $('.vista[data-vista="' + nome + '"]');
+    var fig = $('.diagrama', vista);
+    if (fig) desenhar(fig);
+    if (mudou) {
+      var topo = $('#principal').getBoundingClientRect().top + window.scrollY - 16;
+      if (window.scrollY > topo) window.scrollTo(0, topo);
+    }
+    var lista = $('.trilha ol'), ativo = $('.trilha a[data-ir="' + nome + '"]');
+    if (lista && ativo && lista.scrollWidth > lista.clientWidth) lista.scrollLeft = ativo.parentNode.offsetLeft - 16;
+  }
+  window.addEventListener('hashchange', function () { mostrar(location.hash.slice(1)); });
+
+  /* ---------- eventos ---------- */
+  document.addEventListener('change', function (e) {
+    var inp = e.target.closest && e.target.closest('input[data-item]');
+    if (!inp) return;
+    var id = inp.getAttribute('data-item');
+    if (inp.checked) estado.itens[id] = true; else delete estado.itens[id];
+    salvar();
+    atualizar();
+    var fig = $('.vista[data-vista="' + atual + '"] .diagrama');
+    if (fig && GEO[id] || fig && PECAS.some(function (p) { return p.id === id; })) desenhar(fig);
+  });
+
+  document.addEventListener('click', function (e) {
+    var res = e.target.closest('[data-res]');
+    if (res) {
+      var box = res.closest('[data-resultado]'), n = box.getAttribute('data-resultado'), v = res.getAttribute('data-res');
+      if (estado.testes[n] === v) delete estado.testes[n]; else estado.testes[n] = v;
+      salvar(); atualizar();
+      var det = $('[data-problemas="' + n + '"]');
+      if (det && estado.testes[n] === 'falha') det.open = true;
+      return;
+    }
+    var mini = e.target.closest('.crow .mini');
+    if (mini) {
+      var li = mini.closest('.crow'), id = li.getAttribute('data-conf'), val = mini.getAttribute('data-v');
+      if (estado.conf[id] === val) delete estado.conf[id]; else estado.conf[id] = val;
+      salvar();
+      selecionarConf(id);
+      if (estado.conf[id] === 'ok') {
+        var prox = CONF.filter(function (c) { return !estado.conf[c.id]; })[0];
+        if (prox) selecionarConf(prox.id);
+      }
+      return;
+    }
+    var sel = e.target.closest('.crow-sel');
+    if (sel) { selecionarConf(sel.closest('.crow').getAttribute('data-conf')); return; }
+    var cop = e.target.closest('.copiar');
+    if (cop) {
+      var pre = $('pre', cop.closest('.term'));
+      var texto = pre.textContent;
+      var ok = function () { cop.textContent = 'Copiado'; setTimeout(function () { cop.textContent = 'Copiar'; }, 1600); };
+      var falhou = function () {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        cop.textContent = 'Use Ctrl+C';
+      };
+      try { navigator.clipboard.writeText(texto).then(ok, falhou); } catch (err) { falhou(); }
+      return;
+    }
+    var fio = e.target.closest('.dg .fio, .dg .peca');
+    if (fio) { var f = fio.closest('.diagrama'); aplicarFoco(f, [fio.getAttribute('data-id')]); mostrarDica(f, fio.getAttribute('data-id'), e); }
+  });
+
+  function selecionarConf(id) {
+    confSel = id;
+    atualizar();
+    var fig = $('.diagrama[data-diagrama="conferir"]');
+    if (fig) aplicarFoco(fig, focoBase(fig));
+  }
+
+  document.addEventListener('pointerover', function (e) {
+    var fio = e.target.closest && e.target.closest('.dg .fio, .dg .peca');
+    if (fio) {
+      var f = fio.closest('.diagrama');
+      aplicarFoco(f, [fio.getAttribute('data-id')]);
+      mostrarDica(f, fio.getAttribute('data-id'), e);
+      return;
+    }
+    var li = e.target.closest && e.target.closest('[data-alvo]');
+    if (li) {
+      var fig = $('.diagrama', li.closest('.vista'));
+      if (fig) aplicarFoco(fig, [li.getAttribute('data-alvo')]);
+      li.classList.add('on');
+    }
+  });
+  document.addEventListener('pointerout', function (e) {
+    var de = e.target.closest && e.target.closest('.dg .fio, .dg .peca, [data-alvo]');
+    if (!de) return;
+    if (e.relatedTarget && de.contains(e.relatedTarget)) return;
+    de.classList && de.classList.remove('on');
+    var fig = de.closest('.diagrama') || $('.diagrama', de.closest('.vista'));
+    if (!fig) return;
+    aplicarFoco(fig, focoBase(fig));
+    var tip = $('.tip', fig); if (tip) tip.hidden = true;
+  });
+  document.addEventListener('focusin', function (e) {
+    var li = e.target.closest && e.target.closest('[data-alvo]');
+    if (!li) return;
+    var fig = $('.diagrama', li.closest('.vista'));
+    if (fig) aplicarFoco(fig, [li.getAttribute('data-alvo')]);
+  });
+
+  var zerar = $('#zerar'), armado = null;
+  zerar.addEventListener('click', function () {
+    if (!armado) {
+      zerar.textContent = 'Clique de novo para apagar todo o progresso';
+      zerar.classList.add('armado');
+      armado = setTimeout(function () { armado = null; zerar.textContent = 'Recomeçar do zero'; zerar.classList.remove('armado'); }, 4000);
+      return;
+    }
+    clearTimeout(armado); armado = null;
+    estado.itens = {}; estado.testes = {}; estado.conf = {};
+    salvar();
+    zerar.textContent = 'Recomeçar do zero'; zerar.classList.remove('armado');
+    confSel = null;
+    atualizar();
+    mostrar(atual);
+  });
+
+  /* ---------- protoboard de exemplo ---------- */
+  (function () {
+    var svg = $('#mini-bb');
+    var n = 16, p = 22, x0 = 46;
+    var Y = { 't-': 22, 't+': 44, a: 84, b: 106, c: 128, d: 150, e: 172, f: 214, g: 236, h: 258, i: 280, j: 302, 'b+': 330, 'b-': 352 };
+    var s = '<rect x="6" y="6" width="418" height="360" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>';
+    s += '<line x1="34" y1="11" x2="410" y2="11" stroke="var(--rail-blue)" stroke-width="2"/><line x1="34" y1="56" x2="410" y2="56" stroke="var(--rail-red)" stroke-width="2"/>';
+    s += '<line x1="34" y1="318" x2="410" y2="318" stroke="var(--rail-red)" stroke-width="2"/><line x1="34" y1="362" x2="410" y2="362" stroke="var(--rail-blue)" stroke-width="2"/>';
+    s += '<rect x="12" y="186" width="406" height="16" rx="2" fill="var(--board-edge)" opacity=".55"/>';
+    s += '<text x="22" y="27" text-anchor="middle" class="t-rail" fill="var(--rail-blue)">−</text><text x="22" y="49" text-anchor="middle" class="t-rail" fill="var(--rail-red)">+</text>';
+    s += '<text x="22" y="335" text-anchor="middle" class="t-rail" fill="var(--rail-red)">+</text><text x="22" y="357" text-anchor="middle" class="t-rail" fill="var(--rail-blue)">−</text>';
+    for (var c = 1; c <= n; c++) {
+      var x = x0 + (c - 1) * p;
+      if (c === 1 || c % 5 === 0) s += '<text x="' + x + '" y="72" text-anchor="middle" class="t-bb" style="font-size:10px">' + c + '</text>';
+      Object.keys(Y).forEach(function (r) {
+        var g = r.length === 2 ? r : ('abcde'.indexOf(r) >= 0 ? 's' + c : 'i' + c);
+        s += '<rect class="mh" data-g="' + g + '" x="' + (x - 4.5) + '" y="' + (Y[r] - 4.5) + '" width="9" height="9" rx="2"/>';
+      });
+    }
+    svg.innerHTML = s;
+    var leg = $('#mini-bb-leg');
+    function grupo(g) {
+      $$('.mh', svg).forEach(function (h) { h.classList.toggle('on', h.getAttribute('data-g') === g); });
+      var t;
+      if (g === 't-' || g === 'b-') t = '<b>Trilho −</b>: a linha inteira está ligada. Neste guia, é o GND.';
+      else if (g === 't+' || g === 'b+') t = '<b>Trilho +</b>: a linha inteira está ligada. Neste guia, é o 3V3.';
+      else if (g.charAt(0) === 's') t = '<b>Coluna ' + g.slice(1) + ', metade de cima</b>: estes 5 furos estão ligados entre si, e só entre si.';
+      else t = '<b>Coluna ' + g.slice(1) + ', metade de baixo</b>: outros 5 furos, separados da metade de cima pelo canal do meio.';
+      leg.innerHTML = t;
+    }
+    svg.addEventListener('click', function (e) { var h = e.target.closest('.mh'); if (h) grupo(h.getAttribute('data-g')); });
+    grupo('s4');
+  })();
+
+  atualizar();
+  mostrar(location.hash.slice(1) || 'inicio');
+})();
+</script>
+
+</body>
+</html>

@@ -1,15 +1,17 @@
 import 'package:flutter/widgets.dart';
 
 import '../../models/usuario.dart';
-import '../../views/access_controller/access_controller_menu_view.dart';
-import '../../views/admin/admin_menu_view.dart';
+import '../../views/teams/access_controller/access_controller_menu_view.dart';
+import '../../views/teams/admin/admin_menu_view.dart';
 import '../../views/resident/resident_menu_view.dart';
 import '../../views/visitor/visitor_menu_view.dart';
+import '../../views/user/inicio_view.dart';
 
-/// Menu que cada perfil abre depois do login (ou ao abrir o app já logado).
+/// Tela que cada perfil abre depois do login (ou ao abrir o app já logado):
+/// o menu da equipe; morador e visitante abrem o Início, que leva ao menu.
 Widget menuDoPerfil(Perfil perfil) => switch (perfil) {
   Perfil.admin => AdminMenuView(),
   Perfil.controladorAcesso => AccessControllerMenuView(),
-  Perfil.morador => ResidentMenuView(),
-  Perfil.visitante => VisitorMenuView(),
+  Perfil.morador => InicioView(menu: ResidentMenuView()),
+  Perfil.visitante => InicioView(menu: VisitorMenuView()),
 };

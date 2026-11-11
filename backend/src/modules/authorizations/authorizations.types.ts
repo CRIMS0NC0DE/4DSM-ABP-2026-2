@@ -1,7 +1,9 @@
 export type StatusAutorizacao = 'ATIVA' | 'CANCELADA';
 
+export const SITUACOES = ['ATIVA', 'AGENDADA', 'EXPIRADA', 'ESGOTADA', 'CANCELADA'] as const;
+
 /** Situação calculada a partir do status, das datas e dos usos. */
-export type SituacaoAutorizacao = 'ATIVA' | 'AGENDADA' | 'EXPIRADA' | 'ESGOTADA' | 'CANCELADA';
+export type SituacaoAutorizacao = (typeof SITUACOES)[number];
 
 export interface Authorization {
   id: string;
@@ -24,7 +26,8 @@ export interface Authorization {
 
 export type AuthorizationWithRefs = Authorization & {
   user: { id: string; nome: string; perfil: string };
-  catraca: { id: string; nome: string };
+  /** Com o nome do edifício, da portaria e da porta, como em AccessPointDetalhe (telas U7 e U8). */
+  catraca: { id: string; nome: string; edificio: string; portaria: string; porta: string };
 };
 
 export type NewAuthorization = Pick<
@@ -35,8 +38,12 @@ export type NewAuthorization = Pick<
 export interface AuthorizationFilter {
   userId?: string;
   accessPointId?: string;
-  /** "ATIVA" = não cancelada e ainda dentro da data; "EXPIRADA" = não cancelada e já passou. */
-  situacao?: 'ATIVA' | 'EXPIRADA' | 'CANCELADA';
+  /**
+   * O repositório pré-filtra pelo status e pela data: "EXPIRADA" = não cancelada e já passou;
+   * "ATIVA", "AGENDADA" e "ESGOTADA" = não cancelada e ainda dentro da data.
+   * O service confere com a situação calculada, então "ATIVA" não traz agendadas nem sem usos.
+   */
+  situacao?: SituacaoAutorizacao;
   /** Data de hoje (YYYY-MM-DD) no fuso do prédio, usada pelo filtro de situação. */
   hoje: string;
   /** Autorizações que valem em algum dia do intervalo. */

@@ -9,7 +9,6 @@ import '../services/auth_service.dart';
 /// renova autorizações. O admin é o cargo superior, então toda opção daqui
 /// também existe no menu dele; Locais, Relatórios, Comunicados e
 /// Configurações ficam só com o admin.
-/// Protótipo: as opções ainda não abrem telas, só registram o clique.
 class AccessControllerMenuController {
   AccessControllerMenuController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;

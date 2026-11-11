@@ -60,8 +60,8 @@ class SessaoService {
     }
   }
 
-  /// A API não tem logout: o JWT só deixa de valer quando vence.
-  /// Sair é esquecer o token aqui no app.
+  /// A API não tem logout: o JWT vale até vencer ou até o cadastro ser
+  /// desativado. Sair é esquecer o token aqui no app.
   Future<void> encerrar() async {
     _token = null;
     _usuario = null;

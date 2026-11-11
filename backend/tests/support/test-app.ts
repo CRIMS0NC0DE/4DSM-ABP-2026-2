@@ -42,7 +42,7 @@ export class FakeClock implements Clock {
 /** Monta o app com dados de exemplo: prédio, catraca, terminal e uma pessoa de cada perfil. */
 export async function montarCenario() {
   const clock = new FakeClock();
-  const { repos, db } = createMemoryRepositories();
+  const { repos, db } = createMemoryRepositories(clock);
   const container = createContainer(repos, config, clock);
   const app = createApp(container);
 

@@ -5,21 +5,24 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/routes/rotas.dart';
 import 'core/theme/app_theme.dart';
 import 'models/usuario.dart';
-import 'services/sessao_service.dart';
+import 'services/auth_service.dart';
 import 'views/user/login_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Quem já entrou e o token ainda vale abre direto no menu do perfil.
-  final usuario = await SessaoService.instancia.restaurar();
-  runApp(PasseApp(usuario: usuario));
+  // Quem já entrou e o token ainda vale abre direto na tela do perfil.
+  final sessao = await AuthService.instancia.restaurar();
+  runApp(PasseApp(usuario: sessao.usuario, aviso: sessao.aviso));
 }
 
 class PasseApp extends StatelessWidget {
-  const PasseApp({super.key, this.usuario});
+  const PasseApp({super.key, this.usuario, this.aviso});
 
   /// Usuário da sessão restaurada; null abre o login.
   final Usuario? usuario;
+
+  /// Por que a sessão guardada não vale mais (ex.: cadastro desativado).
+  final String? aviso;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,9 @@ class PasseApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: usuario == null ? LoginView() : menuDoPerfil(usuario.perfil),
+      home: usuario == null
+          ? LoginView(aviso: aviso)
+          : menuDoPerfil(usuario.perfil),
     );
   }
 }

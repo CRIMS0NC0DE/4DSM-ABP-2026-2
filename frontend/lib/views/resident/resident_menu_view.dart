@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import '../../controllers/resident_menu_controller.dart';
 import '../../models/opcao_menu.dart';
 import '../user/login_view.dart';
+import '../user/minhas_autorizacoes_view.dart';
 import '../user/scanner_qr_view.dart';
-import '../widgets/menu_grade.dart';
 import '../widgets/tela_carregando.dart';
+import '../shared/historico_view.dart';
+import '../user/ajuda_view.dart';
+import '../user/minha_tag_view.dart';
+import '../user/perfil_view.dart';
+import '../widgets/menu_grade.dart';
+
 
 class ResidentMenuView extends StatelessWidget {
   final ResidentMenuController controller;
@@ -17,19 +23,26 @@ class ResidentMenuView extends StatelessWidget {
     controller.abrir(opcao);
     final tela = switch (opcao.titulo) {
       'Escanear QR Code' => ScannerQrView(),
+      'Minhas autorizações' => MinhasAutorizacoesView(),
+      'Histórico de acessos' => HistoricoView(daEquipe: false),
+      'Acessos negados' => HistoricoView(daEquipe: false, soNegados: true),
+      'Minha tag NFC' => MinhaTagView(podeBloquear: true),
+      'Perfil' => PerfilView(),
+      'Ajuda' => const AjudaView(),
       _ => null,
     };
     if (tela != null) {
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => tela));
       return;
     }
-    // Protótipo: as outras telas ainda não existem, então só avisa.
+    // As opções que ainda não têm tela só avisam.
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(content: Text('${opcao.titulo}: tela em construção.')),
       );
   }
+
 
   /// Volta para o login; a tela de carregamento limpa o histórico, para o
   /// Voltar não reabrir o menu.

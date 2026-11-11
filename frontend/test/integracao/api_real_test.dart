@@ -108,6 +108,18 @@ void main() {
         expect(restaurado?.perfil, Perfil.controladorAcesso);
       });
 
+      test('Ao reabrir o app, a sessão é conferida na API', () async {
+        await auth.entrar('portaria@passe.com', _senha);
+
+        final nova = SessaoService();
+        final sessao = await AuthService(
+          api: ApiClient(sessao: nova, baseUrl: _apiReal),
+          sessao: nova,
+        ).restaurar();
+        expect(sessao.usuario?.perfil, Perfil.controladorAcesso);
+        expect(sessao.aviso, isNull);
+      });
+
       test('Sem token, a API pede login (401)', () async {
         await expectLater(
           api.get('/auth/me'),

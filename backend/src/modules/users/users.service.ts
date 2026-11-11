@@ -55,6 +55,10 @@ export class UsersService {
     if (!atual) throw notFound('Usuário');
     this.conferirPermissao(quem, atual.perfil);
     if (dados.perfil) this.conferirPermissao(quem, dados.perfil);
+    // O ativo e o perfil valem na hora: quem se desativasse ou se rebaixasse não conseguiria desfazer.
+    if (id === quem.userId && (dados.ativo === false || (dados.perfil && dados.perfil !== atual.perfil))) {
+      throw conflict('Você não pode desativar nem mudar o perfil da própria conta.');
+    }
 
     const email = dados.email?.trim().toLowerCase();
     const cpf = dados.cpf ? somenteNumeros(dados.cpf) : undefined;
@@ -90,11 +94,19 @@ export class UsersService {
     await this.users.removeTag(tagId);
   }
 
+  /** O dono pode bloquear a própria tag; desbloquear continua com a portaria. */
+  async bloquearMinhaTag(userId: string, tagId: string) {
+    const tag = await this.users.findTagById(tagId);
+    if (!tag || tag.userId !== userId) throw notFound('Tag');
+    return this.users.updateTag(tagId, { ativa: false });
+  }
+
   private async tagDoUsuario(quem: AuthContext, userId: string, tagId: string) {
     const user = await this.users.findById(userId);
-    const tag = await this.users.findTagById(tagId);
-    if (!user || !tag || tag.userId !== userId) throw notFound('Tag');
+    if (!user) throw notFound('Usuário');
     this.conferirPermissao(quem, user.perfil);
+    const tag = await this.users.findTagById(tagId);
+    if (!tag || tag.userId !== userId) throw notFound('Tag');
   }
 
   private conferirPermissao(quem: AuthContext, perfilAlvo: Perfil) {
