@@ -70,15 +70,3 @@ Registrar tecnologia/versão do banco, frequência e retenção dos backups, cri
 
 Documentar ferramentas e procedimentos efetivamente usados para logs da API, broker e terminais; métricas de disponibilidade; falhas de autenticação/autorização; eventos negados; alertas; atualização e reinicialização de dispositivos.
 
-## 10. Checklist
-
-- [ ] Conferir Dockerfiles e Compose.
-- [ ] Listar workflows atuais.
-- [ ] Confirmar permissões GHCR.
-- [ ] Confirmar destino e status do deploy.
-- [ ] Identificar ambientes e URLs.
-- [ ] Identificar banco, broker e backups.
-- [ ] Documentar variáveis sem expor valores.
-- [ ] Revisar TLS, ACLs, firewall e secrets.
-- [ ] Definir rollback e recuperação.
-- [ ] Validar o diagrama com a equipe de infraestrutura.
