@@ -36,7 +36,7 @@ P1.AAAAAAAAABAABAAAAAAAAAAAAU.TNBFNK.ZIIJ7VSSEKJGPBSZ.XYZXORKDKZTWKXKNG7CS2OKO
 - Código: `backend/src/modules/terminals/qr-token.ts`. O app não muda: continua
   mandando o texto lido em `POST /access/qr {token}`.
 
-## Firmware (`firmware/`)
+## Firmware (`arduino/`)
 
 PlatformIO + Arduino para ESP32 DevKit. O que ele faz, na ordem do `loop()`:
 
@@ -49,13 +49,13 @@ PlatformIO + Arduino para ESP32 DevKit. O que ele faz, na ordem do `loop()`:
 6. Heartbeat (`POST /terminal/heartbeat`) a cada 30 s: o painel mostra o terminal como online.
 
 ```bash
-cd firmware
+cd arduino
 cp include/credenciais.exemplo.h include/credenciais.h   # Wi-Fi, IP do PC, Id e chave
 pio run -e tft -t upload        # ST7789 (recomendado); ou -e ili9341 / -e oled
 pio device monitor              # log serial a 115200
 ```
 
-Pinos e tempos ficam em `firmware/include/config.h`. Bibliotecas: PubSubClient,
+Pinos e tempos ficam em `arduino/include/config.h`. Bibliotecas: PubSubClient,
 ArduinoJson, MFRC522, Adafruit GFX + driver do display, e a
 [qrcodegen](https://www.nayuki.io/page/qr-code-generator-library) (MIT) em `lib/`.
 
@@ -72,7 +72,7 @@ node scripts/provisionar-terminal.mjs --catraca <id> --nome "Terminal Catraca 2"
 node scripts/provisionar-terminal.mjs --trocar-chave <terminalId>   # chave nova; a antiga para na hora
 ```
 
-O script grava `TERMINAL_ID`/`TERMINAL_KEY` em `firmware/include/credenciais.h` e o
+O script grava `TERMINAL_ID`/`TERMINAL_KEY` em `arduino/include/credenciais.h` e o
 login do terminal em `docker/mosquitto/passwd`. Depois:
 
 1. `docker compose -f docker-compose.dev.yml restart mqtt`

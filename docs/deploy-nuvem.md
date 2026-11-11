@@ -44,7 +44,7 @@ define a porta.
 - 8883 é MQTT com TLS (API e ESP32); 8084 é WebSocket com TLS (simulador). O
   Serverless não tem porta sem TLS.
 - O ESP32 confere o certificado com a CA DigiCert Global Root G2, que está em
-  `firmware/include/ca_digicert_g2.h`.
+  `arduino/include/ca_digicert_g2.h`.
 
 ## Dados e terminal em produção
 
@@ -67,7 +67,7 @@ node scripts/provisionar-terminal.mjs --trocar-chave 00000000-0000-4000-8000-000
 Remove-Item Env:API_URL, Env:ADMIN_SENHA
 ```
 
-O script grava a chave em `firmware/include/credenciais.h` e em
+O script grava a chave em `arduino/include/credenciais.h` e em
 `docker/mosquitto/passwd`. Esse segundo arquivo é do Mosquitto local: desfaça com
 `git restore docker/mosquitto/passwd`. Cadastre a chave nova no EMQX.
 

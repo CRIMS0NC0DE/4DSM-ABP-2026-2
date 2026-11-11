@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: firmware
+        working-directory: arduino
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -136,7 +136,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.platformio
-          key: pio-${{ hashFiles('firmware/platformio.ini') }}
+          key: pio-${{ hashFiles('arduino/platformio.ini') }}
       - run: pip install platformio
       - name: Credenciais de exemplo
         run: cp include/credenciais.exemplo.h include/credenciais.h

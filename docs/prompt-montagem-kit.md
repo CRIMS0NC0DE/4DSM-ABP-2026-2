@@ -66,7 +66,7 @@ Sobre o display: o QR tem 33×33 módulos (versão 4) e precisa de pelo menos un
 para o celular ler a uns 20 cm. Um TFT de 240 px dá 5 px por módulo. O OLED 0,96" (128×64) dá
 1 px por módulo: serve para teste de bancada, não para a apresentação.
 
-## Pinagem que o firmware espera (`firmware/include/config.h`)
+## Pinagem que o firmware espera (`arduino/include/config.h`)
 
 O display e o NFC dividem o mesmo barramento SPI (VSPI), cada um com o seu CS.
 
@@ -181,7 +181,7 @@ então ele precisa de sketch próprio para teste.
 ## Como eu gravo e rodo
 
 ```bash
-cd firmware
+cd arduino
 cp include/credenciais.exemplo.h include/credenciais.h   # Wi-Fi, IP do PC, Id e chave do terminal
 pio run -e tft -t upload        # ST7789 (padrão); ou -e ili9341 / -e oled
 pio device monitor              # Serial a 115200
@@ -211,11 +211,11 @@ Depois da montagem, mando fotos de cima com os fios visíveis para você conferi
 
 ## Código do firmware
 
-Arquivos de `firmware/`. A biblioteca `lib/qrcodegen` (nayuki, MIT) e o certificado CA ficaram de
+Arquivos de `arduino/`. A biblioteca `lib/qrcodegen` (nayuki, MIT) e o certificado CA ficaram de
 fora porque não mudam nada na montagem. O `credenciais.exemplo.h` só tem os valores de demonstração
 do seed.
 
-### `firmware/platformio.ini`
+### `arduino/platformio.ini`
 
 ```ini
 ; Firmware do terminal da catraca (ESP32). Escolha o ambiente pelo display:
@@ -257,7 +257,7 @@ lib_deps =
 build_flags = -DTELA_SSD1306
 ```
 
-### `firmware/include/config.h`
+### `arduino/include/config.h`
 
 ```cpp
 #pragma once
@@ -299,7 +299,7 @@ build_flags = -DTELA_SSD1306
 #define NFC_REPETICAO_MS 3000       // ignora a mesma tag lida de novo nesse intervalo
 ```
 
-### `firmware/include/credenciais.exemplo.h`
+### `arduino/include/credenciais.exemplo.h`
 
 ```cpp
 #pragma once
@@ -333,7 +333,7 @@ build_flags = -DTELA_SSD1306
 #define TERMINAL_KEY "chave-demo-terminal-catraca-1"
 ```
 
-### `firmware/src/main.cpp`
+### `arduino/src/main.cpp`
 
 ```cpp
 // Terminal da catraca do Passe (ESP32). Faz o mesmo que o simulador web
@@ -616,7 +616,7 @@ void loop() {
 }
 ```
 
-### `firmware/src/tela.h`
+### `arduino/src/tela.h`
 
 ```cpp
 #pragma once
@@ -642,7 +642,7 @@ String semAcento(const String& texto);
 }  // namespace tela
 ```
 
-### `firmware/src/tela.cpp`
+### `arduino/src/tela.cpp`
 
 ```cpp
 #include "tela.h"

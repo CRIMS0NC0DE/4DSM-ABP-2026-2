@@ -546,13 +546,13 @@ img{max-width:100%}
     <h3>Gravar o teste de bancada</h3>
     <ol class="passo-a-passo">
       <li>Ligue o ESP32 no computador pelo cabo USB.</li>
-      <li>No VS Code, abra a pasta <code>firmware</code> do repositório (Arquivo → Abrir pasta).</li>
+      <li>No VS Code, abra a pasta <code>arduino</code> do repositório (Arquivo → Abrir pasta).</li>
       <li>Clique no ícone do PlatformIO, a cabeça de formiga na barra da esquerda. Em <b>Project Tasks</b>, abra <b>teste</b> e clique em <b>Upload and Monitor</b>.</li>
       <li>Se a gravação parar em <code>Connecting...</code>, segure o botão <b>BOOT</b> da placa até aparecer <code>Writing at</code>, e então solte.</li>
       <li>Com o monitor aberto, aperte o botão <b>EN</b> da placa para ver as mensagens desde o começo.</li>
     </ol>
     <p class="muted">Prefere o terminal? Dá no mesmo:</p>
-    <div class="term"><div class="term-cab"><span>terminal</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">cd firmware
+    <div class="term"><div class="term-cab"><span>terminal</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">cd arduino
 pio run -e teste -t upload
 pio device monitor</pre></div>
   </div>
@@ -687,7 +687,7 @@ Digite o numero do teste:
         <dt>Não clica e a luz do módulo não acende</dt><dd>Confira o fio laranja (VIN → VCC) e o preto (GND → GND). O VIN só tem energia com o USB ligado.</dd>
         <dt>A luz acende, mas não clica</dt><dd>O relé está recebendo pouca energia. Troque o cabo ou a porta USB, e confira o fio laranja.</dd>
         <dt>Fica ligado o tempo todo e nunca desliga</dt><dd>Alguns módulos de 5 V não desligam com os 3,3 V do ESP32. Se o seu tiver um jumper escrito JD-VCC: tire o jumper, ligue o pino JD-VCC no VIN e o VCC (o que fica ao lado do IN) no 3V3. Se tiver um jumper escrito H e L, coloque em L.</dd>
-        <dt>Funciona ao contrário: fica ligado e desliga no teste</dt><dd>O módulo liga com sinal alto. Em <code>firmware/include/config.h</code>, troque para <code>RELE_LIGADO HIGH</code> e <code>RELE_DESLIGADO LOW</code> e grave o teste de novo.</dd>
+        <dt>Funciona ao contrário: fica ligado e desliga no teste</dt><dd>O módulo liga com sinal alto. Em <code>arduino/include/config.h</code>, troque para <code>RELE_LIGADO HIGH</code> e <code>RELE_DESLIGADO LOW</code> e grave o teste de novo.</dd>
       </dl>
     </details>
   </div>
@@ -726,7 +726,7 @@ Digite o numero do teste:
       <dl>
         <dt>A tela continua preta</dt><dd>A luz de fundo não acendeu. Confira VCC e BLK no trilho +, GND no trilho −, e se o fio vermelho do 3V3 chega no trilho +.</dd>
         <dt>A luz acende, mas a tela fica branca ou sem imagem</dt><dd>A energia está ok; o problema está nos sinais. Confira CS → D5, DC → RX2, RES → TX2, SCL na coluna 9, SDA na coluna 12, e se o D18 e o D23 estão nessas mesmas colunas.</dd>
-        <dt>A imagem sai cortada ou fora do lugar</dt><dd>O display deve ser de 240×320. Em <code>firmware/include/config.h</code>, troque <code>TFT_ALTURA</code> para 320 e grave de novo.</dd>
+        <dt>A imagem sai cortada ou fora do lugar</dt><dd>O display deve ser de 240×320. Em <code>arduino/include/config.h</code>, troque <code>TFT_ALTURA</code> para 320 e grave de novo.</dd>
         <dt>Cores estranhas ou só chuvisco</dt><dd>O display pode ter outro chip (ILI9341 ou ST7735). Avise a equipe com uma foto da parte de trás.</dd>
         <dt>O celular não lê o QR</dt><dd>Afaste o celular uns 20 cm, evite reflexo de lâmpada na tela e espere o foco.</dd>
       </dl>
@@ -824,7 +824,7 @@ cd backend &amp;&amp; npm run dev</pre></div>
   <div class="duas">
     <div>
       <h3>3. Credenciais do terminal</h3>
-      <p>Em <code>firmware/include/credenciais.h</code> (se não existir, copie do <code>credenciais.exemplo.h</code>), preencha a rede e o IP do computador:</p>
+      <p>Em <code>arduino/include/credenciais.h</code> (se não existir, copie do <code>credenciais.exemplo.h</code>), preencha a rede e o IP do computador:</p>
       <div class="term"><div class="term-cab"><span>credenciais.h</span></div><pre class="serial">#define WIFI_SSID  "nome-do-hotspot"
 #define WIFI_SENHA "senha-do-hotspot"
 #define API_URL    "http://192.168.43.10:3000"  <span class="d">// IP do PC, sem barra no fim</span>
@@ -834,7 +834,7 @@ cd backend &amp;&amp; npm run dev</pre></div>
     <div>
       <h3>4. Gravar o firmware de verdade</h3>
       <p>No PlatformIO, em <b>Project Tasks</b>, abra <b>tft</b> e clique em <b>Upload and Monitor</b>. Ou no terminal:</p>
-      <div class="term"><div class="term-cab"><span>terminal</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">cd firmware
+      <div class="term"><div class="term-cab"><span>terminal</span><button class="copiar" type="button">Copiar</button></div><pre class="serial">cd arduino
 pio run -e tft -t upload
 pio device monitor</pre></div>
       <div class="term"><div class="term-cab"><span>monitor serial · tem que aparecer</span></div><pre class="serial">........

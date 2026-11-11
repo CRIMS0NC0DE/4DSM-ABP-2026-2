@@ -8,7 +8,7 @@
 //       gera uma chave nova (a antiga para de funcionar na hora)
 //
 // A chave só aparece uma vez. O script já a grava onde ela é usada:
-//   - firmware/include/credenciais.h  (TERMINAL_ID e TERMINAL_KEY, fora do git)
+//   - arduino/include/credenciais.h   (TERMINAL_ID e TERMINAL_KEY, fora do git)
 //   - docker/mosquitto/passwd          (login do terminal no broker)
 // Depois: reinicie o broker e grave o firmware.
 //
@@ -19,8 +19,8 @@ import { gravarSenha } from './mqtt-senha.mjs';
 
 const API = process.env.API_URL ?? 'http://localhost:3000';
 const RAIZ = new URL('../../', import.meta.url);
-const CREDENCIAIS = new URL('firmware/include/credenciais.h', RAIZ);
-const EXEMPLO = new URL('firmware/include/credenciais.exemplo.h', RAIZ);
+const CREDENCIAIS = new URL('arduino/include/credenciais.h', RAIZ);
+const EXEMPLO = new URL('arduino/include/credenciais.exemplo.h', RAIZ);
 const PASSWD = new URL('docker/mosquitto/passwd', RAIZ);
 
 const { values: args } = parseArgs({
@@ -62,11 +62,11 @@ function gravarCredenciais(terminal) {
 Terminal "${terminal.nome}" pronto.
   TERMINAL_ID  = ${terminal.id}
   TERMINAL_KEY = ${terminal.chave}
-Gravado em firmware/include/credenciais.h e docker/mosquitto/passwd.
+Gravado em arduino/include/credenciais.h e docker/mosquitto/passwd.
 
 Próximos passos:
   1. docker compose -f docker-compose.dev.yml restart mqtt
-  2. Ajuste Wi-Fi e endereços em firmware/include/credenciais.h e grave o ESP32 (pio run -t upload)
+  2. Ajuste Wi-Fi e endereços em arduino/include/credenciais.h e grave o ESP32 (pio run -t upload)
   3. O terminal aparece como online depois do primeiro heartbeat (rode este script sem argumentos)`);
 }
 

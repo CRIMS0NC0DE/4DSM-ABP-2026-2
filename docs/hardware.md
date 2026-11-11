@@ -1,6 +1,6 @@
 # Hardware do protótipo da catraca (issue #9)
 
-Proposta de hardware e pinagem usada pelo firmware (`firmware/include/config.h`).
+Proposta de hardware e pinagem usada pelo firmware (`arduino/include/config.h`).
 A coluna "Temos?" é para conferir com o kit antes de comprar.
 
 Passo a passo da montagem, com desenho, teste por etapa e conferência fio a fio:
@@ -76,7 +76,7 @@ Pinos evitados de propósito: 0, 2, 12 e 15 (definem o modo de boot), 6–11 (fl
 PlatformIO (VS Code) com framework Arduino, `platform = espressif32@6.9.0`.
 Bibliotecas (instaladas sozinhas pelo `platformio.ini`): PubSubClient (MQTT),
 ArduinoJson, MFRC522, Adafruit GFX + driver do display; geração do QR com
-`qrcodegen` (nayuki, MIT) em `firmware/lib/`. O CI compila o firmware a cada push.
+`qrcodegen` (nayuki, MIT) em `arduino/lib/`. O CI compila o firmware a cada push.
 
 ## Demonstração
 

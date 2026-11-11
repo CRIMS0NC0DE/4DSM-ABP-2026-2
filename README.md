@@ -15,7 +15,7 @@ App Flutter ──REST/JWT──▶ API (Express + Prisma) ──▶ Postgres
 |---|---|
 | `backend/` | API em Node 24 + TypeScript (Express 5, Prisma 7, zod, vitest) |
 | `frontend/` | App Flutter (login, sessão e menus por perfil ligados à API) |
-| `firmware/` | Firmware do terminal ESP32 (PlatformIO): QR no display, MQTT, NFC e relé |
+| `arduino/` | Firmware do terminal ESP32 (PlatformIO): QR no display, MQTT, NFC e relé; e o teste de bancada da montagem (`arduino/README.md`) |
 | `docker/` | Configuração do broker Mosquitto (login, ACL e TLS) |
 | `scripts/` | Preparação da rede no Windows para o ESP32 |
 | `docs/` | Design das telas, fluxo da arquitetura e o estado da integração front × back |
@@ -90,7 +90,7 @@ Com a API rodando, abra `http://localhost:3000/console/`. É a versão web das t
 
 ```bash
 cd backend && node scripts/provisionar-terminal.mjs --trocar-chave <terminalId>  # chave nova no firmware e no broker
-cd firmware && pio run -e tft -t upload                                          # grava o ESP32
+cd arduino && pio run -e tft -t upload                                           # grava o ESP32
 ```
 
 ## Testes

@@ -54,7 +54,7 @@ if ($inicio -lt 49152) {
 $ip = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias 'Wi-Fi' -ErrorAction SilentlyContinue).IPAddress
 Write-Host ''
 Write-Host "IP deste PC no Wi-Fi: $ip"
-Write-Host "No firmware (firmware/include/credenciais.h):"
+Write-Host "No firmware (arduino/include/credenciais.h):"
 Write-Host "  #define API_URL   `"http://${ip}:3000`""
 Write-Host "  #define MQTT_HOST `"$ip`""
 Write-Host 'Teste de outro aparelho na mesma rede: http://<IP>:3000/health'
