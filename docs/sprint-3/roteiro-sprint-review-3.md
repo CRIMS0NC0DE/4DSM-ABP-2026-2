@@ -38,7 +38,7 @@ mostramos o que aconteceu com cada um."
 | Card | Estado |
 |---|---|
 | #35 Diagramas | ✅ Entregue |
-| #34 Kit montado | 🔶 Em andamento (LEDs e display ok, leitor NFC em montagem) |
+| #34 Kit montado | ✅ Montado e testado (falta ler o QR do OLED com o celular) |
 | #37 Deploy | ⏸️ Parado pelo CI |
 | #33 GPS no terminal | ⏳ Não começou |
 | #36 Eficiência energética | ⏳ Não começou |
@@ -106,12 +106,14 @@ simples. O terminal continua recebendo `ABRIR`: numa catraca de verdade, basta l
 | ESP32 | ✅ |
 | LEDs | ✅ |
 | Display | ✅ |
-| Leitor NFC | 🔶 |
+| Leitor NFC | ✅ |
 
 Embaixo: "Guia passo a passo, com teste em cada etapa".
 
 **Fala:** O guia de montagem (`docs/montagem-terminal.html`) tem desenho das ligações, um teste em
-cada etapa e uma conferência fio a fio. Mostre-o aberto por 10 segundos.
+cada etapa e uma conferência fio a fio. Mostre-o aberto por 10 segundos. Depois conte os quatro
+problemas da montagem: o cabo que só carregava, o GND solto, o firmware de outro display e o leitor
+sem solda. Os detalhes estão em [`roteiro-kit-e-demonstracao.md`](roteiro-kit-e-demonstracao.md).
 
 **Quem apresenta:** Thiago.
 
@@ -119,7 +121,8 @@ cada etapa e uma conferência fio a fio. Mostre-o aberto por 10 segundos.
 
 **Na tela:** a foto `oled-liberado.jpg` e dois itens:
 
-- Os avisos "Conectando" e "Sem servidor" não apareciam no OLED: corrigido.
+- Os avisos "Conectando" e "Sem servidor" não apareciam no OLED: o branco era `0xFFFF`, e no OLED
+  tem que ser 1. Corrigido.
 - "Pode passar" e "Acesso negado" se sobrepunham ao texto de baixo: corrigido.
 
 E uma linha: "Teste de bancada para o OLED: `pio run -e teste-oled`".
@@ -156,8 +159,12 @@ evita esse tipo de quebra.
 |---|---|---|
 | 1 | Ligar o kit | "Conectando" e depois o QR no OLED |
 | 2 | Ler o QR com o app | "OK / Pode passar" e LED verde |
-| 3 | Encostar uma tag cadastrada | Liberado |
-| 4 | Encostar uma tag sem cadastro | "X / Acesso negado" e LED vermelho |
+| 3 | Encostar uma tag cadastrada | "Acesso liberado" e LED verde |
+| 4 | No app, como morador, bloquear a tag (Minha tag NFC) e encostar de novo | "Sua tag está bloqueada" e LED vermelho |
+| 5 | Desbloquear e encostar de novo | Verde de novo |
+
+As duas tags do kit já estão cadastradas; por isso o "negado" ao vivo é com a tag bloqueada. O passo
+a passo com o que falar em cada passo está em [`roteiro-kit-e-demonstracao.md`](roteiro-kit-e-demonstracao.md).
 
 Depois de um acesso, o kit já mostra um QR novo. Por isso o "QR reutilizado" e o "celular longe da
 catraca" ficam para o simulador (`/simulador/`), que tem o celular de teste.
@@ -180,7 +187,10 @@ eficiência energética (#36) continuam no escopo?
 continua no firmware (pino D26), então numa catraca de verdade é só ligar o atuador.
 
 **Por que o código da `main` não mudou nesta sprint?** A sprint foi de documentação, diagramas e
-hardware. Os ajustes do firmware para o OLED estão no PR do kit.
+hardware. Os ajustes do firmware para o OLED estão no PR do kit (#24).
+
+**Por que o raio da catraca é de 300 m?** Na FATEC a sala fica a uns 200 m da portaria, e o GPS
+dentro do prédio erra dezenas de metros. O raio muda pela tela Locais.
 
 **Por que o OLED, se o QR fica pequeno?** Foi o display do kit. O risco é conhecido e tem plano:
 encurtar o token deixa cada módulo com o dobro do tamanho.
@@ -196,9 +206,13 @@ mudou desde 11/11.
 ## Antes da apresentação
 
 - [ ] Consertar o CI e tirar a foto dele verde.
-- [ ] Terminar o leitor NFC, gravar o firmware com o OLED e **testar o QR do OLED com o app**.
-- [ ] Cadastrar uma tag para o morador de demonstração e separar outra sem cadastro.
+- [x] Terminar o leitor NFC e gravar o firmware com o OLED.
+- [ ] **Testar o QR do OLED com o app.**
+- [x] Cadastrar as tags: `6EACD706` (Maria) e `5C521206` (Thiago).
+- [ ] **Rede da FATEC:** ligar o PC e o kit no roteador do celular, trocar o Wi-Fi e o IP no
+      `credenciais.h` e gravar de novo (passo a passo em `roteiro-kit-e-demonstracao.md`).
+- [ ] Conferir a coordenada da Catraca 1 na portaria (tela Locais).
 - [ ] Trocar "Acionar relé" por "Indicar liberação" nos diagramas de sequência e de atividade.
 - [ ] Tirar as fotos da lista em `novidades-sprint-3.md`.
-- [ ] Abrir o PR do guia e do firmware do OLED.
+- [x] Abrir o PR do guia e do firmware do OLED (#24).
 - [ ] Ensaiar a demonstração uma vez, com o plano B aberto no navegador.

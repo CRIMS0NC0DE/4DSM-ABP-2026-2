@@ -1,21 +1,23 @@
 # Passe · Sprint 3
 
 O que mudou de 11/11 a 23/11/2026, depois da Sprint Review 2. O levantamento foi feito em 23/11
-na `main` (`61146c8`), nas outras branches, no GitHub Actions e na bancada do kit.
+na `main` (`61146c8`), nas outras branches, no GitHub Actions e na bancada do kit. A parte do kit foi
+atualizada em 24/11, depois do teste de ponta a ponta.
 
 ## Resumo
 
 A Sprint 3 foi de documentação e de hardware. O código do backend, do app e do firmware na `main`
-não mudou desde 11/11.
+não mudou desde 11/11; as mudanças do kit estão no PR #24.
 
 - **A documentação técnica ficou completa.** São nove documentos, com 7,3 mil linhas: API,
   aplicativo, backend, banco, Docker e CI/CD, firmware, instalação, MQTT e QR/NFC. As rotas
   descritas na documentação da API batem com as do código.
 - **Arquitetura e diagramas UML.** Há diagramas de casos de uso, de classes, de sequência do QR e
   do NFC, de atividade e de componentes. Isso fecha o RP07 (card #35).
-- **O kit começou a ser montado** (card #34), com o hardware mudado. Um display OLED 0,96" I2C entrou
-  no lugar do TFT, e saíram o relé e o buzzer. Os LEDs e o display já foram testados; o leitor NFC
-  está em montagem.
+- **O kit foi montado e testado de ponta a ponta** (card #34), com o hardware mudado. Um display
+  OLED 0,96" I2C entrou no lugar do TFT, e saíram o relé e o buzzer. LEDs, display e leitor NFC
+  funcionam, e o acesso por QR e por NFC passou do app ao ESP32. Falta ler o QR do OLED com a
+  câmera do celular.
 
 Ficam para a Sprint 4 o GPS no terminal (#33), a eficiência energética (#36) e o deploy (#37). O
 deploy está parado porque o CI da `main` está vermelho desde 11/11, por uma mudança do Flutter e
@@ -25,7 +27,7 @@ não do nosso código.
 
 | | Sprint 2 (11/11) | Sprint 3 (23/11) |
 |---|---|---|
-| Kit do terminal | Firmware pronto, kit não montado | Em montagem: LEDs e display ok, leitor NFC em andamento |
+| Kit do terminal | Firmware pronto, kit não montado | Montado e testado de ponta a ponta (24/11) |
 | Hardware do terminal | TFT 1,54", relé e buzzer | OLED 0,96" I2C, sem relé e sem buzzer |
 | Documentação técnica | README e documentos avulsos | 9 documentos técnicos e 4 de arquitetura |
 | Diagramas (RP07) | Pendentes | Casos de uso, classes, sequência, atividade e componentes |
@@ -73,21 +75,43 @@ dados e o diagrama de componentes, mais quatro diagramas UML:
   são 4 etapas (ESP32, LEDs, display e leitor) e 17 fios em vez de 23, e o leitor NFC vai direto
   no ESP32.
 - **Firmware ajustado para o OLED.** Os avisos "Conectando" e "Sem servidor" não apareciam no OLED,
-  e "Pode passar" e "Acesso negado" se sobrepunham ao texto de baixo. As duas falhas foram
-  corrigidas, e o teste de bancada ganhou uma versão para o OLED (`pio run -e teste-oled`). O
-  firmware do TFT não mudou.
-- **Situação em 22/11:**
-  - LEDs funcionando.
-  - O display responde no I2C e mostrou as imagens enviadas pelo computador.
-  - O leitor NFC estava sendo montado.
+  porque o branco do código (`0xFFFF`) não desenha no SSD1306, que só aceita 1 ou 0. E "Pode
+  passar" e "Acesso negado" se sobrepunham ao texto de baixo. As duas falhas foram corrigidas, e o
+  teste de bancada ganhou uma versão para o OLED (`pio run -e teste-oled`). O firmware do TFT não
+  mudou.
+- **Problemas da montagem e como foram resolvidos:**
 
-O guia e os ajustes do firmware ainda não estão na `main`: falta abrir o PR.
+  | Sintoma | Causa | Solução |
+  |---|---|---|
+  | O PC não reconhecia o ESP32 | Cabo USB que só carrega | Cabo de dados |
+  | Os LEDs apagaram depois do display | O fio do GND saiu do trilho − | Encaixar de novo |
+  | Display com tela preta | O firmware gravado era de outro display, e o branco errado | Backup do firmware antigo, correção do branco e gravação da versão para o OLED |
+  | Leitor com valores diferentes a cada leitura (0x00, 0xFF, 0xEE) | Barra de pinos do leitor sem solda | Soldar; agora responde sempre 0x82 (clone do RC522) |
+
+- **Situação em 24/11:** as 4 etapas do guia passaram, e o firmware do projeto (`oled`) foi
+  gravado e testado contra o backend local:
+
+  | Teste | Resultado |
+  |---|---|
+  | QR com morador autorizado (app simulado por script) | Liberado; a decisão chegou pelo MQTT |
+  | QR fora do horário | Negado: "Fora do horário permitido" |
+  | Tag sem cadastro | Negado: "Tag não cadastrada" |
+  | Tag vinculada a um morador | Liberado, LED verde |
+  | Usuário novo criado pelo admin, com autorização e tag | Liberado |
+  | Chave do terminal trocada pelo admin | O terminal parou na hora ("Sem servidor") |
+  | Painel | Terminal online e todas as tentativas no histórico |
+
+  A leitura do QR do OLED com a câmera do celular ainda não foi testada.
+- **Raio da catraca de demonstração: 300 m.** Na FATEC a sala fica a uns 200 m da portaria, e o
+  GPS dentro do prédio erra. Mudou no seed; num banco que já existe, ajuste pela tela Locais.
+
+O guia, os ajustes do firmware e o raio estão no PR #24, ainda sem merge.
 
 ## O que não entregamos
 
 | Card | Situação |
 |---|---|
-| #34 Kit montado | Em andamento: falta o leitor NFC, gravar o firmware com o OLED e testar com o app |
+| #34 Kit montado | Quase pronto: falta ler o QR do OLED com a câmera do celular e o merge do PR #24 |
 | #33 GPS no terminal (RF11) | Não começou. Hoje a posição da catraca é cadastrada pelo `provisionar-terminal.mjs` |
 | #36 Eficiência energética (RNF07) | Não começou |
 | #37 Deploy | Parado: o deploy só roda com o CI verde |
@@ -130,7 +154,7 @@ Da lista que a Sprint 2 deixou, também continuam abertos:
 | Prioridade | O quê |
 |---|---|
 | 1 | Consertar o CI e confirmar o Render recebendo a versão nova (#37) |
-| 2 | Terminar o kit: leitor NFC, firmware com OLED gravado e QR lido pelo app. Abrir o PR do guia e do firmware (#34) |
+| 2 | Fechar o kit: ler o QR do OLED com o app e fazer o merge do PR #24 (#34) |
 | 3 | Atualizar a documentação, os diagramas e o README para o OLED sem relé e sem buzzer |
 | 4 | GPS no terminal (#33) e eficiência energética (#36), ou combinar com o professor se saem do escopo |
 | 5 | App: "Entrar com NFC" e nome do app. Backend: editar e apagar locais |
