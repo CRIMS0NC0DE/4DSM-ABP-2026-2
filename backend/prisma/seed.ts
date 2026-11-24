@@ -37,7 +37,8 @@ async function main() {
   await db.accessPoint.upsert({
     where: { id: IDS.catraca },
     update: {},
-    create: { id: IDS.catraca, nome: 'Catraca 1', doorId: IDS.porta, ...DEMO_CATRACA_POS, raioMetros: 100 },
+    // 300 m: na FATEC a sala fica a uns 200 m da portaria, e o GPS dentro do prédio erra.
+    create: { id: IDS.catraca, nome: 'Catraca 1', doorId: IDS.porta, ...DEMO_CATRACA_POS, raioMetros: 300 },
   });
   await db.terminal.upsert({
     where: { id: IDS.terminal },
