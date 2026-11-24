@@ -85,6 +85,9 @@ A chave aparece somente na resposta de cadastro ou rotação e deve ser armazena
 | `GET` | `/me/authorizations` | Autenticado | `200` |
 | `GET` | `/me/access-events` | Autenticado | `200` |
 | `PATCH` | `/me/tags/:tagId` | Autenticado | `200` |
+| `GET` | `/me/phones` | Autenticado | `200` |
+| `POST` | `/me/phones` | Autenticado | `201` |
+| `DELETE` | `/me/phones/:celularId` | Autenticado | `204` |
 | `POST` | `/access/qr` | Autenticado | `200` |
 | `GET` | `/users` | Equipe | `200` |
 | `POST` | `/users` | Equipe | `201` |
@@ -93,6 +96,9 @@ A chave aparece somente na resposta de cadastro ou rotação e deve ser armazena
 | `POST` | `/users/:id/tags` | Equipe | `201` |
 | `PATCH` | `/users/:id/tags/:tagId` | Equipe | `200` |
 | `DELETE` | `/users/:id/tags/:tagId` | Equipe | `204` |
+| `GET` | `/users/:id/phones` | Equipe | `200` |
+| `PATCH` | `/users/:id/phones/:celularId` | Equipe | `200` |
+| `DELETE` | `/users/:id/phones/:celularId` | Equipe | `204` |
 | `GET` | `/locations` | Equipe | `200` |
 | `POST` | `/locations/buildings` | Administrador | `201` |
 | `POST` | `/locations/gates` | Administrador | `201` |
@@ -113,6 +119,7 @@ A chave aparece somente na resposta de cadastro ou rotação e deve ser armazena
 | `GET` | `/terminal/qr-token` | Terminal | `200` |
 | `POST` | `/terminal/heartbeat` | Terminal | `200` |
 | `POST` | `/terminal/nfc` | Terminal | `200` |
+| `POST` | `/terminal/phone` | Terminal | `200` |
 | `GET` | `/terminal/decisions` | Terminal | `200` |
 | `GET` | `/simulador/config.json` | Público | `200` |
 
@@ -189,7 +196,7 @@ Parâmetros opcionais:
 | `de` | Data/hora aceita pelo JavaScript, preferencialmente ISO 8601 |
 | `ate` | Data/hora aceita pelo JavaScript, preferencialmente ISO 8601 |
 | `resultado` | `LIBERADO` ou `NEGADO` |
-| `metodo` | `QR` ou `NFC` |
+| `metodo` | `QR`, `NFC` ou `CELULAR` |
 | `accessPointId` | UUID do ponto de acesso |
 | `limite` | De 1 a 200; padrão 50 |
 | `pular` | Inteiro a partir de 0; padrão 0 |
@@ -209,6 +216,19 @@ Corpo aceito:
 ```
 
 O próprio usuário não pode usar essa rota para reativar a tag. O desbloqueio é realizado pela equipe em `PATCH /users/:id/tags/:tagId`.
+
+### `GET /me/phones`, `POST /me/phones` e `DELETE /me/phones/:celularId`
+
+Celular como chave NFC (detalhes em `celular-nfc.md`). O app gera um par EC P-256 no Keystore do Android e manda só a chave pública:
+
+```json
+{
+  "nome": "SM-A546E",
+  "chavePublica": "<SPKI DER em base64>"
+}
+```
+
+A resposta (`201`) e a lista trazem `id`, `userId`, `nome`, `ativo` e `createdAt`, nunca a chave. Chave que não é EC P-256 responde `400`; chave já cadastrada, `409`. A própria pessoa remove o celular dela com `DELETE` (`204`); o de outra pessoa responde `404`.
 
 ## 8. Validação de acesso por QR
 
@@ -365,6 +385,10 @@ Ativa ou bloqueia a tag indicada.
 ### `DELETE /users/:id/tags/:tagId`
 
 Remove a associação da tag. Em caso de sucesso, responde `204` sem conteúdo.
+
+### `GET /users/:id/phones`, `PATCH /users/:id/phones/:celularId` e `DELETE /users/:id/phones/:celularId`
+
+A equipe vê, bloqueia (`{ "ativo": false }`) e remove os celulares de uma pessoa, com a mesma regra das tags: a portaria só mexe em condôminos e visitantes.
 
 ## 10. Locais
 
@@ -531,7 +555,7 @@ Filtros opcionais:
 | `de` | Data/hora inicial |
 | `ate` | Data/hora final |
 | `resultado` | `LIBERADO` ou `NEGADO` |
-| `metodo` | `QR` ou `NFC` |
+| `metodo` | `QR`, `NFC` ou `CELULAR` |
 | `userId` | UUID do usuário |
 | `accessPointId` | UUID do ponto de acesso |
 | `limite` | 1 a 200; padrão 50 |
@@ -673,6 +697,27 @@ A resposta utiliza o mesmo formato de decisão de `POST /access/qr`. Além dos m
 |---|---|
 | `TAG_DESCONHECIDA` | UID não vinculado a um usuário |
 | `TAG_BLOQUEADA` | Tag encontrada, mas inativa |
+
+### `POST /terminal/phone`
+
+O celular Android encostou no leitor e assinou o desafio (o SHA-256 do QR que estava na tela). O terminal repassa:
+
+```json
+{
+  "desafio": "P1.<terminal>.<vence>.<nonce>.<assinatura>",
+  "celularId": "<uuid>",
+  "assinatura": "<r||s, 64 bytes em base64>"
+}
+```
+
+A resposta tem o mesmo formato de decisão de `POST /access/qr`, sem GPS. Além dos motivos gerais, pode responder:
+
+| Motivo | Significado |
+|---|---|
+| `DESAFIO_INVALIDO` | O QR do desafio venceu, é de outro terminal ou essa assinatura já foi usada |
+| `CELULAR_DESCONHECIDO` | O id não é de nenhum celular cadastrado |
+| `CELULAR_NAO_CONFIRMADO` | A assinatura não confere com a chave do celular |
+| `CELULAR_BLOQUEADO` | A equipe bloqueou o celular |
 
 ### `GET /terminal/decisions`
 

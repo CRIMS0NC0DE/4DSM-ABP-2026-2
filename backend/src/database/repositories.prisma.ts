@@ -106,6 +106,24 @@ export function createPrismaRepositories(db: Prisma): Repositories {
       },
     },
 
+    phones: {
+      findById: (id) => db.nfcPhone.findUnique({ where: { id } }),
+      findByChave: (chavePublica) => db.nfcPhone.findUnique({ where: { chavePublica } }),
+      listByUser: (userId) => db.nfcPhone.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      create: (data) => db.nfcPhone.create({ data }),
+      update: async (id, data) => {
+        try {
+          return await db.nfcPhone.update({ where: { id }, data });
+        } catch (erro) {
+          if ((erro as { code?: string }).code === 'P2025') throw notFound('Celular');
+          throw erro;
+        }
+      },
+      remove: async (id) => {
+        await db.nfcPhone.deleteMany({ where: { id } });
+      },
+    },
+
     terminals: {
       create: (data) => db.terminal.create({ data }),
       findById: (id) => db.terminal.findUnique({ where: { id } }),

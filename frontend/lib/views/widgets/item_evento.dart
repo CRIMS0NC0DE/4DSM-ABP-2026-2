@@ -76,10 +76,12 @@ class ItemEvento extends StatelessWidget {
                                 tom: TomOpcao.perigo,
                               ),
                         Selo(
-                          texto: evento.metodo == 'NFC' ? 'Tag NFC' : 'QR Code',
-                          icone: evento.metodo == 'NFC'
-                              ? Icons.contactless_outlined
-                              : Icons.qr_code_2,
+                          texto: evento.metodoTexto,
+                          icone: switch (evento.metodo) {
+                            'NFC' => Icons.contactless_outlined,
+                            'CELULAR' => Icons.phone_android,
+                            _ => Icons.qr_code_2,
+                          },
                         ),
                       ],
                     ),

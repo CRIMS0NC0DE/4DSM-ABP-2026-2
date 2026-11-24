@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Celular como chave: AID proprietário do Passe (F0 + "PASSE" + versão 01).
+     O mesmo AID está no firmware (arduino/src/celular.cpp).
+     requireDeviceUnlock: com a tela bloqueada, o celular não abre a catraca. -->
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/hce_descricao"
+    android:requireDeviceUnlock="true">
+    <aid-group
+        android:category="other"
+        android:description="@string/hce_grupo">
+        <aid-filter android:name="F0504153534501"/>
+    </aid-group>
+</host-apdu-service>

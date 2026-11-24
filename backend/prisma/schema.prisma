@@ -21,6 +21,7 @@ model User {
   eventos      AccessEvent[]
   autorizacoes Authorization[]
   tags         NfcTag[]
+  celulares    NfcPhone[]
 
   @@map("users")
 }
@@ -34,6 +35,21 @@ model NfcTag {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("nfc_tags")
+}
+
+/// Celular Android que faz o papel de tag (HCE). O app gera um par de chaves
+/// EC P-256 no Keystore do aparelho e só a chave pública vem para cá.
+model NfcPhone {
+  id           String   @id @default(uuid())
+  userId       String
+  nome         String
+  chavePublica String   @unique
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("nfc_phones")
 }
 
 model Building {
@@ -161,6 +177,7 @@ enum StatusAutorizacao {
 enum MetodoAcesso {
   QR
   NFC
+  CELULAR
 }
 
 enum ResultadoAcesso {

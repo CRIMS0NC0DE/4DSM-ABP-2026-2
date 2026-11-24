@@ -30,6 +30,13 @@ export function terminalsRouter(terminals: TerminalsService, somenteAdmin: Reque
 
 const sinalSchema = z.object({ latitude: latitude.optional(), longitude: longitude.optional() });
 const nfcSchema = z.object({ uid: z.string().trim().min(4).max(40) });
+// O id vem dos 16 bytes que o celular mandou: confere só o formato, sem exigir versão de UUID,
+// para que um id inventado vire uma negação registrada (CELULAR_DESCONHECIDO) e não um erro 400.
+const celularSchema = z.object({
+  desafio: z.string().trim().min(10).max(200),
+  celularId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, 'id inválido'),
+  assinatura: z.string().trim().min(1).max(200),
+});
 const decisoesSchema = z.object({ apos: z.coerce.number().int().min(0).default(0) });
 
 /**
@@ -51,6 +58,12 @@ export function deviceRouter(terminals: TerminalsService, access: AccessService,
   // RF14: leu uma tag; a resposta já diz se abre ou não.
   router.post('/nfc', async (req, res) => {
     res.json(await access.validarNfc(terminalDe(req), parse(nfcSchema, req.body).uid));
+  });
+
+  // Celular Android encostado no leitor (HCE): o terminal repassa o que o celular respondeu.
+  router.post('/phone', async (req, res) => {
+    const entrada = parse(celularSchema, req.body);
+    res.json(await access.validarCelular(terminalDe(req), { ...entrada, celularId: entrada.celularId.toLowerCase() }));
   });
 
   // Decisões dos acessos por QR, para terminais sem MQTT (consulta periódica).

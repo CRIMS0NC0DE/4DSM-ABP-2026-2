@@ -3,6 +3,7 @@ import type { Repositories } from '../../src/container.js';
 import type { Authorization, AuthorizationWithRefs } from '../../src/modules/authorizations/authorizations.types.js';
 import type { AccessEvent } from '../../src/modules/events/events.types.js';
 import type { AccessPoint, Building, Door, Gate } from '../../src/modules/locations/locations.types.js';
+import type { NfcPhone } from '../../src/modules/phones/phones.types.js';
 import type { Terminal } from '../../src/modules/terminals/terminals.types.js';
 import type { NfcTag, User } from '../../src/modules/users/users.types.js';
 import { systemClock, type Clock } from '../../src/shared/clock.js';
@@ -12,6 +13,7 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
   const db = {
     users: [] as User[],
     tags: [] as NfcTag[],
+    celulares: [] as NfcPhone[],
     buildings: [] as Building[],
     gates: [] as Gate[],
     doors: [] as Door[],
@@ -103,6 +105,17 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
         const portaria = db.gates.find((g) => g.id === porta.gateId)!;
         const edificio = db.buildings.find((b) => b.id === portaria.buildingId)!;
         return { ...c, porta: porta.nome, portaria: portaria.nome, edificio: edificio.nome };
+      },
+    },
+
+    phones: {
+      findById: async (id) => db.celulares.find((c) => c.id === id) ?? null,
+      findByChave: async (chavePublica) => db.celulares.find((c) => c.chavePublica === chavePublica) ?? null,
+      listByUser: async (userId) => db.celulares.filter((c) => c.userId === userId),
+      create: async (data) => push(db.celulares, { id: randomUUID(), ativo: true, createdAt: new Date(), ...data }),
+      update: async (id, data) => atualizar(db.celulares, id, data),
+      remove: async (id) => {
+        db.celulares = db.celulares.filter((c) => c.id !== id);
       },
     },
 

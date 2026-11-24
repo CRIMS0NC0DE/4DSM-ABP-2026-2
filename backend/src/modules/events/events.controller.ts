@@ -8,7 +8,7 @@ export const filtroEventosSchema = z.object({
   de: z.coerce.date().optional(),
   ate: z.coerce.date().optional(),
   resultado: z.enum(['LIBERADO', 'NEGADO']).optional(),
-  metodo: z.enum(['QR', 'NFC']).optional(),
+  metodo: z.enum(['QR', 'NFC', 'CELULAR']).optional(),
   userId: id.optional(),
   accessPointId: id.optional(),
   ...paginacao,

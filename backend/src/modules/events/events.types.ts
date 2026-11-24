@@ -1,4 +1,4 @@
-export type MetodoAcesso = 'QR' | 'NFC';
+export type MetodoAcesso = 'QR' | 'NFC' | 'CELULAR';
 export type ResultadoAcesso = 'LIBERADO' | 'NEGADO';
 
 export interface AccessEvent {

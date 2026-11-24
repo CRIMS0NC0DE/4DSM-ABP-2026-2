@@ -31,8 +31,10 @@ class EventoAcesso {
   final String id;
   final bool liberado;
 
-  /// "QR" ou "NFC".
+  /// "QR", "NFC" (tag) ou "CELULAR" (celular encostado no leitor).
   final String metodo;
+
+  String get metodoTexto => rotuloDoMetodo(metodo);
 
   /// Já no horário do celular.
   final DateTime em;
@@ -80,3 +82,10 @@ class PaginaEventos {
     negados: proxima.negados,
   );
 }
+
+/// Como cada método da API aparece na tela.
+String rotuloDoMetodo(String metodo) => switch (metodo) {
+  'NFC' => 'Tag NFC',
+  'CELULAR' => 'Celular',
+  _ => 'QR Code',
+};

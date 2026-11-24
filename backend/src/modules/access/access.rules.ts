@@ -8,6 +8,10 @@ export type MotivoNegacao =
   | 'TERMINAL_DESCONHECIDO'
   | 'TAG_DESCONHECIDA'
   | 'TAG_BLOQUEADA'
+  | 'DESAFIO_INVALIDO'
+  | 'CELULAR_DESCONHECIDO'
+  | 'CELULAR_NAO_CONFIRMADO'
+  | 'CELULAR_BLOQUEADO'
   | 'USUARIO_INATIVO'
   | 'SEM_AUTORIZACAO'
   | 'AUTORIZACAO_CANCELADA'
@@ -26,6 +30,10 @@ export const MOTIVOS: Record<MotivoNegacao, { titulo: string; oQueFazer: string 
   TERMINAL_DESCONHECIDO: { titulo: 'Catraca não cadastrada', oQueFazer: 'Fale com a portaria.' },
   TAG_DESCONHECIDA: { titulo: 'Tag não cadastrada', oQueFazer: 'Peça para a portaria vincular sua tag.' },
   TAG_BLOQUEADA: { titulo: 'Sua tag está bloqueada', oQueFazer: 'Fale com a portaria.' },
+  DESAFIO_INVALIDO: { titulo: 'A leitura do celular não valeu', oQueFazer: 'Afaste o celular e aproxime de novo.' },
+  CELULAR_DESCONHECIDO: { titulo: 'Celular não cadastrado', oQueFazer: 'Ative o celular como chave no app Passe.' },
+  CELULAR_NAO_CONFIRMADO: { titulo: 'Não conseguimos confirmar este celular', oQueFazer: 'Ative o celular como chave de novo no app.' },
+  CELULAR_BLOQUEADO: { titulo: 'Este celular está bloqueado', oQueFazer: 'Fale com a portaria.' },
   USUARIO_INATIVO: { titulo: 'Seu cadastro está desativado', oQueFazer: 'Fale com a portaria.' },
   SEM_AUTORIZACAO: { titulo: 'Você não tem autorização para esta catraca', oQueFazer: 'Peça uma autorização à portaria.' },
   AUTORIZACAO_CANCELADA: { titulo: 'Sua autorização foi cancelada', oQueFazer: 'Fale com a portaria para saber mais.' },

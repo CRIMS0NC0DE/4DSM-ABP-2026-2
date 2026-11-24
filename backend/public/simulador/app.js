@@ -287,6 +287,77 @@ function mostrarResultado(r) {
   caixa.append(titulo, texto);
 }
 
+// ---------- celular como chave (NFC) ----------
+// Faz o papel do app Android (PasseHceService) e do terminal juntos: a chave EC P-256
+// fica neste navegador (WebCrypto), o "terminal" entrega o SHA-256 do QR da tela e
+// repassa a assinatura para POST /terminal/phone. Protocolo em
+// backend/src/modules/phones/phone-signature.ts.
+
+const PREFIXO_ASSINATURA = new TextEncoder().encode('PASSE-CEL1');
+const paraBase64 = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes)));
+
+function celularGuardado() {
+  try {
+    return JSON.parse(lembrado('celular') ?? 'null');
+  } catch {
+    return null;
+  }
+}
+
+function mostrarCelular() {
+  const c = celularGuardado();
+  $('#celular-chave').textContent = c
+    ? `Ativado para ${c.login} (id ${c.id.slice(0, 8)}…). Encoste com o terminal ligado.`
+    : 'Nenhum celular ativado neste navegador.';
+}
+
+async function ativarCelular() {
+  if (!window.crypto?.subtle) return mostrarResultado({ erro: 'O navegador só gera a chave em https ou em localhost.' });
+  if (!estado.jwt) return mostrarResultado({ erro: 'Entre com uma conta primeiro.' });
+  try {
+    const par = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const chavePublica = paraBase64(await crypto.subtle.exportKey('spki', par.publicKey));
+    const r = await api('/me/phones', {
+      method: 'POST',
+      body: { nome: 'Celular do simulador', chavePublica },
+      headers: { Authorization: `Bearer ${estado.jwt}` },
+    });
+    const jwk = await crypto.subtle.exportKey('jwk', par.privateKey);
+    lembrar('celular', JSON.stringify({ id: r.id, login: $('#login').value, jwk }));
+    mostrarCelular();
+    registrar(`Celular ativado como chave (id ${r.id}).`);
+  } catch (err) {
+    mostrarResultado({ erro: err.message });
+  }
+}
+
+async function encostarCelular() {
+  if (!window.crypto?.subtle) return mostrarResultado({ erro: 'O navegador só assina em https ou em localhost.' });
+  const c = celularGuardado();
+  if (!c) return mostrarResultado({ erro: 'Ative o celular como chave primeiro.' });
+  if (!estado.terminal || !estado.qrAtual) return mostrarResultado({ erro: 'Nenhum QR na tela. Ligue o terminal.' });
+
+  const desafio = estado.qrAtual;
+  try {
+    // O que o celular faz: assina PREFIXO || SHA-256(QR). O WebCrypto já devolve r||s (64 bytes).
+    const privada = await crypto.subtle.importKey('jwk', c.jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+    const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(desafio)));
+    const mensagem = new Uint8Array([...PREFIXO_ASSINATURA, ...hash]);
+    const assinatura = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, privada, mensagem);
+
+    // O que o terminal faz: repassa para a API e aplica a resposta.
+    const r = await api('/terminal/phone', {
+      method: 'POST',
+      body: { desafio, celularId: c.id, assinatura: paraBase64(assinatura) },
+      headers: cabecalhosTerminal(),
+    });
+    registrar(`Celular encostado: ${r.titulo}${r.motivo ? ` [${r.motivo}]` : ''}`);
+    mostrarResultado(r);
+  } catch (err) {
+    mostrarResultado({ erro: err.message });
+  }
+}
+
 // ---------- início ----------
 
 async function iniciar() {
@@ -307,6 +378,9 @@ async function iniciar() {
   $('#form-login').addEventListener('submit', entrar);
   $('#btn-escanear').addEventListener('click', () => escanear(estado.qrAtual));
   $('#btn-reusar').addEventListener('click', () => escanear(estado.ultimoQrLido));
+  $('#btn-ativar-celular').addEventListener('click', ativarCelular);
+  $('#btn-encostar-celular').addEventListener('click', encostarCelular);
+  mostrarCelular();
   $('#pos-perto').addEventListener('click', () => {
     const c = demo?.catraca;
     if (c) definirPosicao(c.latitude, c.longitude);

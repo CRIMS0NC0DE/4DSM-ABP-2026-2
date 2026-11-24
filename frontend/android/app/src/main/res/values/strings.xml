@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Aparecem nos ajustes de NFC do Android ("Pagamentos por aproximação" / "Outros"). -->
+    <string name="hce_descricao">Passe: celular como chave da catraca</string>
+    <string name="hce_grupo">Chave da catraca do Passe</string>
+</resources>

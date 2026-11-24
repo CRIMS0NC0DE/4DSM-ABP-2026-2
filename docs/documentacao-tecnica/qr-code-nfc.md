@@ -4,7 +4,7 @@
 |---|---|
 | Projeto | Passe — Controle de acesso por QR Code e NFC |
 | Componente | Credenciais e fluxos de validação de acesso |
-| Métodos documentados | QR Code e tag NFC |
+| Métodos documentados | QR Code e tag NFC. O celular Android como chave NFC está em `celular-nfc.md` |
 | Revisão | 11/11/2026 |
 | Base da documentação | Backend, aplicativo Flutter, firmware ESP32 e banco de dados atuais |
 

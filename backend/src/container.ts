@@ -7,6 +7,8 @@ import type { EventsRepository, QrTokenStore } from './modules/events/events.typ
 import { EventsService } from './modules/events/events.service.js';
 import type { LocationsRepository } from './modules/locations/locations.types.js';
 import { LocationsService } from './modules/locations/locations.service.js';
+import { PhonesService } from './modules/phones/phones.service.js';
+import type { PhonesRepository } from './modules/phones/phones.types.js';
 import type { SimuladorConfig } from './modules/simulador/simulador.router.js';
 import { QrTokenService } from './modules/terminals/qr-token.js';
 import { CompositeTerminalNotifier, InMemoryTerminalNotifier, type TerminalNotifier } from './modules/terminals/terminal-notifier.js';
@@ -19,6 +21,7 @@ export interface Repositories {
   users: UsersRepository;
   locations: LocationsRepository;
   terminals: TerminalsRepository;
+  phones: PhonesRepository;
   authorizations: AuthorizationsRepository;
   events: EventsRepository;
   qrTokens: QrTokenStore;
@@ -45,6 +48,7 @@ export interface Container {
     users: UsersService;
     locations: LocationsService;
     terminals: TerminalsService;
+    phones: PhonesService;
     authorizations: AuthorizationsService;
     access: AccessService;
     events: EventsService;
@@ -75,6 +79,7 @@ export function createContainer(
       users: new UsersService(repos.users),
       locations: new LocationsService(repos.locations),
       terminals: new TerminalsService(repos.terminals, repos.locations, qr, clock),
+      phones: new PhonesService(repos.phones, repos.users),
       authorizations: new AuthorizationsService(repos.authorizations, repos.users, repos.locations, clock, config.timezone),
       access: new AccessService({ ...repos, qr, notifier, clock, timezone: config.timezone }),
       events: new EventsService(repos.events),

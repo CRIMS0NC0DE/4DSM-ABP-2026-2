@@ -103,6 +103,38 @@ conferir(decisoes.status === 200 && decisoes.body.length >= 3, 'terminal recebe 
 const historico = await chamar('GET', '/access-events?limite=10', { token: admin });
 conferir(historico.status === 200 && historico.body.total >= 3 && historico.body.negados >= 1, 'histórico de acessos', historico.body);
 
+// Celular como chave: o WebCrypto faz o papel do Keystore do Android e o script, o do terminal.
+const { subtle } = globalThis.crypto;
+const par = await subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+const chavePublica = Buffer.from(await subtle.exportKey('spki', par.publicKey)).toString('base64');
+const celular = await chamar('POST', '/me/phones', { token: loginAna.body.token, body: { nome: 'Celular do smoke', chavePublica } });
+conferir(celular.status === 201 && celular.body.id && !celular.body.chavePublica, 'ativa o celular como chave', celular.body);
+
+// Dois usos: a segunda tentativa só pode ser barrada pela repetição da assinatura, não pelo limite.
+const paraCelular = await chamar('POST', '/authorizations', {
+  token: admin,
+  body: { userId: ana.id, accessPointId: catracaId, dataInicio: hojeEmSP, dataFim: hojeEmSP, horaInicio: '00:00', horaFim: '23:59', maxUsos: 2 },
+});
+const desafio = (await chamar('GET', '/terminal/qr-token', { headers: TERMINAL })).body.token;
+const mensagem = Buffer.concat([
+  Buffer.from('PASSE-CEL1'),
+  Buffer.from(await subtle.digest('SHA-256', Buffer.from(desafio, 'ascii'))),
+]);
+const assinatura = Buffer.from(await subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, par.privateKey, mensagem)).toString('base64');
+const encostar = () => chamar('POST', '/terminal/phone', { headers: TERMINAL, body: { desafio, celularId: celular.body.id, assinatura } });
+
+const viaCelular = await encostar();
+conferir(viaCelular.status === 200 && viaCelular.body.liberado === true, 'celular libera a visitante', viaCelular.body);
+const repetida = await encostar();
+conferir(repetida.body?.motivo === 'DESAFIO_INVALIDO', 'a mesma assinatura não abre duas vezes', repetida.body);
+
+const doCelular = await chamar('GET', '/access-events?metodo=CELULAR&limite=5', { token: admin });
+conferir(doCelular.status === 200 && doCelular.body.itens[0]?.metodo === 'CELULAR', 'histórico filtra o celular', doCelular.body);
+
+const removido = await chamar('DELETE', `/me/phones/${celular.body.id}`, { token: loginAna.body.token });
+conferir(removido.status === 204, 'remove o celular');
+await chamar('POST', `/authorizations/${paraCelular.body.id}/cancel`, { token: admin });
+
 const cancelada = await chamar('POST', `/authorizations/${autorizacao.body.id}/cancel`, { token: admin });
 conferir(cancelada.body?.situacao === 'CANCELADA', 'cancela autorização', cancelada.body);
 

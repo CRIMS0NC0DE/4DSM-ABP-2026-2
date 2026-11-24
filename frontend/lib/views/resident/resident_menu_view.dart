@@ -8,6 +8,7 @@ import '../user/scanner_qr_view.dart';
 import '../widgets/tela_carregando.dart';
 import '../shared/historico_view.dart';
 import '../user/ajuda_view.dart';
+import '../user/celular_chave_view.dart';
 import '../user/minha_tag_view.dart';
 import '../user/perfil_view.dart';
 import '../widgets/menu_grade.dart';
@@ -27,6 +28,7 @@ class ResidentMenuView extends StatelessWidget {
       'Histórico de acessos' => HistoricoView(daEquipe: false),
       'Acessos negados' => HistoricoView(daEquipe: false, soNegados: true),
       'Minha tag NFC' => MinhaTagView(podeBloquear: true),
+      'Celular como chave' => CelularChaveView(),
       'Perfil' => PerfilView(),
       'Ajuda' => const AjudaView(),
       _ => null,

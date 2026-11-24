@@ -27,7 +27,9 @@ App Flutter ──REST/JWT──▶ API (Express + Prisma) ──▶ Postgres
 3. A API confere a assinatura e a validade do QR, se o usuário está ativo e tem autorização para aquele ponto, se está a até 100 m do terminal e se o QR ainda não foi usado.
 4. A decisão (`ABRIR` ou `NEGAR`) vai para o terminal pelo tópico MQTT `passe/terminais/{terminalId}/decisoes` (QoS 1). Se o broker cair, o terminal consulta `GET /terminal/decisions?apos={seq}` como reserva.
 
-Pelo NFC o terminal manda o UID da tag em `POST /terminal/nfc` e recebe a decisão na resposta. As rotas do terminal se autenticam pelos cabeçalhos `X-Terminal-Id` e `X-Terminal-Key`; no broker, o terminal entra com usuário = Id e senha = chave, e a ACL só deixa ele ler o próprio tópico.
+Pelo NFC o terminal manda o UID da tag em `POST /terminal/nfc` e recebe a decisão na resposta.
+
+O celular Android também serve de chave: ativado no app ("Celular como chave"), ele responde como um cartão quando encosta no leitor (HCE). O terminal entrega ao celular o SHA-256 do QR da tela, o celular assina com uma chave guardada no Keystore e o terminal repassa em `POST /terminal/phone`. Não precisa de GPS nem de internet no celular. Detalhes em [`docs/documentacao-tecnica/celular-nfc.md`](docs/documentacao-tecnica/celular-nfc.md). As rotas do terminal se autenticam pelos cabeçalhos `X-Terminal-Id` e `X-Terminal-Key`; no broker, o terminal entra com usuário = Id e senha = chave, e a ACL só deixa ele ler o próprio tópico.
 
 ## Como rodar
 
@@ -68,7 +70,7 @@ Terminal de demonstração: `X-Terminal-Id=00000000-0000-4000-8000-000000000005`
 
 ### Simulador do terminal
 
-Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o papel da catraca: mostra o QR rotativo, recebe as decisões por MQTT (ou por consulta HTTP, se o broker não estiver no ar), lê tag NFC e tem um "celular de teste" para ler o QR de dentro do navegador, de perto da catraca, a 1 km ou sem GPS. Dá para testar acesso liberado, QR reutilizado, pessoa longe do terminal e NFC sem nenhum hardware.
+Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o papel da catraca: mostra o QR rotativo, recebe as decisões por MQTT (ou por consulta HTTP, se o broker não estiver no ar), lê tag NFC e tem um "celular de teste" para ler o QR de dentro do navegador, de perto da catraca, a 1 km ou sem GPS, ou para encostar no leitor como chave NFC. Dá para testar acesso liberado, QR reutilizado, pessoa longe do terminal e NFC sem nenhum hardware.
 
 ### Console web de testes
 

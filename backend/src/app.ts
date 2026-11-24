@@ -9,6 +9,7 @@ import { authRouter } from './modules/auth/auth.controller.js';
 import { authorizationsRouter } from './modules/authorizations/authorizations.controller.js';
 import { eventsRouter, filtroEventosSchema } from './modules/events/events.controller.js';
 import { locationsRouter } from './modules/locations/locations.controller.js';
+import { celularesDaEquipeRouter, meusCelularesRouter } from './modules/phones/phones.controller.js';
 import { deviceRouter, terminalsRouter } from './modules/terminals/terminals.controller.js';
 import { usersRouter } from './modules/users/users.controller.js';
 import { simuladorRouter } from './modules/simulador/simulador.router.js';
@@ -38,11 +39,13 @@ export function createApp(c: Container) {
 
   // App: qualquer pessoa logada
   app.use('/auth', authRouter(services.auth, services.users, autenticado));
+  app.use('/me/phones', autenticado, meusCelularesRouter(services.phones));
   app.use('/me', autenticado, meRouter(c));
   // Quem foi desativado também passa: a validação nega com USUARIO_INATIVO e registra a tentativa (RF17).
   app.use('/access', autenticar(c.config.jwtSecret, c.repos.users, { aceitarInativo: true }), accessRouter(services.access));
 
   // App: administração (admin e portaria)
+  app.use('/users/:id/phones', ...equipe, celularesDaEquipeRouter(services.phones));
   app.use('/users', ...equipe, usersRouter(services.users));
   app.use('/locations', ...equipe, locationsRouter(services.locations, somenteAdmin));
   app.use('/authorizations', ...equipe, authorizationsRouter(services.authorizations));

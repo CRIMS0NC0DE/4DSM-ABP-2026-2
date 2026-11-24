@@ -2,6 +2,8 @@
 // (backend/public/simulador): pede o QR à API, desenha, troca antes de vencer,
 // recebe ABRIR/NEGAR pelo MQTT e aciona o relé. Sem broker, consulta
 // GET /terminal/decisions. Lê tags NFC e manda o UID para a API decidir.
+// Também aceita o celular Android como chave (HCE): o celular assina o
+// SHA-256 do QR da tela e a API confere (celular.cpp).
 //
 // Quem decide é sempre o backend: o terminal não guarda segredo de QR nem regra
 // de acesso, só a própria chave para se identificar.
@@ -14,6 +16,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
+#include "celular.h"
 #include "config.h"
 #include "credenciais.h"
 #include "tela.h"
@@ -40,6 +43,7 @@ static uint32_t ultimoSeq = 0;
 static bool filaIniciada = false;
 static String ultimaTag;
 static uint32_t ultimaTagEm = 0;
+static String qrAtual;  // o QR que está na tela: vira o desafio do celular
 
 // ---------- API ----------
 
@@ -94,8 +98,9 @@ static void aplicarDecisao(bool liberado, const String& titulo, const String& te
 
 // Decisão vinda do MQTT ou da consulta HTTP: {acao, metodo, mensagem, nome?}.
 static void tratarDecisao(JsonVariantConst d) {
-  // As decisões de NFC já chegam na resposta do POST /terminal/nfc.
-  if (String(d["metodo"] | "") == "NFC") return;
+  // As decisões de NFC e do celular já chegam na resposta do POST do próprio terminal.
+  const String metodo = d["metodo"] | "";
+  if (metodo == "NFC" || metodo == "CELULAR") return;
   const bool abrir = String(d["acao"] | "") == "ABRIR";
   const String nome = d["nome"] | "";
   const String mensagem = d["mensagem"] | "";
@@ -112,12 +117,14 @@ static void buscarQr() {
   JsonDocument r;
   const int status = chamarApi("GET", "/terminal/qr-token", "", r);
   if (status != 200 || !r["token"].is<const char*>()) {
+    qrAtual = "";
     tela::mostrarAviso("Sem servidor", status == 401 ? "Chave do terminal recusada" : "Tentando de novo...");
     modo = Modo::AVISO;
     proximoQr = millis() + ESPERA_ERRO_MS;
     return;
   }
   const String token = r["token"].as<String>();
+  qrAtual = token;
   const uint32_t trocar = (r["trocarEmSegundos"] | 10) * 1000UL;
   if (tela::mostrarQr(token, nomeTerminal + " - aponte o app Passe")) modo = Modo::QR;
   proximoQr = millis() + trocar;
@@ -163,8 +170,66 @@ static void consultarDecisoes() {
 
 // ---------- NFC ----------
 
+// Ignora a mesma credencial lida de novo logo em seguida.
+static bool repetida(const String& credencial) {
+  if (credencial == ultimaTag && millis() - ultimaTagEm < NFC_REPETICAO_MS) return true;
+  ultimaTag = credencial;
+  ultimaTagEm = millis();
+  return false;
+}
+
+// Manda a credencial para a API e aplica a resposta: {liberado, titulo, oQueFazer?}.
+static void decidirNfc(const String& caminho, const String& corpo) {
+  JsonDocument r;
+  const int status = chamarApi("POST", caminho, corpo, r);
+  if (status != 200) {
+    aplicarDecisao(false, "Sem servidor", "Tente de novo");
+    return;
+  }
+  aplicarDecisao(r["liberado"] | false, r["titulo"] | "", r["oQueFazer"] | "");
+}
+
+// Celular Android encostado (HCE). Devolve false se não era o app Passe:
+// aí o cartão segue como tag comum, pelo UID.
+static bool lerCelular() {
+  if (qrAtual.isEmpty()) {
+    aplicarDecisao(false, "Sem servidor", "Tente de novo");
+    return true;
+  }
+  const String desafio = qrAtual;
+  celular::Resposta resposta;
+  switch (celular::autenticar(nfc, desafio, resposta)) {
+    case celular::Leitura::SEM_APP:
+      return false;
+    case celular::Leitura::NAO_ATIVADO:
+      Serial.println("Celular com o app, mas sem chave ativada");
+      aplicarDecisao(false, "Celular sem chave", "Ative no app Passe");
+      return true;
+    case celular::Leitura::FALHOU:
+      Serial.println("Celular: a leitura caiu no meio");
+      aplicarDecisao(false, "Leitura incompleta", "Aproxime de novo");
+      return true;
+    case celular::Leitura::OK:
+      break;
+  }
+  if (repetida(resposta.celularId)) return true;
+  Serial.printf("Celular %s\n", resposta.celularId.c_str());
+
+  JsonDocument corpo;
+  corpo["desafio"] = desafio;
+  corpo["celularId"] = resposta.celularId;
+  corpo["assinatura"] = resposta.assinatura;
+  String json;
+  serializeJson(corpo, json);
+  decidirNfc("/terminal/phone", json);
+  return true;
+}
+
 static void lerTag() {
   if (!nfc.PICC_IsNewCardPresent() || !nfc.PICC_ReadCardSerial()) return;
+  // O celular escolhe um UID aleatório a cada aproximação: ele se identifica pela assinatura.
+  if (celular::ehIsoDep(nfc.uid) && lerCelular()) return;
+
   String uid;
   for (byte i = 0; i < nfc.uid.size; i++) {
     if (nfc.uid.uidByte[i] < 0x10) uid += '0';
@@ -173,19 +238,9 @@ static void lerTag() {
   uid.toUpperCase();
   nfc.PICC_HaltA();
 
-  if (uid == ultimaTag && millis() - ultimaTagEm < NFC_REPETICAO_MS) return;
-  ultimaTag = uid;
-  ultimaTagEm = millis();
+  if (repetida(uid)) return;
   Serial.printf("Tag %s\n", uid.c_str());
-
-  JsonDocument r;
-  const int status = chamarApi("POST", "/terminal/nfc", "{\"uid\":\"" + uid + "\"}", r);
-  if (status != 200) {
-    aplicarDecisao(false, "Sem servidor", "Tente de novo");
-    return;
-  }
-  // Resposta: {liberado, titulo, oQueFazer?}
-  aplicarDecisao(r["liberado"] | false, r["titulo"] | "", r["oQueFazer"] | "");
+  decidirNfc("/terminal/nfc", "{\"uid\":\"" + uid + "\"}");
 }
 
 // ---------- Ciclo ----------
