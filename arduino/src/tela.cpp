@@ -22,8 +22,9 @@ static const bool COLORIDA = false;
 #error "Escolha o display: -DTELA_ST7789, -DTELA_ILI9341 ou -DTELA_SSD1306 (veja platformio.ini)"
 #endif
 
-// Cores RGB565; no OLED tudo vira branco sobre preto.
-static const uint16_t BRANCO = 0xFFFF;
+// Cores RGB565; no OLED tudo vira branco sobre preto. O SSD1306 só aceita 1 (aceso) e
+// 0 (apagado): com 0xFFFF o texto branco não aparece.
+static const uint16_t BRANCO = COLORIDA ? 0xFFFF : 1;
 static const uint16_t PRETO = 0x0000;
 static const uint16_t VERDE = COLORIDA ? 0x05E6 : BRANCO;
 static const uint16_t VERMELHO = COLORIDA ? 0xD8A3 : BRANCO;
@@ -47,6 +48,11 @@ static void escreverCentralizado(const String& texto, int16_t y, uint8_t tamanho
   int16_t x1, y1;
   uint16_t w, h;
   display.getTextBounds(limpo, 0, 0, &x1, &y1, &w, &h);
+  // No OLED (128 px) o título grande não cabe: diminui a fonte antes de quebrar a linha.
+  while (!COLORIDA && w > display.width() && tamanho > 1) {
+    display.setTextSize(--tamanho);
+    display.getTextBounds(limpo, 0, 0, &x1, &y1, &w, &h);
+  }
   // Texto maior que a tela: quebra em linhas pelo próprio GFX, a partir da margem.
   if (w > display.width()) {
     display.setTextWrap(true);
@@ -112,7 +118,7 @@ void mostrarDecisao(bool liberado, const String& titulo, const String& texto) {
   const bool pequena = display.height() < 128;
   escreverCentralizado(liberado ? "OK" : "X", pequena ? 2 : 40, pequena ? 3 : 6, frente);
   escreverCentralizado(titulo, pequena ? 30 : 120, 2, frente);
-  escreverCentralizado(texto, pequena ? 50 : 160, 1, frente);
+  escreverCentralizado(texto, pequena ? 46 : 160, 1, frente);
   atualizar();
 }
 
