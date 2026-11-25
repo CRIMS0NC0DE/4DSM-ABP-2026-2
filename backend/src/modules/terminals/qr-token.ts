@@ -14,18 +14,21 @@ export type QrVerificado = { ok: true; terminalId: string; jti: string } | { ok:
  *   terminal   UUID do terminal em base32 (26 caracteres)
  *   vence      instante em segundos (unix), base36
  *   nonce      10 bytes aleatórios em base32; é o id de uso único (jti)
- *   assinatura HMAC-SHA256 dos campos anteriores, 15 bytes em base32
+ *   assinatura HMAC-SHA256 dos campos anteriores, 14 bytes (112 bits) em base32
  *
- * São ~78 caracteres só com A-Z, 0-9 e ponto, o modo alfanumérico do QR: cabe
- * na versão 4 (33×33 módulos), contra a versão 10 (57×57) do JWT que havia antes.
- * Isso deixa o QR legível no display pequeno do ESP32. O conteúdo continua sendo
- * gerado e conferido só pelo backend; o terminal apenas desenha o texto.
+ * São 77 caracteres só com A-Z, 0-9 e ponto, o modo alfanumérico do QR. 77 é o
+ * máximo da versão 3 (29×29 módulos) com correção L: no OLED de 64 pontos de
+ * altura, cada módulo fica com 2 pontos (uns 10 mm de QR) em vez de 1 (uns 6 mm)
+ * da versão 4, que era o que os 78 caracteres da assinatura de 15 bytes pediam.
+ * O JWT de antes pedia a versão 10 (57×57). O conteúdo continua sendo gerado e
+ * conferido só pelo backend; o terminal apenas desenha o texto.
+ * O "vence" tem 6 caracteres em base36 até 2038; depois vira 7 e o QR volta à versão 4.
  */
 const VERSAO = 'P1';
 const BYTES_NONCE = 10;
-const BYTES_ASSINATURA = 15;
+const BYTES_ASSINATURA = 14;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const FORMATO = /^P1\.([A-Z2-7]{26})\.([0-9A-Z]{1,8})\.([A-Z2-7]{16})\.([A-Z2-7]{24})$/;
+const FORMATO = /^P1\.([A-Z2-7]{26})\.([0-9A-Z]{1,8})\.([A-Z2-7]{16})\.([A-Z2-7]{23})$/;
 
 /** Gera e confere o conteúdo do QR Code mostrado no terminal (RF12). */
 export class QrTokenService {

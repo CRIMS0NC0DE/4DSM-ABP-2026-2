@@ -29,8 +29,9 @@ P1.AAAAAAAAABAABAAAAAAAAAAAAU.TNBFNK.ZIIJ7VSSEKJGPBSZ.XYZXORKDKZTWKXKNG7CS2OKO
 └ versão do formato
 ```
 
-- 78 caracteres, só `A-Z`, `0-9` e `.`: usa o **modo alfanumérico** do QR e cabe na
-  **versão 4 (33×33)** com correção M. Num TFT de 240 px, cada módulo fica com 5 px.
+- 77 caracteres, só `A-Z`, `0-9` e `.`: usa o **modo alfanumérico** do QR. No TFT cabe na
+  **versão 4 (33×33)** com correção M (5 px por módulo em 240 px); no OLED 128×64, na
+  **versão 3 (29×29)** com correção L, com 2 px por módulo.
 - Trocar qualquer campo (terminal, validade) invalida a assinatura → `QR_INVALIDO`.
 - Vencido → `QR_EXPIRADO`. Reutilizado → `QR_JA_UTILIZADO` (nonce gravado no banco).
 - Código: `backend/src/modules/terminals/qr-token.ts`. O app não muda: continua

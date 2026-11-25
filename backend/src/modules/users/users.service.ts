@@ -14,6 +14,13 @@ export function semSenha(user: User | UserWithTags): PublicUser {
 // A portaria só cadastra quem usa o prédio; admin e portaria são criados pelo admin.
 const PERFIS_QUE_A_PORTARIA_GERENCIA: readonly Perfil[] = ['CONDOMINO', 'VISITANTE'];
 
+/** Admin mexe em todos; a portaria, só em condôminos e visitantes. */
+export function conferirPermissao(quem: AuthContext, perfilAlvo: Perfil) {
+  if (quem.perfil === 'ADMIN') return;
+  if (quem.perfil === 'CONTROLADOR_ACESSO' && PERFIS_QUE_A_PORTARIA_GERENCIA.includes(perfilAlvo)) return;
+  throw forbidden();
+}
+
 export interface CriarUsuario {
   nome: string;
   email: string;
@@ -45,6 +52,22 @@ export class UsersService {
       email,
       cpf,
       perfil: dados.perfil,
+      senhaHash: await hashSenha(dados.senha),
+    });
+    return semSenha(user);
+  }
+
+  /** Cadastro pelo app (tela Registrar): morador, inativo até a portaria liberar em Usuários. */
+  async solicitarCadastro(dados: Omit<CriarUsuario, 'perfil'>) {
+    const email = dados.email.trim().toLowerCase();
+    const cpf = somenteNumeros(dados.cpf);
+    await this.garantirUnico(email, cpf);
+    const user = await this.users.create({
+      nome: dados.nome.trim(),
+      email,
+      cpf,
+      perfil: 'CONDOMINO',
+      ativo: false,
       senhaHash: await hashSenha(dados.senha),
     });
     return semSenha(user);
@@ -110,9 +133,7 @@ export class UsersService {
   }
 
   private conferirPermissao(quem: AuthContext, perfilAlvo: Perfil) {
-    if (quem.perfil === 'ADMIN') return;
-    if (quem.perfil === 'CONTROLADOR_ACESSO' && PERFIS_QUE_A_PORTARIA_GERENCIA.includes(perfilAlvo)) return;
-    throw forbidden();
+    conferirPermissao(quem, perfilAlvo);
   }
 
   private async garantirUnico(email?: string, cpf?: string, ignorarId?: string) {

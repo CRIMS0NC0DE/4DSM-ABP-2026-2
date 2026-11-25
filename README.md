@@ -27,7 +27,11 @@ App Flutter ──REST/JWT──▶ API (Express + Prisma) ──▶ Postgres
 3. A API confere a assinatura e a validade do QR, se o usuário está ativo e tem autorização para aquele ponto, se está a até 100 m do terminal e se o QR ainda não foi usado.
 4. A decisão (`ABRIR` ou `NEGAR`) vai para o terminal pelo tópico MQTT `passe/terminais/{terminalId}/decisoes` (QoS 1). Se o broker cair, o terminal consulta `GET /terminal/decisions?apos={seq}` como reserva.
 
-Pelo NFC o terminal manda o UID da tag em `POST /terminal/nfc` e recebe a decisão na resposta. As rotas do terminal se autenticam pelos cabeçalhos `X-Terminal-Id` e `X-Terminal-Key`; no broker, o terminal entra com usuário = Id e senha = chave, e a ACL só deixa ele ler o próprio tópico.
+Pelo NFC o terminal manda o UID da tag em `POST /terminal/nfc` e recebe a decisão na resposta.
+
+O que mais o app faz, além do acesso: o morador cadastra os próprios visitantes ("Meus visitantes", com senha provisória e só para as catracas e o período dele), quem não tem conta pede cadastro pelo app (a portaria libera), o admin publica comunicados (aparecem no Início do morador) e muda as regras do condomínio (Configurações), e a equipe vê relatórios agregados por dia, método, catraca e motivo.
+
+O celular Android também serve de chave: ativado no app ("Celular como chave"), ele responde como um cartão quando encosta no leitor (HCE). O terminal entrega ao celular o SHA-256 do QR da tela, o celular assina com uma chave guardada no Keystore e o terminal repassa em `POST /terminal/phone`. Não precisa de GPS nem de internet no celular. Detalhes em [`docs/documentacao-tecnica/celular-nfc.md`](docs/documentacao-tecnica/celular-nfc.md). As rotas do terminal se autenticam pelos cabeçalhos `X-Terminal-Id` e `X-Terminal-Key`; no broker, o terminal entra com usuário = Id e senha = chave, e a ACL só deixa ele ler o próprio tópico.
 
 ## Como rodar
 
@@ -68,7 +72,7 @@ Terminal de demonstração: `X-Terminal-Id=00000000-0000-4000-8000-000000000005`
 
 ### Simulador do terminal
 
-Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o papel da catraca: mostra o QR rotativo, recebe as decisões por MQTT (ou por consulta HTTP, se o broker não estiver no ar), lê tag NFC e tem um "celular de teste" para ler o QR de dentro do navegador, de perto da catraca, a 1 km ou sem GPS. Dá para testar acesso liberado, QR reutilizado, pessoa longe do terminal e NFC sem nenhum hardware.
+Com a API rodando, abra `http://localhost:3000/simulador/`. A página faz o papel da catraca: mostra o QR rotativo, recebe as decisões por MQTT (ou por consulta HTTP, se o broker não estiver no ar), lê tag NFC e tem um "celular de teste" para ler o QR de dentro do navegador, de perto da catraca, a 1 km ou sem GPS, ou para encostar no leitor como chave NFC. Dá para testar acesso liberado, QR reutilizado, pessoa longe do terminal e NFC sem nenhum hardware.
 
 ### Console web de testes
 
@@ -78,6 +82,18 @@ Com a API rodando, abra `http://localhost:3000/console/`. É a versão web das t
 - **Todos os perfis:** minhas autorizações, meu histórico, perfil e "Ler QR Code". Nessa tela, o botão "Gerar QR do terminal de demonstração" pega um QR do terminal do seed (só com `NODE_ENV=development`) e o celular de teste manda o QR e a posição para a API decidir.
 
 É só HTML, CSS e JS em `backend/public/console/`, sem build. Quando a API devolve erro, a mensagem aparece como no app.
+
+### Dia da apresentação
+
+Três scripts, nesta ordem (o passo a passo e o roteiro estão em [`docs/apresentacao/`](docs/apresentacao/)):
+
+```bash
+bash scripts/gravar-terminal.sh          # grava o ESP32 (OLED) apontando para o IP atual do PC
+bash scripts/app-no-celular.sh           # app web em HTTPS (câmera e GPS no celular), com QR do endereço
+node backend/scripts/checar-apresentacao.mjs   # confere chave do terminal, broker, IP, Wi-Fi, tags e horários
+```
+
+O `app-no-celular.sh` sobe um nginx (perfil `celular` do compose) em `https://<IP do PC>:8443`, com a API em `/api`; o certificado é do próprio PC (o celular avisa uma vez). Para outra rede, troque o Wi-Fi com `WIFI_SSID=... WIFI_SENHA=... bash scripts/gravar-terminal.sh`.
 
 ### Terminal físico (ESP32)
 
@@ -126,6 +142,9 @@ Estão todas em `backend/.env.example`. O `.env` de verdade não vai para o git.
 
 ## Próximos passos
 
-- Montar o terminal físico e testar o firmware no ESP32 (`docs/hardware.md`)
-- Restante das telas do app (o andamento está em `docs/integracao-frontend-backend.md`)
+- Testar o celular como chave (HCE) num Android com NFC e compilar o APK (o Kotlin nunca foi compilado)
+- GPS no terminal (#33) e eficiência energética (#36)
+- Atualizar o resto da documentação para o OLED sem relé e sem buzzer
 - ACL do broker na nuvem e troca das senhas de demonstração (`docs/deploy-nuvem.md`)
+
+O que mudou no dia da apresentação (25/11/2026) está em [`docs/apresentacao/relatorio-modificacoes.md`](docs/apresentacao/relatorio-modificacoes.md).

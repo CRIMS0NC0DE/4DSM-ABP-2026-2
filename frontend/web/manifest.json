@@ -1,11 +1,11 @@
 {
-    "name": "public",
-    "short_name": "public",
+    "name": "Passe",
+    "short_name": "Passe",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#141414",
     "theme_color": "#141414",
-    "description": "A new Flutter project.",
+    "description": "Passe: seu acesso ao prédio pelo celular.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

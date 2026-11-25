@@ -4,7 +4,7 @@
 |---|---|
 | Projeto | Passe — Controle de acesso por QR Code e NFC |
 | Componente | Credenciais e fluxos de validação de acesso |
-| Métodos documentados | QR Code e tag NFC |
+| Métodos documentados | QR Code e tag NFC. O celular Android como chave NFC está em `celular-nfc.md` |
 | Revisão | 11/11/2026 |
 | Base da documentação | Backend, aplicativo Flutter, firmware ESP32 e banco de dados atuais |
 
@@ -182,9 +182,9 @@ P1.<terminal>.<vence>.<nonce>.<assinatura>
 | `terminal` | Base32 RFC 4648 sem `=` | 26 caracteres | UUID do terminal |
 | `vence` | Segundos Unix em base 36 | 1 a 8 caracteres | Expiração |
 | `nonce` | 10 bytes aleatórios em Base32 | 16 caracteres | Identificador de uso único, o JTI |
-| `assinatura` | HMAC-SHA256 truncado para 15 bytes e codificado em Base32 | 24 caracteres | Integridade e autenticidade |
+| `assinatura` | HMAC-SHA256 truncado para 14 bytes e codificado em Base32 | 23 caracteres | Integridade e autenticidade |
 
-O conteúdo possui aproximadamente 78 caracteres e utiliza letras maiúsculas, números compatíveis e pontos. Isso permite o modo alfanumérico do QR e normalmente cabe na versão 4, com 33×33 módulos.
+O conteúdo tem 77 caracteres (até 2038, quando o `vence` passa a ter 7) e usa letras maiúsculas, números compatíveis e pontos. Isso permite o modo alfanumérico do QR. Com correção L, 77 caracteres é o máximo da versão 3 (29×29 módulos), que o OLED 128×64 desenha com 2 pontos por módulo; o TFT usa correção M, na versão 4 (33×33). Até 25/11/2026 a assinatura tinha 15 bytes e o token 78 caracteres, o que obrigava a versão 4 no OLED, com 1 ponto por módulo (uns 6 mm de QR).
 
 O formato anterior baseado em JWT seria maior. O formato compacto reduz a densidade da imagem e melhora a leitura no display do ESP32.
 
@@ -196,7 +196,7 @@ O backend calcula HMAC-SHA256 sobre:
 P1.<terminal>.<vence>.<nonce>
 ```
 
-Somente os primeiros 15 bytes da saída são utilizados, resultando em uma assinatura de 120 bits antes da codificação Base32.
+Somente os primeiros 14 bytes da saída são utilizados, resultando em uma assinatura de 112 bits antes da codificação Base32. Para um token que vale 30 segundos e só pode ser conferido pela API, 112 bits continuam muito acima do necessário.
 
 Na verificação, o backend:
 

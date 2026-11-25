@@ -57,6 +57,11 @@ class ResidentMenuController {
           icone: Icons.contactless_outlined,
         ),
         OpcaoMenu(
+          titulo: 'Celular como chave',
+          descricao: 'Encoste o celular no leitor',
+          icone: Icons.phone_android,
+        ),
+        OpcaoMenu(
           titulo: 'Perfil',
           descricao: 'Seus dados e documentos',
           icone: Icons.person_outline,

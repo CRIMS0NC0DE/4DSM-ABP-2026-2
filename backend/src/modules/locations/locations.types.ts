@@ -40,6 +40,17 @@ export interface LocationsRepository {
   createDoor(data: Omit<Door, 'id'>): Promise<Door>;
   createAccessPoint(data: Omit<AccessPoint, 'id'>): Promise<AccessPoint>;
   updateAccessPoint(id: string, data: Partial<Omit<AccessPoint, 'id'>>): Promise<AccessPoint>;
+  updateBuilding(id: string, data: Partial<Omit<Building, 'id'>>): Promise<Building>;
+  updateGate(id: string, data: { nome?: string }): Promise<Gate>;
+  updateDoor(id: string, data: { nome?: string }): Promise<Door>;
+  /**
+   * Apagam só o que não tem filhos (a catraca: nem terminal, nem autorizações) e devolvem false
+   * quando não apagaram. Os eventos de acesso ficam, sem a catraca (accessPointId = null).
+   */
+  removeBuilding(id: string): Promise<boolean>;
+  removeGate(id: string): Promise<boolean>;
+  removeDoor(id: string): Promise<boolean>;
+  removeAccessPoint(id: string): Promise<boolean>;
   findBuilding(id: string): Promise<Building | null>;
   findGate(id: string): Promise<Gate | null>;
   findDoor(id: string): Promise<Door | null>;

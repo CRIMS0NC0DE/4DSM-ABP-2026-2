@@ -81,9 +81,13 @@ class _LoginViewState extends State<LoginView> {
 
   Future<void> _registrar() async {
     controller.registrar();
-    // O cadastro devolve o e-mail da conta criada, para já vir preenchido.
-    final email = await Navigator.of(context)
-        .push<String>(MaterialPageRoute(builder: (_) => RegisterView()));
+    // O pedido de cadastro devolve o e-mail, para já vir preenchido. A conta
+    // só entra depois que a portaria liberar.
+    final email = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => RegisterView(controller: controller.cadastro()),
+      ),
+    );
     if (mounted && email != null) _usuario.text = email;
   }
 
@@ -173,15 +177,6 @@ class _LoginViewState extends State<LoginView> {
                               onTocar: _entrar,
                             ),
                             const SizedBox(height: 12),
-                            OutlinedButton.icon(
-                              onPressed: () {
-                                controller.entrarComNfc();
-                                _avisar('Entrar com NFC: em construção.');
-                              },
-                              icon: const Icon(Icons.contactless_outlined),
-                              label: const Text('Entrar com NFC'),
-                            ),
-                            const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 controller.esqueciSenha();
@@ -202,7 +197,7 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                                 TextButton(
                                   onPressed: _registrar,
-                                  child: const Text('Registrar'),
+                                  child: const Text('Solicitar cadastro'),
                                 ),
                               ],
                             ),

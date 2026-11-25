@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/usuario.dart';
 import '../services/auth_service.dart';
+import 'register_controller.dart';
 
 /// Tela de login. Entra pela API (POST /auth/login).
 class LoginController {
@@ -30,18 +31,17 @@ class LoginController {
     return _auth.entrar(usuario, senha);
   }
 
-  void entrarComNfc() {
-    // A API só valida tag NFC no terminal da catraca (POST /terminal/nfc),
-    // não no login do app.
-    debugPrint('Entrando com NFC...');
-  }
-
   void esqueciSenha() {
     // Sem rota na API: a portaria troca a senha (PATCH /users/:id).
     debugPrint('Esqueci minha senha...');
   }
 
+  /// Abre o pedido de cadastro (POST /auth/register). Não existe login por
+  /// NFC: a tag funciona direto na catraca, sem o app.
   void registrar() {
-    debugPrint('Navegando para a tela de Registrar...');
+    debugPrint('Abrindo o pedido de cadastro...');
   }
+
+  /// Controller da tela de cadastro, com a mesma API do login.
+  RegisterController cadastro() => RegisterController(auth: _auth);
 }

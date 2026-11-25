@@ -48,7 +48,7 @@ describe('O que as telas novas pedem ao backend', () => {
     expect(depois.status).toBe(401);
     expect(depois.body.erro).toEqual({
       codigo: 'CADASTRO_DESATIVADO',
-      mensagem: 'Seu cadastro está desativado. Fale com a portaria.',
+      mensagem: 'Seu cadastro está desativado ou aguarda liberação. Fale com a portaria.',
     });
 
     await c.api.patch(`/users/${c.pessoas.portaria.id}`).set('Authorization', `Bearer ${admin}`).send({ ativo: true });

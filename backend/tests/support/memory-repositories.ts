@@ -1,8 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import type { Repositories } from '../../src/container.js';
+import type { Comunicado } from '../../src/modules/announcements/announcements.types.js';
 import type { Authorization, AuthorizationWithRefs } from '../../src/modules/authorizations/authorizations.types.js';
 import type { AccessEvent } from '../../src/modules/events/events.types.js';
 import type { AccessPoint, Building, Door, Gate } from '../../src/modules/locations/locations.types.js';
+import type { NfcPhone } from '../../src/modules/phones/phones.types.js';
+import { CONFIGURACAO_PADRAO, type Configuracao } from '../../src/modules/settings/settings.types.js';
 import type { Terminal } from '../../src/modules/terminals/terminals.types.js';
 import type { NfcTag, User } from '../../src/modules/users/users.types.js';
 import { systemClock, type Clock } from '../../src/shared/clock.js';
@@ -12,6 +15,7 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
   const db = {
     users: [] as User[],
     tags: [] as NfcTag[],
+    celulares: [] as NfcPhone[],
     buildings: [] as Building[],
     gates: [] as Gate[],
     doors: [] as Door[],
@@ -20,6 +24,8 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
     authorizations: [] as Authorization[],
     events: [] as AccessEvent[],
     qrUsados: new Set<string>(),
+    comunicados: [] as Comunicado[],
+    configuracao: { ...CONFIGURACAO_PADRAO, updatedAt: clock.now() } as Configuracao,
   };
 
   const comTags = (u: User) => ({ ...u, tags: db.tags.filter((t) => t.userId === u.id) });
@@ -34,6 +40,10 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
       user: { id: u.id, nome: u.nome, perfil: u.perfil },
       catraca: { id: c.id, nome: c.nome, edificio: edificio.nome, portaria: portaria.nome, porta: porta.nome },
     };
+  };
+  const comAutor = (c: Comunicado) => {
+    const u = db.users.find((x) => x.id === c.autorId);
+    return { ...c, autor: u ? { id: u.id, nome: u.nome } : null };
   };
   const atualizar = <T extends { id: string }>(lista: T[], id: string, dados: object): T => {
     const item = lista.find((x) => x.id === id);
@@ -93,6 +103,18 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
       createDoor: async (data) => push(db.doors, { id: randomUUID(), ...data }),
       createAccessPoint: async (data) => push(db.accessPoints, { id: randomUUID(), ...data }),
       updateAccessPoint: async (id, data) => atualizar(db.accessPoints, id, data),
+      updateBuilding: async (id, data) => atualizar(db.buildings, id, data),
+      updateGate: async (id, data) => atualizar(db.gates, id, data),
+      updateDoor: async (id, data) => atualizar(db.doors, id, data),
+      removeBuilding: async (id) => !db.gates.some((g) => g.buildingId === id) && tirar(db.buildings, id),
+      removeGate: async (id) => !db.doors.some((d) => d.gateId === id) && tirar(db.gates, id),
+      removeDoor: async (id) => !db.accessPoints.some((c) => c.doorId === id) && tirar(db.doors, id),
+      removeAccessPoint: async (id) => {
+        if (db.terminals.some((t) => t.accessPointId === id) || db.authorizations.some((a) => a.accessPointId === id)) return false;
+        // Como o ON DELETE SET NULL do banco: o evento fica, sem a catraca.
+        for (const e of db.events) if (e.accessPointId === id) e.accessPointId = null;
+        return tirar(db.accessPoints, id);
+      },
       findBuilding: async (id) => db.buildings.find((x) => x.id === id) ?? null,
       findGate: async (id) => db.gates.find((x) => x.id === id) ?? null,
       findDoor: async (id) => db.doors.find((x) => x.id === id) ?? null,
@@ -106,6 +128,17 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
       },
     },
 
+    phones: {
+      findById: async (id) => db.celulares.find((c) => c.id === id) ?? null,
+      findByChave: async (chavePublica) => db.celulares.find((c) => c.chavePublica === chavePublica) ?? null,
+      listByUser: async (userId) => db.celulares.filter((c) => c.userId === userId),
+      create: async (data) => push(db.celulares, { id: randomUUID(), ativo: true, createdAt: new Date(), ...data }),
+      update: async (id, data) => atualizar(db.celulares, id, data),
+      remove: async (id) => {
+        db.celulares = db.celulares.filter((c) => c.id !== id);
+      },
+    },
+
     terminals: {
       create: async (data) =>
         push(db.terminals, { id: randomUUID(), ultimoSinal: null, latitude: null, longitude: null, ...data }),
@@ -113,6 +146,10 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
       findByAccessPoint: async (accessPointId) => db.terminals.find((x) => x.accessPointId === accessPointId) ?? null,
       list: async () => db.terminals,
       update: async (id, data) => atualizar(db.terminals, id, data),
+      remove: async (id) => {
+        db.terminals = db.terminals.filter((t) => t.id !== id);
+        for (const e of db.events) if (e.terminalId === id) e.terminalId = null;
+      },
     },
 
     authorizations: {
@@ -123,6 +160,7 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
             usosRealizados: 0,
             status: 'ATIVA',
             canceladaEm: null,
+            criadaPorId: null,
             createdAt: new Date(),
             ...data,
           }),
@@ -135,6 +173,7 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
         db.authorizations
           .filter((a) => !f.userId || a.userId === f.userId)
           .filter((a) => !f.accessPointId || a.accessPointId === f.accessPointId)
+          .filter((a) => !f.criadaPorId || a.criadaPorId === f.criadaPorId)
           .filter((a) => {
             if (f.situacao === 'CANCELADA') return a.status === 'CANCELADA';
             if (f.situacao === 'ATIVA' || f.situacao === 'AGENDADA' || f.situacao === 'ESGOTADA') {
@@ -173,6 +212,34 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
         const liberados = filtrados.filter((e) => e.resultado === 'LIBERADO').length;
         return { itens, total: filtrados.length, liberados, negados: filtrados.length - liberados };
       },
+      listForReport: async (f) =>
+        db.events
+          .filter((e) => e.createdAt >= f.de && e.createdAt <= f.ate && (!f.accessPointId || e.accessPointId === f.accessPointId))
+          .map(({ createdAt, resultado, metodo, motivo, accessPointId }) => {
+            const c = db.accessPoints.find((x) => x.id === accessPointId);
+            return { createdAt, resultado, metodo, motivo, accessPointId, catraca: c ? { nome: c.nome } : null };
+          }),
+    },
+
+    announcements: {
+      list: async (limite) =>
+        [...db.comunicados]
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .slice(0, limite)
+          .map(comAutor),
+      create: async (data) => comAutor(push(db.comunicados, { id: randomUUID(), createdAt: clock.now(), ...data })),
+      findById: async (id) => db.comunicados.find((c) => c.id === id) ?? null,
+      remove: async (id) => {
+        db.comunicados = db.comunicados.filter((c) => c.id !== id);
+      },
+    },
+
+    settings: {
+      get: async () => ({ ...db.configuracao }),
+      update: async (data) => {
+        db.configuracao = { ...db.configuracao, ...data, updatedAt: clock.now() };
+        return { ...db.configuracao };
+      },
     },
 
     qrTokens: {
@@ -190,4 +257,11 @@ export function createMemoryRepositories(clock: Clock = systemClock) {
 function push<T>(lista: T[], item: T): T {
   lista.push(item);
   return item;
+}
+
+/** Tira da lista; false se não estava lá. */
+function tirar<T extends { id: string }>(lista: T[], id: string): boolean {
+  const i = lista.findIndex((x) => x.id === id);
+  if (i >= 0) lista.splice(i, 1);
+  return i >= 0;
 }

@@ -30,8 +30,9 @@ static const uint16_t VERDE = COLORIDA ? 0x05E6 : BRANCO;
 static const uint16_t VERMELHO = COLORIDA ? 0xD8A3 : BRANCO;
 static const uint16_t AZUL = COLORIDA ? 0x1B3A : BRANCO;
 
-// O token do backend (~78 caracteres alfanuméricos) cabe na versão 4 (33x33).
-// A versão máxima deixa folga caso o formato cresça.
+// O token do backend (77 caracteres alfanuméricos) cabe na versão 3 (29x29) com
+// correção L, ou na versão 4 (33x33) com correção M. A versão máxima deixa folga
+// caso o formato cresça.
 static const int QR_VERSAO_MAX = 6;
 
 static void atualizar() {
@@ -83,16 +84,21 @@ void iniciar() {
 bool mostrarQr(const String& texto, const String& rodape) {
   static uint8_t qr[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_VERSAO_MAX)];
   static uint8_t temp[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_VERSAO_MAX)];
-  // Correção M: aguenta reflexo e um pouco de sujeira na tela.
-  if (!qrcodegen_encodeText(texto.c_str(), temp, qr, qrcodegen_Ecc_MEDIUM, 1, QR_VERSAO_MAX, qrcodegen_Mask_AUTO, true)) {
+  const bool pequena = display.height() < 128;
+  // TFT: correção M, que aguenta reflexo e um pouco de sujeira na tela. OLED: correção L,
+  // para o QR caber na versão 3 (29x29) e cada módulo ter 2 pontos em vez de 1. O OLED
+  // tem contraste alto e não reflete, então a correção menor não atrapalha a leitura.
+  const qrcodegen_Ecc correcao = pequena ? qrcodegen_Ecc_LOW : qrcodegen_Ecc_MEDIUM;
+  if (!qrcodegen_encodeText(texto.c_str(), temp, qr, correcao, 1, QR_VERSAO_MAX, qrcodegen_Mask_AUTO, true)) {
     Serial.printf("QR grande demais (%u caracteres)\n", texto.length());
     return false;
   }
 
   const int modulos = qrcodegen_getSize(qr);
-  const bool pequena = display.height() < 128;
   const int alturaRodape = pequena ? 0 : 28;
-  const int margem = pequena ? 2 : 4;  // zona de silêncio, em módulos
+  // Zona de silêncio, em módulos. No OLED, 1 módulo na altura (29 + 2 = 31 módulos de 2
+  // pontos = 62 dos 64 pontos); dos lados sobra tela branca de sobra.
+  const int margem = pequena ? 1 : 4;
   const int area = min<int>(display.width(), display.height() - alturaRodape);
   const int escala = max(1, area / (modulos + 2 * margem));
   const int lado = modulos * escala;

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { badRequest } from '../errors.js';
 
+// Mensagens padrão do zod em português (as dos schemas, como "Informe o nome", continuam valendo).
+z.config(z.locales.pt());
+
 /** O Postgres não guarda o caractere NUL: sem isto, o texto vira erro 500 no banco. */
 function temNul(valor: unknown): boolean {
   if (typeof valor === 'string') return valor.includes('\0');

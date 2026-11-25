@@ -30,7 +30,7 @@ class FiltroEventos {
   /// true só negados, false só liberados.
   final bool? negados;
 
-  /// "QR" ou "NFC".
+  /// "QR", "NFC" ou "CELULAR".
   final String? metodo;
   final String? catracaId;
   final String? catracaNome;

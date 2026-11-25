@@ -11,7 +11,8 @@ import '../widgets/selo.dart';
 import '../widgets/tela_base.dart';
 import 'catraca_form_view.dart';
 
-/// A5 · Locais: a árvore do prédio. O "+" de cada nível cria o nível de baixo.
+/// A5 · Locais: a árvore do prédio. Para o admin, o "+" de cada nível cria o
+/// nível de baixo e o menu "⋮" edita ou apaga. A portaria só consulta.
 class LocaisView extends StatefulWidget {
   LocaisView({super.key, LocaisController? controller})
     : controller = controller ?? LocaisController();
@@ -29,24 +30,103 @@ class _LocaisViewState extends State<LocaisView>
   @override
   Future<List<Edificio>> buscar() => controller.arvore();
 
-  /// Pede o nome (e o endereço, no edifício), salva e recarrega a árvore.
-  Future<void> _novo({
+  /// Faz a ação e recarrega a árvore, mesmo quando a API recusa (alguém pode
+  /// ter mudado os locais enquanto isso). 401 volta ao login. Ao apagar, o 409
+  /// abre um aviso com a mensagem da API, que diz o que tirar antes.
+  Future<void> _executar(
+    Future<void> Function() acao, {
+    String? feito,
+    bool apagando = false,
+  }) async {
+    try {
+      await acao();
+      if (!mounted) return;
+      if (feito != null) avisar(context, feito);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      if (e.naoAutenticado) {
+        await voltarAoLogin(context, e);
+        return;
+      }
+      if (apagando && e.status == 409) {
+        await _explicarRecusa(e.mensagem);
+      } else {
+        avisar(context, e.mensagem);
+      }
+    }
+    if (mounted) await carregar();
+  }
+
+  /// Pede o nome (e o endereço, no edifício) e salva. Com [nome] e
+  /// [endereco] preenchidos, é a edição.
+  Future<void> _pedirNome({
     required String titulo,
     required Future<void> Function(String nome, String endereco) salvar,
     bool comEndereco = false,
+    String nome = '',
+    String endereco = '',
   }) async {
     final valores = await showDialog<(String, String)>(
       context: context,
-      builder: (_) => _DialogoNome(titulo: titulo, comEndereco: comEndereco),
+      builder: (_) => _DialogoNome(
+        titulo: titulo,
+        comEndereco: comEndereco,
+        nome: nome,
+        endereco: endereco,
+      ),
     );
-    if (valores == null) return;
-    try {
-      await salvar(valores.$1, valores.$2);
-      if (mounted) await carregar();
-    } on ApiException catch (e) {
-      if (mounted) await tratarErro(context, e);
-    }
+    if (valores == null || !mounted) return;
+    await _executar(() => salvar(valores.$1, valores.$2));
   }
+
+  /// Confirma antes de apagar. [tipo] vai no título: "Apagar porta?".
+  Future<void> _apagar({
+    required String tipo,
+    required String nome,
+    required String feito,
+    required Future<void> Function() apagar,
+  }) async {
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (contexto) => AlertDialog(
+        title: Text('Apagar $tipo?'),
+        content: Text(
+          '$nome sai da lista de locais. O histórico de acessos continua '
+          'guardado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(contexto).pop(false),
+            child: const Text('Não apagar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(contexto).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(contexto).colorScheme.error,
+            ),
+            child: const Text('Apagar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmou != true || !mounted) return;
+    await _executar(apagar, feito: feito, apagando: true);
+  }
+
+  Future<void> _explicarRecusa(String mensagem) => showDialog<void>(
+    context: context,
+    builder: (contexto) => AlertDialog(
+      icon: const Icon(Icons.info_outline),
+      title: const Text('Ainda não dá para apagar'),
+      content: Text(mensagem),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(contexto).pop(),
+          child: const Text('Entendi'),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _abrirCatraca({
     required String portaId,
@@ -67,12 +147,15 @@ class _LocaisViewState extends State<LocaisView>
   }
 
   List<Widget> _arvore(List<Edificio> edificios) {
+    final admin = controller.podeGerenciar;
     if (edificios.isEmpty) {
-      return const [
+      return [
         EstadoVazio(
           icone: Icons.apartment,
           titulo: 'Nenhum local cadastrado',
-          texto: 'Comece pelo edifício.',
+          texto: admin
+              ? 'Comece pelo edifício.'
+              : 'O administrador cadastra os edifícios e as catracas.',
         ),
       ];
     }
@@ -91,11 +174,34 @@ class _LocaisViewState extends State<LocaisView>
                   nome: edificio.nome,
                   detalhe: edificio.endereco,
                   rotuloAdicionar: 'Nova portaria',
-                  onAdicionar: () => _novo(
-                    titulo: 'Nova portaria',
-                    salvar: (nome, _) =>
-                        controller.criarPortaria(nome, edificio.id),
-                  ),
+                  onAdicionar: admin
+                      ? () => _pedirNome(
+                          titulo: 'Nova portaria',
+                          salvar: (nome, _) =>
+                              controller.criarPortaria(nome, edificio.id),
+                        )
+                      : null,
+                  onEditar: admin
+                      ? () => _pedirNome(
+                          titulo: 'Editar edifício',
+                          comEndereco: true,
+                          nome: edificio.nome,
+                          endereco: edificio.endereco,
+                          salvar: (nome, endereco) => controller.editarEdificio(
+                            edificio.id,
+                            nome: nome,
+                            endereco: endereco,
+                          ),
+                        )
+                      : null,
+                  onApagar: admin
+                      ? () => _apagar(
+                          tipo: 'edifício',
+                          nome: edificio.nome,
+                          feito: 'Edifício apagado.',
+                          apagar: () => controller.apagarEdificio(edificio.id),
+                        )
+                      : null,
                 ),
                 for (final portaria in edificio.portarias) ...[
                   _Nivel(
@@ -104,11 +210,30 @@ class _LocaisViewState extends State<LocaisView>
                     rotulo: 'Portaria',
                     nome: portaria.nome,
                     rotuloAdicionar: 'Nova porta',
-                    onAdicionar: () => _novo(
-                      titulo: 'Nova porta',
-                      salvar: (nome, _) =>
-                          controller.criarPorta(nome, portaria.id),
-                    ),
+                    onAdicionar: admin
+                        ? () => _pedirNome(
+                            titulo: 'Nova porta',
+                            salvar: (nome, _) =>
+                                controller.criarPorta(nome, portaria.id),
+                          )
+                        : null,
+                    onEditar: admin
+                        ? () => _pedirNome(
+                            titulo: 'Editar portaria',
+                            nome: portaria.nome,
+                            salvar: (nome, _) =>
+                                controller.editarPortaria(portaria.id, nome),
+                          )
+                        : null,
+                    onApagar: admin
+                        ? () => _apagar(
+                            tipo: 'portaria',
+                            nome: portaria.nome,
+                            feito: 'Portaria apagada.',
+                            apagar: () =>
+                                controller.apagarPortaria(portaria.id),
+                          )
+                        : null,
                   ),
                   for (final porta in portaria.portas) ...[
                     _Nivel(
@@ -117,10 +242,28 @@ class _LocaisViewState extends State<LocaisView>
                       rotulo: 'Porta',
                       nome: porta.nome,
                       rotuloAdicionar: 'Nova catraca',
-                      onAdicionar: () => _abrirCatraca(
-                        portaId: porta.id,
-                        caminho: '${portaria.nome} › ${porta.nome}',
-                      ),
+                      onAdicionar: admin
+                          ? () => _abrirCatraca(
+                              portaId: porta.id,
+                              caminho: '${portaria.nome} › ${porta.nome}',
+                            )
+                          : null,
+                      onEditar: admin
+                          ? () => _pedirNome(
+                              titulo: 'Editar porta',
+                              nome: porta.nome,
+                              salvar: (nome, _) =>
+                                  controller.editarPorta(porta.id, nome),
+                            )
+                          : null,
+                      onApagar: admin
+                          ? () => _apagar(
+                              tipo: 'porta',
+                              nome: porta.nome,
+                              feito: 'Porta apagada.',
+                              apagar: () => controller.apagarPorta(porta.id),
+                            )
+                          : null,
                     ),
                     for (final catraca in porta.catracas)
                       _Nivel(
@@ -133,11 +276,29 @@ class _LocaisViewState extends State<LocaisView>
                           icone: Icons.location_on_outlined,
                           tom: TomOpcao.sucesso,
                         ),
-                        onTocar: () => _abrirCatraca(
-                          portaId: porta.id,
-                          caminho: '${portaria.nome} › ${porta.nome}',
-                          catraca: catraca,
-                        ),
+                        onTocar: admin
+                            ? () => _abrirCatraca(
+                                portaId: porta.id,
+                                caminho: '${portaria.nome} › ${porta.nome}',
+                                catraca: catraca,
+                              )
+                            : null,
+                        onEditar: admin
+                            ? () => _abrirCatraca(
+                                portaId: porta.id,
+                                caminho: '${portaria.nome} › ${porta.nome}',
+                                catraca: catraca,
+                              )
+                            : null,
+                        onApagar: admin
+                            ? () => _apagar(
+                                tipo: 'catraca',
+                                nome: catraca.nome,
+                                feito: 'Catraca apagada.',
+                                apagar: () =>
+                                    controller.apagarCatraca(catraca.id),
+                              )
+                            : null,
                       ),
                   ],
                 ],
@@ -156,19 +317,23 @@ class _LocaisViewState extends State<LocaisView>
       titulo: 'Locais',
       subtitulo: 'Edifício › Portaria › Porta › Catraca',
       onAtualizar: carregar,
-      botaoFlutuante: FloatingActionButton.extended(
-        onPressed: () => _novo(
-          titulo: 'Novo edifício',
-          comEndereco: true,
-          salvar: controller.criarEdificio,
-        ),
-        icon: const Icon(Icons.add),
-        label: const Text('Novo edifício'),
-      ),
+      botaoFlutuante: controller.podeGerenciar
+          ? FloatingActionButton.extended(
+              onPressed: () => _pedirNome(
+                titulo: 'Novo edifício',
+                comEndereco: true,
+                salvar: controller.criarEdificio,
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('Novo edifício'),
+            )
+          : null,
       filhos: conteudo(_arvore),
     );
   }
 }
+
+enum _Acao { editar, apagar }
 
 class _Nivel extends StatelessWidget {
   const _Nivel({
@@ -181,6 +346,8 @@ class _Nivel extends StatelessWidget {
     this.rotuloAdicionar,
     this.onAdicionar,
     this.onTocar,
+    this.onEditar,
+    this.onApagar,
   });
 
   final int recuo;
@@ -192,6 +359,8 @@ class _Nivel extends StatelessWidget {
   final String? rotuloAdicionar;
   final VoidCallback? onAdicionar;
   final VoidCallback? onTocar;
+  final VoidCallback? onEditar;
+  final VoidCallback? onApagar;
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +394,50 @@ class _Nivel extends StatelessWidget {
                 tooltip: rotuloAdicionar,
                 icon: const Icon(Icons.add_circle_outline),
               ),
-            if (onTocar != null) const Icon(Icons.chevron_right),
+            if (onEditar != null || onApagar != null)
+              PopupMenuButton<_Acao>(
+                tooltip: 'Opções de $nome',
+                icon: const Icon(Icons.more_vert),
+                onSelected: (acao) {
+                  switch (acao) {
+                    case _Acao.editar:
+                      onEditar?.call();
+                    case _Acao.apagar:
+                      onApagar?.call();
+                  }
+                },
+                itemBuilder: (_) => [
+                  if (onEditar != null)
+                    const PopupMenuItem(
+                      value: _Acao.editar,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.edit_outlined),
+                        title: Text('Editar'),
+                      ),
+                    ),
+                  if (onApagar != null)
+                    PopupMenuItem(
+                      value: _Acao.apagar,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          Icons.delete_outline,
+                          color: colorScheme.error,
+                        ),
+                        title: Text(
+                          'Apagar',
+                          style: TextStyle(color: colorScheme.error),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            if (onTocar != null)
+              const Padding(
+                padding: EdgeInsets.only(top: 12),
+                child: Icon(Icons.chevron_right),
+              ),
           ],
         ),
       ),
@@ -234,10 +446,19 @@ class _Nivel extends StatelessWidget {
 }
 
 class _DialogoNome extends StatefulWidget {
-  const _DialogoNome({required this.titulo, required this.comEndereco});
+  const _DialogoNome({
+    required this.titulo,
+    required this.comEndereco,
+    this.nome = '',
+    this.endereco = '',
+  });
 
   final String titulo;
   final bool comEndereco;
+
+  /// Valores atuais, na edição.
+  final String nome;
+  final String endereco;
 
   @override
   State<_DialogoNome> createState() => _DialogoNomeState();
@@ -245,8 +466,8 @@ class _DialogoNome extends StatefulWidget {
 
 class _DialogoNomeState extends State<_DialogoNome> {
   final _form = GlobalKey<FormState>();
-  final _nome = TextEditingController();
-  final _endereco = TextEditingController();
+  late final _nome = TextEditingController(text: widget.nome);
+  late final _endereco = TextEditingController(text: widget.endereco);
 
   @override
   void dispose() {
@@ -296,9 +517,8 @@ class _DialogoNomeState extends State<_DialogoNome> {
         TextButton(
           onPressed: () {
             if (_form.currentState!.validate()) {
-              Navigator.of(
-                context,
-              ).pop((_nome.text.trim(), _endereco.text.trim()));
+              Navigator.of(context)
+                  .pop((_nome.text.trim(), _endereco.text.trim()));
             }
           },
           child: const Text('Salvar'),

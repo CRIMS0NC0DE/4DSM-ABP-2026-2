@@ -43,6 +43,12 @@ export class TerminalsService {
     return { ...this.apresentar(terminal), chave };
   }
 
+  /** Tira o terminal da catraca (ex.: para apagar a catraca). A chave dele para na hora. */
+  async remover(id: string) {
+    if (!(await this.terminals.findById(id))) throw notFound('Terminal');
+    await this.terminals.remove(id);
+  }
+
   /** RF12: conteúdo do QR que o terminal desenha na tela. */
   qrToken(terminal: Terminal) {
     return this.qr.gerar(terminal.id);

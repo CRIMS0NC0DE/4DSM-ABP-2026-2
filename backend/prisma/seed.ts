@@ -40,12 +40,33 @@ async function main() {
     // 300 m: na FATEC a sala fica a uns 200 m da portaria, e o GPS dentro do prédio erra.
     create: { id: IDS.catraca, nome: 'Catraca 1', doorId: IDS.porta, ...DEMO_CATRACA_POS, raioMetros: 300 },
   });
+  // A chave volta à do TERMINAL_DEMO_KEY a cada seed (o compose roda o seed a cada subida).
+  // Quem troca a chave do terminal de demonstração precisa trocar o TERMINAL_DEMO_KEY também;
+  // o provisionar-terminal.mjs --trocar-chave já grava no .env da raiz.
   await db.terminal.upsert({
     where: { id: IDS.terminal },
     update: { chaveHash: hashChave(CHAVE_TERMINAL_DEMO) },
     create: { id: IDS.terminal, nome: 'Terminal Catraca 1', accessPointId: IDS.catraca, chaveHash: hashChave(CHAVE_TERMINAL_DEMO) },
   });
   await db.nfcTag.upsert({ where: { uid: DEMO_TAG_UID }, update: {}, create: { uid: DEMO_TAG_UID, userId: maria!.id } });
+
+  // Regras do condomínio (tela Configurações). A migration cria a linha com os valores
+  // padrão; o seed só troca enquanto ninguém mudou o nome, para não desfazer o que o admin salvou.
+  const fatec = { nomeCondominio: 'FATEC Jacareí', contatoPortaria: 'Portaria principal: ramal 100, das 7h às 23h.' };
+  const configuracao = await db.configuracao.findUnique({ where: { id: 1 } });
+  if (!configuracao || configuracao.nomeCondominio === 'Condomínio') {
+    await db.configuracao.upsert({ where: { id: 1 }, update: fatec, create: { id: 1, ...fatec } });
+  }
+  await db.comunicado.upsert({
+    where: { id: IDS.comunicadoBoasVindas },
+    update: {},
+    create: {
+      id: IDS.comunicadoBoasVindas,
+      titulo: 'Bem-vindo ao Passe',
+      mensagem: 'Agora você entra pelo QR Code da catraca, pela tag NFC ou com o celular. Dúvidas? Fale com a portaria.',
+      autorId: users[0]!.id,
+    },
+  });
 
   const hoje = new Date();
   const dia = (deslocamento: number) => new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate() + deslocamento));

@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 
 const BCRYPT_ROUNDS = 10;
 
@@ -18,3 +18,10 @@ export function conferirChave(chave: string, hash: string): boolean {
 }
 
 export const somenteNumeros = (texto: string) => texto.replace(/\D/g, '');
+
+// Sem 0/O, 1/I/L: a senha provisória é ditada ou copiada do celular do morador.
+const ALFABETO_SENHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+/** Senha provisória do visitante criado pelo morador: aparece só uma vez. */
+export const gerarSenhaProvisoria = (tamanho = 8) =>
+  Array.from({ length: tamanho }, () => ALFABETO_SENHA[randomInt(ALFABETO_SENHA.length)]).join('');

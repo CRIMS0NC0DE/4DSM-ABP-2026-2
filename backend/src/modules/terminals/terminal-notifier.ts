@@ -1,6 +1,8 @@
+import type { MetodoAcesso } from '../events/events.types.js';
+
 export interface DecisaoTerminal {
   acao: 'ABRIR' | 'NEGAR';
-  metodo: 'QR' | 'NFC';
+  metodo: MetodoAcesso;
   mensagem: string;
   motivo?: string;
   nome?: string;

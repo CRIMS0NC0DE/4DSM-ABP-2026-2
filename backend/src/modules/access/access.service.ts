@@ -3,6 +3,8 @@ import { distanciaEmMetros, type Coordenadas } from '../../shared/geo.js';
 import type { AuthorizationsRepository } from '../authorizations/authorizations.types.js';
 import type { EventsRepository, MetodoAcesso, QrTokenStore } from '../events/events.types.js';
 import type { AccessPointDetalhe, LocationsRepository } from '../locations/locations.types.js';
+import { conferirAssinatura } from '../phones/phone-signature.js';
+import type { PhonesRepository } from '../phones/phones.types.js';
 import type { QrTokenService } from '../terminals/qr-token.js';
 import type { TerminalNotifier } from '../terminals/terminal-notifier.js';
 import type { Terminal, TerminalsRepository } from '../terminals/terminals.types.js';
@@ -26,6 +28,7 @@ export interface AccessServiceDeps {
   authorizations: AuthorizationsRepository;
   terminals: TerminalsRepository;
   locations: LocationsRepository;
+  phones: PhonesRepository;
   events: EventsRepository;
   qrTokens: QrTokenStore;
   qr: QrTokenService;
@@ -46,7 +49,7 @@ interface Tentativa {
 
 /**
  * O validador de acesso: a única parte do sistema que decide liberar ou negar.
- * QR (RF13) e NFC (RF14) passam pelas mesmas regras; toda tentativa vira um evento (RF17).
+ * QR (RF13), tag NFC (RF14) e celular por NFC passam pelas mesmas regras; toda tentativa vira um evento (RF17).
  */
 export class AccessService {
   constructor(private readonly deps: AccessServiceDeps) {}
@@ -98,6 +101,43 @@ export class AccessService {
 
     const escolha = await this.escolher(user.id, catraca.id);
     if (escolha.motivo) return this.negar(tentativa, escolha.motivo);
+    return this.liberar(tentativa, escolha.autorizacao);
+  }
+
+  /**
+   * Celular Android encostado no leitor (HCE). O terminal deu ao celular o SHA-256 do QR
+   * que estava na tela e o celular devolveu o id dele e a assinatura (phone-signature.ts).
+   * Não usa GPS: encostar no leitor já prova que a pessoa está na catraca.
+   */
+  async validarCelular(
+    terminal: Terminal,
+    entrada: { desafio: string; celularId: string; assinatura: string },
+  ): Promise<DecisaoAcesso> {
+    const { deps } = this;
+    const catraca = await deps.locations.findAccessPoint(terminal.accessPointId);
+    const tentativa: Tentativa = { metodo: 'CELULAR', terminal, catraca, credencial: entrada.celularId };
+    if (!catraca) return this.negar(tentativa, 'TERMINAL_DESCONHECIDO');
+
+    // O desafio é um QR deste terminal, ainda na validade: a leitura aconteceu aqui, agora.
+    const qr = deps.qr.verificar(entrada.desafio);
+    if (!qr.ok || qr.terminalId !== terminal.id) return this.negar(tentativa, 'DESAFIO_INVALIDO');
+
+    const celular = await deps.phones.findById(entrada.celularId);
+    const dono = celular ? await deps.users.findById(celular.userId) : null;
+    if (!celular || !dono) return this.negar(tentativa, 'CELULAR_DESCONHECIDO');
+    // Até aqui o id podia ser de outra pessoa; só a assinatura prova que é o aparelho dela.
+    if (!conferirAssinatura(celular.chavePublica, entrada.desafio, entrada.assinatura)) {
+      return this.negar(tentativa, 'CELULAR_NAO_CONFIRMADO');
+    }
+
+    tentativa.user = dono;
+    if (!celular.ativo) return this.negar(tentativa, 'CELULAR_BLOQUEADO');
+    if (!dono.ativo) return this.negar(tentativa, 'USUARIO_INATIVO');
+
+    const escolha = await this.escolher(dono.id, catraca.id);
+    if (escolha.motivo) return this.negar(tentativa, escolha.motivo);
+    // A mesma assinatura não abre duas vezes. Outro celular pode usar o mesmo QR.
+    if (!(await deps.qrTokens.marcarUsado(`${qr.jti}.${celular.id}`))) return this.negar(tentativa, 'DESAFIO_INVALIDO');
     return this.liberar(tentativa, escolha.autorizacao);
   }
 

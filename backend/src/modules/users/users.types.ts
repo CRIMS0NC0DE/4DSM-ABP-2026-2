@@ -32,6 +32,8 @@ export interface NewUser {
   cpf: string;
   senhaHash: string;
   perfil: Perfil;
+  /** Padrão true. O cadastro feito pelo próprio app nasce inativo. */
+  ativo?: boolean;
 }
 
 export interface UserFilter {

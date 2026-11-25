@@ -114,7 +114,7 @@ class _HistoricoViewState extends State<HistoricoView>
             ),
           if (_filtro.metodo != null)
             InputChip(
-              label: Text(_filtro.metodo == 'NFC' ? 'Tag NFC' : 'QR Code'),
+              label: Text(rotuloDoMetodo(_filtro.metodo!)),
               onDeleted: () => _aplicar(
                 FiltroEventos(
                   periodo: _filtro.periodo,
@@ -298,6 +298,7 @@ class _FiltrosHistoricoState extends State<_FiltrosHistorico> {
                 (null, 'Todos'),
                 ('QR', 'QR Code'),
                 ('NFC', 'Tag NFC'),
+                ('CELULAR', 'Celular'),
               ],
               onMudar: (v) => setState(() => _metodo = v),
             ),

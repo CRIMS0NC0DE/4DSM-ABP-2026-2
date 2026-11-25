@@ -156,9 +156,13 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+      # Versão fixa: o stable 3.50 marcou package:flutter/material.dart como obsoleto e o
+      # flutter analyze passou a falhar sem mudança no app (CI vermelho desde 11/11).
+      # Para atualizar, troque aqui e rode o flutter analyze local com a versão nova.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.47.8
           cache: true
       - run: flutter pub get
       - name: Análise estática

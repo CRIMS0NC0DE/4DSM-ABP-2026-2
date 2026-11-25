@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/register_controller.dart';
+import '../../services/api_client.dart';
 import '../widgets/botao_acao.dart';
 import '../widgets/campo_texto.dart';
 
+/// Pedido de cadastro pelo app (POST /auth/register). O cadastro nasce
+/// desativado: depois de enviar, explica que a portaria vai liberar o acesso
+/// e volta ao login com o e-mail preenchido.
 class RegisterView extends StatefulWidget {
   final RegisterController controller;
 
@@ -22,8 +26,14 @@ class _RegisterViewState extends State<RegisterView> {
   final _senha = TextEditingController();
   final _confirmacao = TextEditingController();
 
-  /// Só valida enquanto digita depois da primeira tentativa de registrar.
+  /// Só valida enquanto digita depois da primeira tentativa de enviar.
   var _validarAoDigitar = false;
+
+  /// Esperando a API; trava o botão para não enviar duas vezes.
+  var _enviando = false;
+
+  /// Erros de cada campo que a API devolveu no 400.
+  Map<String, List<String>> _errosDaApi = const {};
 
   RegisterController get controller => widget.controller;
 
@@ -37,26 +47,67 @@ class _RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
+  String? _erroDaApi(String campo) => _errosDaApi[campo]?.first;
+
   Future<void> _registrar() async {
+    if (_enviando) return;
+    _errosDaApi = const {};
     if (!_form.currentState!.validate()) {
       setState(() => _validarAoDigitar = true);
       return;
     }
+    setState(() => _enviando = true);
     final email = _email.text.trim();
-    final erro = await controller.registrar(
-      nome: _nome.text.trim(),
-      cpf: _cpf.text.trim(),
-      email: email,
-      senha: _senha.text,
-    );
-    if (!mounted) return;
-    if (erro != null) {
-      _avisar(erro);
+    final String mensagem;
+    try {
+      mensagem = await controller.registrar(
+        nome: _nome.text.trim(),
+        cpf: _cpf.text.trim(),
+        email: email,
+        senha: _senha.text,
+      );
+    } on ApiException catch (erro) {
+      if (!mounted) return;
+      setState(() => _enviando = false);
+      if (erro.campos.isNotEmpty) {
+        _errosDaApi = erro.campos;
+        _form.currentState!.validate();
+        setState(() => _validarAoDigitar = true);
+      }
+      // Ex.: "Já existe alguém com este e-mail." ou sem conexão.
+      _avisar(erro.mensagem);
       return;
     }
-    _avisar('Conta criada. Agora é só entrar.');
+    if (!mounted) return;
+    setState(() => _enviando = false);
+    await _confirmarEnvio(mensagem, email);
     // Volta para o login com o e-mail já preenchido.
-    Navigator.of(context).maybePop(email);
+    if (mounted) Navigator.of(context).maybePop(email);
+  }
+
+  /// O pedido foi aceito, mas a conta só entra depois da portaria liberar.
+  Future<void> _confirmarEnvio(String mensagem, String email) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (contexto) => AlertDialog(
+        icon: const Icon(Icons.mark_email_read_outlined, size: 36),
+        title: const Text('Pedido enviado'),
+        content: SingleChildScrollView(
+          child: Text(
+            '$mensagem\n\nQuando a portaria liberar, entre com $email e a '
+            'senha que você acabou de criar.',
+          ),
+        ),
+        actions: [
+          FilledButton.icon(
+            onPressed: () => Navigator.of(contexto).pop(),
+            icon: const Icon(Icons.login),
+            label: const Text('Voltar ao login'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _avisar(String mensagem) {
@@ -96,10 +147,14 @@ class _RegisterViewState extends State<RegisterView> {
                           ),
                         ),
                       const SizedBox(height: 16),
-                      Text('Criar conta', style: textTheme.headlineMedium),
+                      Text(
+                        'Solicitar cadastro',
+                        style: textTheme.headlineMedium,
+                      ),
                       const SizedBox(height: 8),
                       Text(
-                        'Preencha seus dados para o primeiro acesso.',
+                        'Preencha seus dados. A portaria confere e libera '
+                        'seu acesso.',
                         style: textTheme.bodyLarge?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -111,7 +166,8 @@ class _RegisterViewState extends State<RegisterView> {
                         icone: Icons.person_outline,
                         teclado: TextInputType.name,
                         autofill: const [AutofillHints.name],
-                        validator: controller.validarNome,
+                        validator: (v) =>
+                            controller.validarNome(v) ?? _erroDaApi('nome'),
                       ),
                       const SizedBox(height: 20),
                       CampoTexto(
@@ -121,7 +177,8 @@ class _RegisterViewState extends State<RegisterView> {
                         dica: '000.000.000-00',
                         ajuda: 'Pode digitar só os números.',
                         teclado: TextInputType.number,
-                        validator: controller.validarCpf,
+                        validator: (v) =>
+                            controller.validarCpf(v) ?? _erroDaApi('cpf'),
                       ),
                       const SizedBox(height: 20),
                       CampoTexto(
@@ -131,7 +188,8 @@ class _RegisterViewState extends State<RegisterView> {
                         dica: 'seu@email.com',
                         teclado: TextInputType.emailAddress,
                         autofill: const [AutofillHints.email],
-                        validator: controller.validarEmail,
+                        validator: (v) =>
+                            controller.validarEmail(v) ?? _erroDaApi('email'),
                       ),
                       const SizedBox(height: 20),
                       CampoTexto(
@@ -144,7 +202,8 @@ class _RegisterViewState extends State<RegisterView> {
                             '${RegisterController.tamanhoMinimoSenha} '
                             'caracteres.',
                         autofill: const [AutofillHints.newPassword],
-                        validator: controller.validarSenha,
+                        validator: (v) =>
+                            controller.validarSenha(v) ?? _erroDaApi('senha'),
                       ),
                       const SizedBox(height: 20),
                       CampoTexto(
@@ -159,8 +218,9 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       const SizedBox(height: 32),
                       BotaoAcao(
-                        rotulo: 'Registrar',
+                        rotulo: _enviando ? 'Enviando…' : 'Enviar pedido',
                         icone: Icons.person_add_alt_1_outlined,
+                        carregando: _enviando,
                         onTocar: _registrar,
                       ),
                     ],

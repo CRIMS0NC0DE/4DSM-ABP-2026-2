@@ -16,8 +16,11 @@ export const dataIso = z
 
 export const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use o formato HH:MM');
 
-export const latitude = z.number().min(-90).max(90);
-export const longitude = z.number().min(-180).max(180);
+export const latitude = z.number({ message: 'Informe a latitude' }).min(-90, 'A latitude vai de -90 a 90').max(90, 'A latitude vai de -90 a 90');
+export const longitude = z
+  .number({ message: 'Informe a longitude' })
+  .min(-180, 'A longitude vai de -180 a 180')
+  .max(180, 'A longitude vai de -180 a 180');
 
 export const cpf = z
   .string()

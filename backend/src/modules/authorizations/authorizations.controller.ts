@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { authDe } from '../../shared/http/auth.js';
 import { dataIso, hora, id, idParam } from '../../shared/http/schemas.js';
 import { parse } from '../../shared/http/validate.js';
 import type { AuthorizationsService } from './authorizations.service.js';
@@ -34,7 +35,7 @@ export function authorizationsRouter(authorizations: AuthorizationsService) {
   });
 
   router.post('/', async (req, res) => {
-    res.status(201).json(await authorizations.criar(parse(criarSchema, req.body)));
+    res.status(201).json(await authorizations.criar({ ...parse(criarSchema, req.body), criadaPorId: authDe(req).userId }));
   });
 
   router.get('/:id', async (req, res) => {

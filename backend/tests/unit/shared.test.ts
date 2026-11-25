@@ -63,11 +63,11 @@ describe('QrTokenService', () => {
     expect(qr.verificar(token)).toMatchObject({ ok: true, terminalId: TERMINAL });
   });
 
-  it('cabe no modo alfanumérico de um QR versão 4 (33×33)', () => {
+  it('cabe no modo alfanumérico de um QR versão 3 (29×29), o que o OLED desenha com 2 pontos por módulo', () => {
     const { token } = criar().qr.gerar(TERMINAL);
     expect(token).toMatch(/^[0-9A-Z.]+$/);
-    // Capacidade alfanumérica da versão 4 com correção M.
-    expect(token.length).toBeLessThanOrEqual(90);
+    // Capacidade alfanumérica da versão 3 com correção L (o firmware do OLED usa L; o do TFT, M na versão 4).
+    expect(token.length).toBeLessThanOrEqual(77);
   });
 
   it('cada token tem um id único', () => {

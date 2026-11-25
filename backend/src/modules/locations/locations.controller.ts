@@ -9,6 +9,8 @@ const nome = z.string().trim().min(1, 'Informe o nome');
 const edificioSchema = z.object({ nome, endereco: z.string().trim().min(1, 'Informe o endereço') });
 const portariaSchema = z.object({ nome, buildingId: id });
 const portaSchema = z.object({ nome, gateId: id });
+// Editar portaria e porta muda só o nome: para mudar de lugar, apague e crie de novo.
+const renomearSchema = z.object({ nome: nome.optional() });
 const catracaSchema = z.object({
   nome,
   doorId: id,
@@ -17,7 +19,7 @@ const catracaSchema = z.object({
   raioMetros: z.number().int().min(10).max(1000).default(100),
 });
 
-/** RF02. Leitura para a equipe; criar e editar só o admin (somenteAdmin). */
+/** RF02. Leitura para a equipe; criar, editar e apagar só o admin (somenteAdmin). */
 export function locationsRouter(locations: LocationsService, somenteAdmin: RequestHandler) {
   const router = Router();
 
@@ -48,6 +50,42 @@ export function locationsRouter(locations: LocationsService, somenteAdmin: Reque
   router.patch('/access-points/:id', somenteAdmin, async (req, res) => {
     const { id: catracaId } = parse(idParam, req.params);
     res.json(await locations.atualizarCatraca(catracaId, parse(catracaSchema.partial(), req.body)));
+  });
+
+  router.patch('/buildings/:id', somenteAdmin, async (req, res) => {
+    const { id: edificioId } = parse(idParam, req.params);
+    res.json(await locations.atualizarEdificio(edificioId, parse(edificioSchema.partial(), req.body)));
+  });
+
+  router.patch('/gates/:id', somenteAdmin, async (req, res) => {
+    const { id: portariaId } = parse(idParam, req.params);
+    res.json(await locations.atualizarPortaria(portariaId, parse(renomearSchema, req.body)));
+  });
+
+  router.patch('/doors/:id', somenteAdmin, async (req, res) => {
+    const { id: portaId } = parse(idParam, req.params);
+    res.json(await locations.atualizarPorta(portaId, parse(renomearSchema, req.body)));
+  });
+
+  // Só apaga o que está vazio (409 se não); o histórico de acessos nunca é apagado.
+  router.delete('/buildings/:id', somenteAdmin, async (req, res) => {
+    await locations.apagarEdificio(parse(idParam, req.params).id);
+    res.status(204).end();
+  });
+
+  router.delete('/gates/:id', somenteAdmin, async (req, res) => {
+    await locations.apagarPortaria(parse(idParam, req.params).id);
+    res.status(204).end();
+  });
+
+  router.delete('/doors/:id', somenteAdmin, async (req, res) => {
+    await locations.apagarPorta(parse(idParam, req.params).id);
+    res.status(204).end();
+  });
+
+  router.delete('/access-points/:id', somenteAdmin, async (req, res) => {
+    await locations.apagarCatraca(parse(idParam, req.params).id);
+    res.status(204).end();
   });
 
   return router;

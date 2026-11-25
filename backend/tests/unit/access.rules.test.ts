@@ -20,6 +20,7 @@ const base: Authorization = {
   usosRealizados: 3,
   status: 'ATIVA',
   canceladaEm: null,
+  criadaPorId: null,
   createdAt: new Date(),
 };
 

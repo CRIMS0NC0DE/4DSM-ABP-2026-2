@@ -81,9 +81,18 @@ void main() {
     expect(find.text('E-mail ou CPF'), findsOneWidget);
     expect(find.text('Senha'), findsOneWidget);
     expect(_botaoEntrar, findsOneWidget);
-    expect(find.text('Entrar com NFC'), findsOneWidget);
     expect(find.text('Esqueci minha senha'), findsOneWidget);
-    expect(find.text('Registrar'), findsOneWidget);
+    expect(find.text('Solicitar cadastro'), findsOneWidget);
+  });
+
+  testWidgets('Não tem mais o botão de entrar com NFC', (
+    WidgetTester tester,
+  ) async {
+    // A API não tem login por NFC: a tag funciona direto na catraca.
+    await tester.pumpWidget(MaterialApp(home: _login()));
+
+    expect(find.text('Entrar com NFC'), findsNothing);
+    expect(find.byIcon(Icons.contactless_outlined), findsNothing);
   });
 
   testWidgets('Entrar sem preencher mostra os erros e não chama o controller', (
@@ -150,6 +159,25 @@ void main() {
     expect(find.text('E-mail, CPF ou senha não conferem.'), findsOneWidget);
     expect(find.byType(LoginView), findsOneWidget);
     expect(find.byType(AdminMenuView), findsNothing);
+    expect(SessaoService.instancia.token, isNull);
+  });
+
+  testWidgets('Cadastro ainda não liberado mostra a mensagem da API', (
+    WidgetTester tester,
+  ) async {
+    // Quem pediu o cadastro pelo app só entra depois que a portaria liberar.
+    const mensagem =
+        'Seu cadastro está desativado ou ainda não foi liberado. '
+        'Fale com a portaria.';
+    final cliente = MockClient(
+      (request) async => erroDaApi(401, 'CADASTRO_DESATIVADO', mensagem),
+    );
+    await tester.pumpWidget(MaterialApp(home: _login(cliente: cliente)));
+
+    await _entrarCom(tester, 'maria@email.com', 'segredo123');
+
+    expect(find.text(mensagem), findsOneWidget);
+    expect(find.byType(LoginView), findsOneWidget);
     expect(SessaoService.instancia.token, isNull);
   });
 
@@ -238,13 +266,13 @@ void main() {
     expect(senhaOculta(), isTrue);
   });
 
-  testWidgets('Registrar abre a tela de criar conta', (
+  testWidgets('Solicitar cadastro abre o pedido de cadastro', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(MaterialApp(home: _login()));
 
-    await tester.ensureVisible(find.text('Registrar'));
-    await tester.tap(find.text('Registrar'));
+    await tester.ensureVisible(find.text('Solicitar cadastro'));
+    await tester.tap(find.text('Solicitar cadastro'));
     await tester.pumpAndSettle();
 
     expect(find.byType(RegisterView), findsOneWidget);
@@ -284,7 +312,7 @@ void main() {
     await tester.pump();
     await tester.tap(_botaoEntrar);
     await tester.pump();
-    await tester.ensureVisible(find.text('Registrar'));
+    await tester.ensureVisible(find.text('Solicitar cadastro'));
     await tester.pump();
 
     // Se algo estourasse, o Flutter lançaria um erro de overflow.

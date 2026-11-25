@@ -19,8 +19,12 @@ model User {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   eventos      AccessEvent[]
-  autorizacoes Authorization[]
+  autorizacoes Authorization[] @relation("AutorizacaoDoUsuario")
   tags         NfcTag[]
+  celulares    NfcPhone[]
+  /// Autorizações que a pessoa criou (o morador em "Meus visitantes").
+  convites     Authorization[] @relation("AutorizacaoCriadaPor")
+  comunicados  Comunicado[]
 
   @@map("users")
 }
@@ -34,6 +38,21 @@ model NfcTag {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("nfc_tags")
+}
+
+/// Celular Android que faz o papel de tag (HCE). O app gera um par de chaves
+/// EC P-256 no Keystore do aparelho e só a chave pública vem para cá.
+model NfcPhone {
+  id           String   @id @default(uuid())
+  userId       String
+  nome         String
+  chavePublica String   @unique
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("nfc_phones")
 }
 
 model Building {
@@ -106,13 +125,17 @@ model Authorization {
   usosRealizados Int               @default(0)
   status         StatusAutorizacao @default(ATIVA)
   canceladaEm    DateTime?
+  /// Quem criou: a equipe ou o morador que convidou o visitante. Null nas antigas.
+  criadaPorId    String?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   eventos        AccessEvent[]
   catraca        AccessPoint       @relation(fields: [accessPointId], references: [id], onDelete: Cascade)
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User              @relation("AutorizacaoDoUsuario", fields: [userId], references: [id], onDelete: Cascade)
+  criadaPor      User?             @relation("AutorizacaoCriadaPor", fields: [criadaPorId], references: [id], onDelete: SetNull)
 
   @@index([userId, accessPointId])
+  @@index([criadaPorId])
   @@map("authorizations")
 }
 
@@ -139,6 +162,32 @@ model AccessEvent {
   @@map("access_events")
 }
 
+/// Aviso do admin para quem usa o prédio.
+model Comunicado {
+  id        String   @id @default(uuid())
+  titulo    String
+  mensagem  String
+  autorId   String?
+  createdAt DateTime @default(now())
+  autor     User?    @relation(fields: [autorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("comunicados")
+}
+
+/// Regras do condomínio. Uma linha só (id = 1), criada pela migration.
+model Configuracao {
+  id                  Int      @id @default(1)
+  nomeCondominio      String   @default("Condomínio")
+  contatoPortaria     String   @default("Fale com a portaria pelo interfone.")
+  moradorPodeConvidar Boolean  @default(true)
+  visitanteMaxUsos    Int      @default(2)
+  visitanteDiasMax    Int      @default(7)
+  updatedAt           DateTime @default(now()) @updatedAt
+
+  @@map("configuracoes")
+}
+
 model UsedQrToken {
   jti    String   @id
   usedAt DateTime @default(now())
@@ -161,6 +210,7 @@ enum StatusAutorizacao {
 enum MetodoAcesso {
   QR
   NFC
+  CELULAR
 }
 
 enum ResultadoAcesso {

@@ -92,6 +92,16 @@ export function createPrismaRepositories(db: Prisma): Repositories {
       createDoor: (data) => db.door.create({ data }),
       createAccessPoint: (data) => db.accessPoint.create({ data }),
       updateAccessPoint: (id, data) => db.accessPoint.update({ where: { id }, data }),
+      updateBuilding: (id, data) => db.building.update({ where: { id }, data }),
+      updateGate: (id, data) => db.gate.update({ where: { id }, data }),
+      updateDoor: (id, data) => db.door.update({ where: { id }, data }),
+      // A condição vai no próprio DELETE: se um filho aparecer depois da conferência, o cascade não o leva junto.
+      removeBuilding: async (id) => (await db.building.deleteMany({ where: { id, portarias: { none: {} } } })).count === 1,
+      removeGate: async (id) => (await db.gate.deleteMany({ where: { id, portas: { none: {} } } })).count === 1,
+      removeDoor: async (id) => (await db.door.deleteMany({ where: { id, catracas: { none: {} } } })).count === 1,
+      // Os eventos ficam: a chave estrangeira é ON DELETE SET NULL.
+      removeAccessPoint: async (id) =>
+        (await db.accessPoint.deleteMany({ where: { id, terminal: { is: null }, autorizacoes: { none: {} } } })).count === 1,
       findBuilding: (id) => db.building.findUnique({ where: { id } }),
       findGate: (id) => db.gate.findUnique({ where: { id } }),
       findDoor: (id) => db.door.findUnique({ where: { id } }),
@@ -106,12 +116,34 @@ export function createPrismaRepositories(db: Prisma): Repositories {
       },
     },
 
+    phones: {
+      findById: (id) => db.nfcPhone.findUnique({ where: { id } }),
+      findByChave: (chavePublica) => db.nfcPhone.findUnique({ where: { chavePublica } }),
+      listByUser: (userId) => db.nfcPhone.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      create: (data) => db.nfcPhone.create({ data }),
+      update: async (id, data) => {
+        try {
+          return await db.nfcPhone.update({ where: { id }, data });
+        } catch (erro) {
+          if ((erro as { code?: string }).code === 'P2025') throw notFound('Celular');
+          throw erro;
+        }
+      },
+      remove: async (id) => {
+        await db.nfcPhone.deleteMany({ where: { id } });
+      },
+    },
+
     terminals: {
       create: (data) => db.terminal.create({ data }),
       findById: (id) => db.terminal.findUnique({ where: { id } }),
       findByAccessPoint: (accessPointId) => db.terminal.findUnique({ where: { accessPointId } }),
       list: () => db.terminal.findMany({ orderBy: { nome: 'asc' } }),
       update: (id, data) => db.terminal.update({ where: { id }, data }),
+      // Os eventos ficam (terminalId vira null pela chave estrangeira ON DELETE SET NULL).
+      remove: async (id) => {
+        await db.terminal.deleteMany({ where: { id } });
+      },
     },
 
     authorizations: {
@@ -134,6 +166,7 @@ export function createPrismaRepositories(db: Prisma): Repositories {
           where: {
             userId: f.userId,
             accessPointId: f.accessPointId,
+            criadaPorId: f.criadaPorId,
             AND: [
               f.situacao === 'CANCELADA' ? { status: 'CANCELADA' } : {},
               dentroDaData ? { status: 'ATIVA', dataFim: { gte: hoje } } : {},
@@ -197,6 +230,27 @@ export function createPrismaRepositories(db: Prisma): Repositories {
         const negados = contar('NEGADO');
         return { itens, total: liberados + negados, liberados, negados };
       },
+      listForReport: (f) =>
+        db.accessEvent.findMany({
+          where: { accessPointId: f.accessPointId, createdAt: { gte: f.de, lte: f.ate } },
+          select: { createdAt: true, resultado: true, metodo: true, motivo: true, accessPointId: true, catraca: { select: { nome: true } } },
+        }),
+    },
+
+    announcements: {
+      list: (limite) =>
+        db.comunicado.findMany({ include: { autor: { select: { id: true, nome: true } } }, orderBy: { createdAt: 'desc' }, take: limite }),
+      create: (data) => db.comunicado.create({ data, include: { autor: { select: { id: true, nome: true } } } }),
+      findById: (id) => db.comunicado.findUnique({ where: { id } }),
+      remove: async (id) => {
+        await db.comunicado.deleteMany({ where: { id } });
+      },
+    },
+
+    settings: {
+      // A migration cria a linha; o upsert cobre um banco em que ela foi apagada.
+      get: () => db.configuracao.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } }),
+      update: (data) => db.configuracao.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } }),
     },
 
     qrTokens: {
