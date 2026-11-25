@@ -79,6 +79,13 @@ class ApiClient {
 
   Future<dynamic> delete(String caminho) => _enviar('DELETE', caminho);
 
+  /// Com API_URL relativo (ex.: "/api"), a API fica no mesmo endereço de onde
+  /// o app web foi aberto. É o que o scripts/app-no-celular.sh usa: o mesmo
+  /// build serve em qualquer rede, sem gravar o IP do computador no app.
+  Uri _endereco(String caminho) => baseUrl.startsWith('/')
+      ? Uri.base.resolve('$baseUrl$caminho')
+      : Uri.parse('$baseUrl$caminho');
+
   Future<dynamic> _enviar(
     String metodo,
     String caminho, {
@@ -87,7 +94,7 @@ class ApiClient {
   }) async {
     final request = http.Request(
       metodo,
-      Uri.parse('$baseUrl$caminho').replace(queryParameters: query),
+      _endereco(caminho).replace(queryParameters: query),
     );
     request.headers['Accept'] = 'application/json';
     final token = _sessao.token;

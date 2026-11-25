@@ -118,7 +118,7 @@ async function buscarQr() {
 }
 
 function desenharQr(texto) {
-  // O token só tem A-Z, 0-9 e ponto: o modo alfanumérico deixa o QR menor (versão 4).
+  // O token só tem A-Z, 0-9 e ponto: o modo alfanumérico deixa o QR menor (versão 4 com correção M).
   const qr = window.qrcode(0, 'M');
   qr.addData(texto, /^[0-9A-Z $%*+\-./:]+$/.test(texto) ? 'Alphanumeric' : 'Byte');
   qr.make();

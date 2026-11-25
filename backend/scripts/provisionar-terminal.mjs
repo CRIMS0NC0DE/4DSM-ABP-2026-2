@@ -10,6 +10,9 @@
 // A chave só aparece uma vez. O script já a grava onde ela é usada:
 //   - arduino/include/credenciais.h   (TERMINAL_ID e TERMINAL_KEY, fora do git)
 //   - docker/mosquitto/passwd          (login do terminal no broker)
+//   - .env da raiz (TERMINAL_DEMO_KEY, fora do git), só para o terminal de demonstração:
+//     o seed roda a cada subida do backend no Docker e grava essa chave no banco. Sem isso,
+//     a chave trocada voltava a ser a do seed e o ESP32 ficava em "Sem servidor" (401).
 // Depois: reinicie o broker e grave o firmware.
 //
 // Variáveis: API_URL (padrão http://localhost:3000), ADMIN_LOGIN, ADMIN_SENHA.
@@ -22,6 +25,8 @@ const RAIZ = new URL('../../', import.meta.url);
 const CREDENCIAIS = new URL('arduino/include/credenciais.h', RAIZ);
 const EXEMPLO = new URL('arduino/include/credenciais.exemplo.h', RAIZ);
 const PASSWD = new URL('docker/mosquitto/passwd', RAIZ);
+const ENV_RAIZ = new URL('.env', RAIZ);
+const TERMINAL_DEMO = '00000000-0000-4000-8000-000000000005';
 
 const { values: args } = parseArgs({
   options: {
@@ -58,16 +63,27 @@ function gravarCredenciais(terminal) {
     .replace(/#define TERMINAL_KEY .*/, `#define TERMINAL_KEY "${terminal.chave}"`);
   writeFileSync(CREDENCIAIS, texto);
   gravarSenha(PASSWD, terminal.id, terminal.chave);
+  if (terminal.id === TERMINAL_DEMO) gravarChaveDemo(terminal.chave);
   console.info(`
 Terminal "${terminal.nome}" pronto.
   TERMINAL_ID  = ${terminal.id}
   TERMINAL_KEY = ${terminal.chave}
-Gravado em arduino/include/credenciais.h e docker/mosquitto/passwd.
+Gravado em arduino/include/credenciais.h e docker/mosquitto/passwd${terminal.id === TERMINAL_DEMO ? ' e no .env da raiz (TERMINAL_DEMO_KEY)' : ''}.
 
 Próximos passos:
-  1. docker compose -f docker-compose.dev.yml restart mqtt
+  1. docker compose -f docker-compose.dev.yml restart mqtt${terminal.id === TERMINAL_DEMO ? '\n     docker compose -f docker-compose.dev.yml up -d backend   (lê o TERMINAL_DEMO_KEY novo)' : ''}
   2. Ajuste Wi-Fi e endereços em arduino/include/credenciais.h e grave o ESP32 (pio run -t upload)
   3. O terminal aparece como online depois do primeiro heartbeat (rode este script sem argumentos)`);
+}
+
+/** Guarda a chave do terminal de demonstração para o seed não voltar à chave padrão. */
+function gravarChaveDemo(chave) {
+  const linhas = existsSync(ENV_RAIZ)
+    ? readFileSync(ENV_RAIZ, 'utf8')
+        .split('\n')
+        .filter((l) => l.trim() && !l.startsWith('TERMINAL_DEMO_KEY='))
+    : [];
+  writeFileSync(ENV_RAIZ, [...linhas, `TERMINAL_DEMO_KEY=${chave}`].join('\n') + '\n');
 }
 
 const { token } = await chamar('POST', '/auth/login', {

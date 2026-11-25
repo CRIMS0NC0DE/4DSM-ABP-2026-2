@@ -1,23 +1,26 @@
 import 'package:flutter/foundation.dart';
 
-import '../services/api_client.dart';
 import '../services/auth_service.dart';
 
-/// Tela de primeiro acesso (criar conta).
-/// A API ainda não tem cadastro público (ver AuthService.registrar), então
-/// por enquanto a tela avisa para pedir o cadastro na portaria.
+/// Tela de pedido de cadastro (POST /auth/register). O cadastro nasce
+/// desativado: a portaria libera o acesso em Usuários, e só então a pessoa
+/// consegue entrar.
 class RegisterController {
   RegisterController({AuthService? auth})
     : _auth = auth ?? AuthService.instancia;
 
   final AuthService _auth;
 
-  static const tamanhoMinimoSenha = 8;
+  // Mesmas regras da rota de cadastro do backend.
+  static const tamanhoMinimoNome = 3;
+  static const tamanhoMinimoSenha = 6;
   static final _email = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
   String? validarNome(String? valor) {
-    if (valor == null || valor.trim().isEmpty) {
-      return 'Informe seu nome completo.';
+    final nome = valor?.trim() ?? '';
+    if (nome.isEmpty) return 'Informe seu nome completo.';
+    if (nome.length < tamanhoMinimoNome) {
+      return 'O nome precisa ter pelo menos $tamanhoMinimoNome letras.';
     }
     return null;
   }
@@ -50,19 +53,16 @@ class RegisterController {
     return null;
   }
 
-  /// Devolve a mensagem de erro, ou null se a conta foi criada.
-  Future<String?> registrar({
+  /// Envia o pedido e devolve a mensagem para a tela, ex.: "Pedido enviado.
+  /// A portaria vai liberar seu acesso.". Lança ApiException com a mensagem
+  /// da API (e-mail ou CPF já cadastrado, campos inválidos, sem conexão).
+  Future<String> registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
-  }) async {
-    debugPrint('Registrando $nome ($email)...');
-    try {
-      await _auth.registrar(nome: nome, cpf: cpf, email: email, senha: senha);
-      return null;
-    } on ApiException catch (erro) {
-      return erro.mensagem;
-    }
+  }) {
+    debugPrint('Enviando pedido de cadastro de $email...');
+    return _auth.registrar(nome: nome, cpf: cpf, email: email, senha: senha);
   }
 }

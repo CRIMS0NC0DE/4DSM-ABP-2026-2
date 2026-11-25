@@ -21,6 +21,8 @@ export interface Authorization {
   usosRealizados: number;
   status: StatusAutorizacao;
   canceladaEm: Date | null;
+  /** Quem criou: a equipe ou o morador que convidou o visitante. Null nas antigas. */
+  criadaPorId: string | null;
   createdAt: Date;
 }
 
@@ -33,10 +35,12 @@ export type AuthorizationWithRefs = Authorization & {
 export type NewAuthorization = Pick<
   Authorization,
   'userId' | 'accessPointId' | 'dataInicio' | 'dataFim' | 'horaInicio' | 'horaFim' | 'maxUsos'
->;
+> & { criadaPorId?: string | null };
 
 export interface AuthorizationFilter {
   userId?: string;
+  /** As criadas por esta pessoa ("Meus visitantes"). */
+  criadaPorId?: string;
   accessPointId?: string;
   /**
    * O repositório pré-filtra pelo status e pela data: "EXPIRADA" = não cancelada e já passou;

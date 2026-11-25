@@ -35,6 +35,14 @@ export interface EventFilter {
   pular: number;
 }
 
+/** O filtro como chega das rotas: só a data (YYYY-MM-DD) vale pelo dia inteiro no fuso do prédio. */
+export type FiltroEventos = Omit<EventFilter, 'de' | 'ate'> & { de?: Date | string; ate?: Date | string };
+
+/** O mínimo de cada evento que o relatório agrupa. */
+export type LinhaRelatorio = Pick<AccessEvent, 'createdAt' | 'resultado' | 'metodo' | 'motivo' | 'accessPointId'> & {
+  catraca: { nome: string } | null;
+};
+
 export interface EventPage {
   itens: AccessEventView[];
   total: number;
@@ -50,6 +58,8 @@ export type EventPageComTexto = Omit<EventPage, 'itens'> & { itens: AccessEventC
 export interface EventsRepository {
   create(data: NewAccessEvent): Promise<AccessEvent>;
   list(filter: EventFilter): Promise<EventPage>;
+  /** Todos os eventos do período, sem paginar (relatório). */
+  listForReport(filter: { de: Date; ate: Date; accessPointId?: string }): Promise<LinhaRelatorio[]>;
 }
 
 /** Guarda os QR já usados para que não sirvam de novo. */

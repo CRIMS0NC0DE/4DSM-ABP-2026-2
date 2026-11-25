@@ -5,14 +5,18 @@ import helmet from 'helmet';
 import { z } from 'zod';
 import type { Container } from './container.js';
 import { accessRouter } from './modules/access/access.controller.js';
+import { announcementsRouter } from './modules/announcements/announcements.controller.js';
 import { authRouter } from './modules/auth/auth.controller.js';
 import { authorizationsRouter } from './modules/authorizations/authorizations.controller.js';
 import { eventsRouter, filtroEventosSchema } from './modules/events/events.controller.js';
 import { locationsRouter } from './modules/locations/locations.controller.js';
 import { celularesDaEquipeRouter, meusCelularesRouter } from './modules/phones/phones.controller.js';
+import { reportsRouter } from './modules/reports/reports.controller.js';
 import { deviceRouter, terminalsRouter } from './modules/terminals/terminals.controller.js';
 import { usersRouter } from './modules/users/users.controller.js';
+import { settingsRouter } from './modules/settings/settings.controller.js';
 import { simuladorRouter } from './modules/simulador/simulador.router.js';
+import { visitorsRouter } from './modules/visitors/visitors.controller.js';
 import { PERFIS_EQUIPE } from './modules/users/users.types.js';
 import { toLocal } from './shared/clock.js';
 import { authDe, autenticar, autenticarTerminal, exigirPerfil } from './shared/http/auth.js';
@@ -40,9 +44,14 @@ export function createApp(c: Container) {
   // App: qualquer pessoa logada
   app.use('/auth', authRouter(services.auth, services.users, autenticado));
   app.use('/me/phones', autenticado, meusCelularesRouter(services.phones));
+  // "Meus visitantes": só o morador convida (o visitante não convida outro visitante).
+  app.use('/me/visitors', autenticado, exigirPerfil('CONDOMINO'), visitorsRouter(services.visitors));
   app.use('/me', autenticado, meRouter(c));
   // Quem foi desativado também passa: a validação nega com USUARIO_INATIVO e registra a tentativa (RF17).
   app.use('/access', autenticar(c.config.jwtSecret, c.repos.users, { aceitarInativo: true }), accessRouter(services.access));
+  // Todos leem; só o admin publica comunicados e muda as configurações.
+  app.use('/announcements', autenticado, announcementsRouter(services.announcements, somenteAdmin));
+  app.use('/settings', autenticado, settingsRouter(services.settings, somenteAdmin));
 
   // App: administração (admin e portaria)
   app.use('/users/:id/phones', ...equipe, celularesDaEquipeRouter(services.phones));
@@ -50,6 +59,7 @@ export function createApp(c: Container) {
   app.use('/locations', ...equipe, locationsRouter(services.locations, somenteAdmin));
   app.use('/authorizations', ...equipe, authorizationsRouter(services.authorizations));
   app.use('/access-events', ...equipe, eventsRouter(services.events));
+  app.use('/reports', ...equipe, reportsRouter(services.reports));
   app.use('/terminals', ...equipe, terminalsRouter(services.terminals, somenteAdmin));
   app.get('/dashboard', ...equipe, async (_req, res) => {
     const meiaNoite = inicioDoDia(c);

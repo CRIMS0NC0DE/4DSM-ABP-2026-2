@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/resident_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
+import 'package:public/views/resident/meus_visitantes_view.dart';
 import 'package:public/views/resident/resident_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 import 'package:public/views/user/minha_tag_view.dart';
@@ -87,7 +88,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tocar numa opção chama o controller e avisa', (
+  testWidgets('Meus visitantes abre a lista de convites do morador', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -98,10 +99,11 @@ void main() {
     await tester.scrollUntilVisible(find.text('Meus visitantes'), 200);
     await tester.pump();
     await tester.tap(find.text('Meus visitantes'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(controller.abertas, ['Meus visitantes']);
-    expect(find.text('Meus visitantes: tela em construção.'), findsOneWidget);
+    expect(find.byType(MeusVisitantesView), findsOneWidget);
+    expect(find.textContaining('em construção'), findsNothing);
   });
 
   testWidgets('Minha tag NFC abre com a opção de bloquear', (

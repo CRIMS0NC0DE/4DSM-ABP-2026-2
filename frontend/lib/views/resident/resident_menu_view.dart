@@ -12,7 +12,7 @@ import '../user/celular_chave_view.dart';
 import '../user/minha_tag_view.dart';
 import '../user/perfil_view.dart';
 import '../widgets/menu_grade.dart';
-
+import 'meus_visitantes_view.dart';
 
 class ResidentMenuView extends StatelessWidget {
   final ResidentMenuController controller;
@@ -27,6 +27,7 @@ class ResidentMenuView extends StatelessWidget {
       'Minhas autorizações' => MinhasAutorizacoesView(),
       'Histórico de acessos' => HistoricoView(daEquipe: false),
       'Acessos negados' => HistoricoView(daEquipe: false, soNegados: true),
+      'Meus visitantes' => MeusVisitantesView(),
       'Minha tag NFC' => MinhaTagView(podeBloquear: true),
       'Celular como chave' => CelularChaveView(),
       'Perfil' => PerfilView(),
@@ -44,7 +45,6 @@ class ResidentMenuView extends StatelessWidget {
         SnackBar(content: Text('${opcao.titulo}: tela em construção.')),
       );
   }
-
 
   /// Volta para o login; a tela de carregamento limpa o histórico, para o
   /// Voltar não reabrir o menu.

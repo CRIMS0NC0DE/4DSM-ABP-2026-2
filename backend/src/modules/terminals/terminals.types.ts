@@ -14,4 +14,6 @@ export interface TerminalsRepository {
   findByAccessPoint(accessPointId: string): Promise<Terminal | null>;
   list(): Promise<Terminal[]>;
   update(id: string, data: Partial<Omit<Terminal, 'id' | 'accessPointId'>>): Promise<Terminal>;
+  /** Os eventos do terminal ficam no histórico, sem o terminal. */
+  remove(id: string): Promise<void>;
 }

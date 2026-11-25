@@ -11,6 +11,7 @@ import 'package:public/controllers/locais_controller.dart';
 import 'package:public/controllers/minhas_autorizacoes_controller.dart';
 import 'package:public/controllers/painel_controller.dart';
 import 'package:public/controllers/perfil_controller.dart';
+import 'package:public/controllers/relatorios_controller.dart';
 import 'package:public/controllers/terminais_controller.dart';
 import 'package:public/controllers/usuarios_controller.dart';
 import 'package:public/models/autorizacao.dart';
@@ -160,6 +161,44 @@ const _eventoLiberado = {
   'catraca': {'id': 'c1', 'nome': 'Catraca 1'},
 };
 
+// GET /reports/access como no contrato: 30 dias, com dias zerados.
+final _relatorio = {
+  'de': '2026-10-27',
+  'ate': '2026-11-25',
+  'total': 1234,
+  'liberados': 1000,
+  'negados': 234,
+  'porDia': [
+    for (var i = 0; i < 30; i++)
+      {
+        'dia': DateTime(2026, 10, 27 + i).toIso8601String().substring(0, 10),
+        'liberados': i.isEven ? 40 + i : 0,
+        'negados': i % 3 == 0 ? 9 : 0,
+      },
+  ],
+  'porMetodo': [
+    {'metodo': 'QR', 'liberados': 700, 'negados': 200},
+    {'metodo': 'NFC', 'liberados': 290, 'negados': 30},
+    {'metodo': 'CELULAR', 'liberados': 10, 'negados': 4},
+  ],
+  'porCatraca': [
+    {
+      'catraca': {'id': _idCatraca, 'nome': 'Catraca 1'},
+      'liberados': 1000,
+      'negados': 200,
+    },
+    {'catraca': null, 'liberados': 0, 'negados': 34},
+  ],
+  'porMotivo': [
+    {
+      'motivo': 'FORA_DO_HORARIO',
+      'titulo': 'Fora do horário permitido',
+      'total': 200,
+    },
+    {'motivo': 'QR_INVALIDO', 'titulo': 'QR Code não reconhecido', 'total': 34},
+  ],
+};
+
 /// GPS de mentira: devolve sempre a mesma [posicao] (null = sem permissão).
 class _LocalizacaoFalsa extends LocalizacaoService {
   _LocalizacaoFalsa(this.posicao);
@@ -197,9 +236,11 @@ MockClient _api({List<http.Request>? chamadas, int? statusFixo}) {
       'POST /users' => respostaJson(_ana, 201),
       'PATCH /users/u-maria' => respostaJson(_maria, 200),
       'GET /locations' => respostaJson(_arvore, 200),
+      'GET /reports/access' => respostaJson(_relatorio, 200),
       'POST /locations/access-points' => respostaJson(_catraca, 201),
       'PATCH /locations/access-points/$_idCatraca' => respostaJson(_catraca, 200),
       'GET /terminals' => respostaJson([_terminal], 200),
+      'DELETE /terminals/t1' => http.Response('', 204),
       'GET /authorizations' => respostaJson([
         for (final a in [
           autorizacaoJson(),
@@ -299,9 +340,8 @@ Map<String, Widget Function(http.Client)> _telas() {
     'Tags NFC': (c) => TagsView(controller: UsuariosController(api: api(c))),
     'Terminais': (c) =>
         TerminaisView(controller: TerminaisController(api: api(c))),
-    'Relatórios': (c) => RelatoriosView(
-      controller: HistoricoController(daEquipe: true, api: api(c)),
-    ),
+    'Relatórios': (c) =>
+        RelatoriosView(controller: RelatoriosController(api: api(c))),
     'Perfil': (c) => PerfilView(controller: PerfilController(api: api(c))),
     'Minha tag': (c) => MinhaTagView(
       podeBloquear: true,
@@ -920,6 +960,33 @@ void main() {
       );
       expect(find.text('Novo terminal'), findsOneWidget);
       expect(find.text('Trocar chave'), findsOneWidget);
+      expect(find.text('Remover'), findsOneWidget);
+    });
+
+    testWidgets('Admin remove o terminal depois de confirmar', (tester) async {
+      final auth = authFalso();
+      await auth.entrar('admin@passe.com', senhaDemo);
+      final chamadas = <http.Request>[];
+      await _abrir(
+        tester,
+        TerminaisView(
+          controller: TerminaisController(
+            api: ApiClient(cliente: _api(chamadas: chamadas)),
+            auth: auth,
+          ),
+        ),
+      );
+      await tester.tap(find.text('Remover'));
+      await tester.pumpAndSettle();
+      expect(find.text('Remover o terminal?'), findsOneWidget);
+      await tester.tap(find.text('Remover').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        chamadas.map((r) => '${r.method} ${r.url.path}'),
+        contains('DELETE /terminals/t1'),
+      );
+      expect(find.text('Terminal Catraca 1 removido.'), findsOneWidget);
     });
 
     testWidgets('Portaria não vê cadastrar nem trocar chave', (tester) async {
@@ -936,6 +1003,7 @@ void main() {
       );
       expect(find.text('Novo terminal'), findsNothing);
       expect(find.text('Trocar chave'), findsNothing);
+      expect(find.text('Remover'), findsNothing);
     });
   });
 

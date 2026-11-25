@@ -1,10 +1,11 @@
+import { fimDoDiaLocal, inicioDoDiaLocal } from '../../shared/clock.js';
 import { MOTIVOS, type MotivoNegacao } from '../access/access.rules.js';
 import type {
   AccessEventComTexto,
   AccessEventView,
-  EventFilter,
   EventPageComTexto,
   EventsRepository,
+  FiltroEventos,
 } from './events.types.js';
 
 function comTexto(evento: AccessEventView): AccessEventComTexto {
@@ -14,10 +15,19 @@ function comTexto(evento: AccessEventView): AccessEventComTexto {
 
 /** RF06: histórico das tentativas de acesso. */
 export class EventsService {
-  constructor(private readonly events: EventsRepository) {}
+  constructor(
+    private readonly events: EventsRepository,
+    private readonly timezone: string,
+  ) {}
 
-  async listar(filtro: EventFilter): Promise<EventPageComTexto> {
-    const pagina = await this.events.list(filtro);
+  async listar(filtro: FiltroEventos): Promise<EventPageComTexto> {
+    // "ate=2026-10-14" vale até 23:59:59.999 no fuso do prédio, e não só até a meia-noite UTC que abre o dia.
+    const { de, ate } = filtro;
+    const pagina = await this.events.list({
+      ...filtro,
+      de: typeof de === 'string' ? inicioDoDiaLocal(de, this.timezone) : de,
+      ate: typeof ate === 'string' ? fimDoDiaLocal(ate, this.timezone) : ate,
+    });
     return { ...pagina, itens: pagina.itens.map(comTexto) };
   }
 

@@ -25,6 +25,11 @@ export function terminalsRouter(terminals: TerminalsService, somenteAdmin: Reque
     res.json(await terminals.trocarChave(parse(idParam, req.params).id));
   });
 
+  router.delete('/:id', somenteAdmin, async (req, res) => {
+    await terminals.remover(parse(idParam, req.params).id);
+    res.status(204).end();
+  });
+
   return router;
 }
 

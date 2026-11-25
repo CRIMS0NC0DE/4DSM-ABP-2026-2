@@ -1,5 +1,7 @@
 import type { Clock } from './shared/clock.js';
 import { AccessService } from './modules/access/access.service.js';
+import { AnnouncementsService } from './modules/announcements/announcements.service.js';
+import type { AnnouncementsRepository } from './modules/announcements/announcements.types.js';
 import { AuthService } from './modules/auth/auth.service.js';
 import type { AuthorizationsRepository } from './modules/authorizations/authorizations.types.js';
 import { AuthorizationsService } from './modules/authorizations/authorizations.service.js';
@@ -9,6 +11,9 @@ import type { LocationsRepository } from './modules/locations/locations.types.js
 import { LocationsService } from './modules/locations/locations.service.js';
 import { PhonesService } from './modules/phones/phones.service.js';
 import type { PhonesRepository } from './modules/phones/phones.types.js';
+import { ReportsService } from './modules/reports/reports.service.js';
+import { SettingsService } from './modules/settings/settings.service.js';
+import type { SettingsRepository } from './modules/settings/settings.types.js';
 import type { SimuladorConfig } from './modules/simulador/simulador.router.js';
 import { QrTokenService } from './modules/terminals/qr-token.js';
 import { CompositeTerminalNotifier, InMemoryTerminalNotifier, type TerminalNotifier } from './modules/terminals/terminal-notifier.js';
@@ -16,6 +21,7 @@ import type { TerminalsRepository } from './modules/terminals/terminals.types.js
 import { TerminalsService } from './modules/terminals/terminals.service.js';
 import type { UsersRepository } from './modules/users/users.types.js';
 import { UsersService } from './modules/users/users.service.js';
+import { VisitorsService } from './modules/visitors/visitors.service.js';
 
 export interface Repositories {
   users: UsersRepository;
@@ -25,6 +31,8 @@ export interface Repositories {
   authorizations: AuthorizationsRepository;
   events: EventsRepository;
   qrTokens: QrTokenStore;
+  announcements: AnnouncementsRepository;
+  settings: SettingsRepository;
 }
 
 export interface AppConfig {
@@ -52,6 +60,10 @@ export interface Container {
     authorizations: AuthorizationsService;
     access: AccessService;
     events: EventsService;
+    reports: ReportsService;
+    announcements: AnnouncementsService;
+    settings: SettingsService;
+    visitors: VisitorsService;
   };
 }
 
@@ -68,6 +80,13 @@ export function createContainer(
   );
   const decisoes = new InMemoryTerminalNotifier();
   const notifier = new CompositeTerminalNotifier([decisoes, ...notificadoresExtras]);
+  const authorizations = new AuthorizationsService(repos.authorizations, repos.users, repos.locations, clock, config.timezone);
+  const settings = new SettingsService(repos.settings, {
+    fuso: config.timezone,
+    qrTrocaSegundos: config.qrRotationSeconds,
+    qrValidadeSegundos: config.qrTtlSeconds,
+    raioPadraoMetros: 100,
+  });
 
   return {
     config,
@@ -77,12 +96,23 @@ export function createContainer(
     services: {
       auth: new AuthService(repos.users, { secret: config.jwtSecret, expiresIn: config.jwtExpiresIn }),
       users: new UsersService(repos.users),
-      locations: new LocationsService(repos.locations),
+      locations: new LocationsService(repos.locations, repos.terminals),
       terminals: new TerminalsService(repos.terminals, repos.locations, qr, clock),
       phones: new PhonesService(repos.phones, repos.users),
-      authorizations: new AuthorizationsService(repos.authorizations, repos.users, repos.locations, clock, config.timezone),
+      authorizations,
       access: new AccessService({ ...repos, qr, notifier, clock, timezone: config.timezone }),
-      events: new EventsService(repos.events),
+      events: new EventsService(repos.events, config.timezone),
+      reports: new ReportsService(repos.events, clock, config.timezone),
+      announcements: new AnnouncementsService(repos.announcements),
+      settings,
+      visitors: new VisitorsService({
+        users: repos.users,
+        authorizationsRepo: repos.authorizations,
+        authorizations,
+        settings,
+        clock,
+        timezone: config.timezone,
+      }),
     },
   };
 }

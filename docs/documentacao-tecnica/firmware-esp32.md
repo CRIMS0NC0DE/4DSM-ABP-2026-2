@@ -324,7 +324,7 @@ Detalhes da renderização:
 - rodapé exibido quando a altura do display é suficiente;
 - token atual redesenhado conforme `trocarEmSegundos`, com padrão de 10 segundos.
 
-O token compacto atual normalmente cabe na versão 4, com 33×33 módulos. No TFT de 240 pixels ele possui escala adequada para leitura por celular. No OLED 128×64, a escala fica pequena e o ambiente é indicado somente para teste.
+O token compacto (77 caracteres) cabe na versão 4 (33×33 módulos) com a correção M usada no TFT; no TFT de 240 pixels cada módulo fica com 5 pixels. No OLED 128×64 o firmware usa correção L e 1 módulo de margem: o QR cabe na versão 3 (29×29) e cada módulo fica com 2 pontos (58 pontos de lado, uns 10 mm), o dobro do tamanho de antes.
 
 Se a API não responder, devolver status diferente de `200` ou não fornecer um token, o terminal mostra `Sem servidor` e tenta novamente após três segundos. Uma resposta `401` é mostrada como recusa da chave do terminal.
 

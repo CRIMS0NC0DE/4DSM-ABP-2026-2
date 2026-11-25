@@ -46,6 +46,10 @@ services:
       MQTT_USERNAME: passe-api
       MQTT_PASSWORD: ${MQTT_API_PASSWORD:-passe-api-dev}
       MQTT_WS_URL: ws://localhost:${MQTT_WS_PORT:-9001}
+      # Chave do terminal de demonstração. O seed grava essa chave a cada subida; depois de
+      # trocar a chave (provisionar-terminal.mjs --trocar-chave), o script a guarda no .env da
+      # raiz, e o backend, o broker e o credenciais.h continuam com a mesma chave.
+      TERMINAL_DEMO_KEY: ${TERMINAL_DEMO_KEY:-chave-demo-terminal-catraca-1}
     # Aplica as migrations, carrega os dados de demonstração e sobe com recarga automática.
     command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run db:seed && npm run dev"
     ports:
@@ -68,6 +72,21 @@ services:
     volumes:
       - ./frontend:/app
       - flutter_pub_cache:/root/.pub-cache
+
+  # App web em HTTPS para o celular (câmera e GPS só funcionam em HTTPS). Não sobe com o
+  # resto: use scripts/app-no-celular.sh, que gera o certificado e o build do app antes.
+  app-https:
+    image: nginx:1.27-alpine
+    profiles: ["celular"]
+    ports:
+      - "${APP_HTTPS_PORT:-8443}:8443"
+      - "${APP_HTTP_PORT:-8080}:8080"
+    volumes:
+      - ./frontend/build/web:/usr/share/nginx/html:ro
+      - ./docker/app-https/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/app-https/certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

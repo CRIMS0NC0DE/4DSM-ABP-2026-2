@@ -192,21 +192,78 @@ void main() {
     });
   });
 
-  test('Cadastro pelo app ainda não existe na API', () async {
-    await expectLater(
-      authFalso().registrar(
-        nome: 'João Pereira',
-        cpf: '765.430.123-00',
-        email: 'joao@email.com',
-        senha: 'segredo123',
-      ),
-      throwsA(
-        isA<ApiException>().having(
-          (e) => e.mensagem,
-          'mensagem',
-          contains('Peça seu cadastro na portaria'),
-        ),
-      ),
+  group('Cadastro pelo app (POST /auth/register)', () {
+    const dados = (
+      nome: 'João Pereira',
+      cpf: '765.430.123-00',
+      email: 'joao@email.com',
+      senha: 'segredo123',
     );
+
+    AuthService authQueResponde(Future<http.Response> Function() resposta) =>
+        authFalso(
+          cliente: MockClient((request) {
+            chamadas.add(request);
+            return resposta();
+          }),
+        );
+
+    Future<String> registrar(AuthService auth) => auth.registrar(
+      nome: dados.nome,
+      cpf: dados.cpf,
+      email: dados.email,
+      senha: dados.senha,
+    );
+
+    test('Envia os dados, devolve a mensagem e não inicia sessão', () async {
+      final auth = authQueResponde(() async {
+        return respostaJson({
+          'mensagem': 'Pedido enviado. A portaria vai liberar seu acesso.',
+          'usuario': {
+            'id': 'u-joao',
+            'nome': dados.nome,
+            'email': dados.email,
+            'cpf': '76543012300',
+            'perfil': 'CONDOMINO',
+            'ativo': false,
+          },
+        }, 201);
+      });
+
+      expect(
+        await registrar(auth),
+        'Pedido enviado. A portaria vai liberar seu acesso.',
+      );
+      final chamada = chamadas.single;
+      expect(chamada.method, 'POST');
+      expect(chamada.url.path, '/auth/register');
+      expect(jsonDecode(chamada.body), {
+        'nome': dados.nome,
+        'email': dados.email,
+        'cpf': dados.cpf,
+        'senha': dados.senha,
+      });
+      expect(SessaoService.instancia.token, isNull);
+    });
+
+    test('E-mail ou CPF repetido vira ApiException com a mensagem', () async {
+      final auth = authQueResponde(
+        () async =>
+            erroDaApi(409, 'CONFLITO', 'Já existe alguém com este CPF.'),
+      );
+
+      await expectLater(
+        registrar(auth),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.status, 'status', 409)
+              .having(
+                (e) => e.mensagem,
+                'mensagem',
+                'Já existe alguém com este CPF.',
+              ),
+        ),
+      );
+    });
   });
 }

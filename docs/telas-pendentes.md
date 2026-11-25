@@ -1,5 +1,13 @@
 # Telas pendentes do app Passe
 
+> **Atualização de 25/11/2026 (dia da apresentação):** as pendências das seções 2, 3 e 4 foram
+> resolvidas: Meus visitantes, Comunicados e Configurações têm tela e backend (B8 e B10), Locais edita
+> e apaga (B5), Relatórios usa a rota agregada `GET /reports/access` (B12), o "Entrar com NFC" saiu do
+> login, o "Registrar" virou "Solicitar cadastro" (D1: o pedido nasce inativo e a portaria libera), o
+> app se chama "Passe" no Android, no iOS e na web, as mensagens de validação da API saíram do inglês
+> e o `ate=AAAA-MM-DD` do histórico vale até o fim do dia no fuso do prédio. Detalhes em
+> `docs/apresentacao/relatorio-modificacoes.md`. O texto abaixo é o levantamento de 04/11.
+
 Atualizado em 04/11/2026, no merge da `dev-thiago` com a `main`.
 
 O levantamento de 02/11 vinha com um código-base para copiar e colar. Esse código já está no projeto, então o código-base saiu do repositório e esta lista ficou só com o que falta.

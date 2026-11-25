@@ -20,10 +20,9 @@ firmware de bancada: `pio run -e teste -t upload` e `pio device monitor`.
 | Protoboard e jumpers | 830 pontos + jumpers M-M/M-F | Montagem | | R$ 25 |
 | Alimentação | Fonte USB 5 V 2 A (cabo micro-USB/USB-C do DevKit); fonte 12 V só se usar trava | | | R$ 20 |
 
-**Sobre o display.** O QR (versão 4, 33×33 módulos) precisa de pelo menos ~4 px por
-módulo para o celular ler de uns 20 cm: um TFT de 240 px dá 5 px. O OLED 0,96"
-(128×64) dá 1 px por módulo (QR de ~6 mm): serve para teste de bancada, não para a
-demonstração. Evite o ST7789 1.3" **sem pino CS**: ele não divide o barramento SPI
+**Sobre o display.** No TFT, o QR (versão 4, 33×33 módulos) fica com 5 px por módulo
+em 240 px e o celular lê de uns 20 cm. No OLED 0,96" (128×64), o firmware usa a versão 3
+(29×29) com 2 px por módulo, um QR de uns 10 mm: lê de perto (5 a 10 cm). Evite o ST7789 1.3" **sem pino CS**: ele não divide o barramento SPI
 com o leitor NFC.
 
 **Sobre o NFC.** O MFRC522 é o mais barato e comum nos kits; funciona em 3,3 V

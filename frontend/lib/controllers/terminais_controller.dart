@@ -50,6 +50,10 @@ class TerminaisController {
     return Terminal.fromJson(json as Map<String, dynamic>);
   }
 
+  /// Tira o terminal da catraca: a chave dele para na hora, e o histórico de
+  /// acessos fica. Depois disso a catraca pode ser apagada em Locais.
+  Future<void> remover(String id) => _api.delete('/terminals/$id');
+
   /// A chave antiga para de funcionar: grave a nova no firmware e no broker.
   Future<Terminal> trocarChave(String id) async {
     final json = await _api.post('/terminals/$id/rotate-key');

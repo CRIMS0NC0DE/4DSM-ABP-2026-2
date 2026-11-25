@@ -23,6 +23,11 @@ const size_t BYTES_ASSINATURA = 64;
 
 const uint32_t ESPERA_MINIMA_MS = 100;  // alguns celulares respondem perto do limite do FWT
 const uint32_t ESPERA_MAXIMA_MS = 1500;
+// Tempo total de uma APDU, somando os pedidos de mais tempo (S(WTX)). Na primeira
+// aproximação com o app fechado, o Android sobe o processo antes de responder ao
+// SELECT, e o chip NFC pede mais tempo várias vezes (a cada ~30 ms com FWI 7).
+const uint32_t ESPERA_APDU_MS = 3000;
+const int MAX_PEDACOS = 8;  // quadros encadeados de uma resposta (82 bytes = 2 quadros)
 const uint16_t RECARGA_PADRAO = 0x03E8;  // 25 ms, o mesmo do PCD_Init()
 
 struct Sessao {
@@ -116,7 +121,9 @@ bool apdu(Sessao& s, const byte* comando, byte n, byte* resposta, size_t& tam) {
 
   size_t juntou = 0;
   uint32_t espera = s.fwtMs;
-  for (int voltas = 0; voltas < 16; voltas++) {
+  const uint32_t inicio = millis();
+  // O WTX não conta como pedaço: o limite dele é o tempo total.
+  for (int pedacos = 0; pedacos < MAX_PEDACOS;) {
     byte volta[64];
     byte tamVolta = sizeof(volta);
     if (!quadro(s.nfc, envio, tamEnvio, volta, tamVolta, espera)) return false;
@@ -128,7 +135,7 @@ bool apdu(Sessao& s, const byte* comando, byte n, byte* resposta, size_t& tam) {
 
     if ((pcb & 0xF7) == 0xF2) {
       // S(WTX): o celular pede mais tempo. Devolve o mesmo multiplicador.
-      if (i >= tamVolta) return false;
+      if (i >= tamVolta || millis() - inicio > ESPERA_APDU_MS) return false;
       const byte wtxm = volta[i] & 0x3F;
       if (wtxm == 0) return false;
       envio[0] = 0xF2;
@@ -145,6 +152,7 @@ bool apdu(Sessao& s, const byte* comando, byte n, byte* resposta, size_t& tam) {
     if (juntou + dados > tam) return false;
     memcpy(&resposta[juntou], &volta[i], dados);
     juntou += dados;
+    pedacos++;
 
     if (!(pcb & 0x10)) {  // último pedaço
       tam = juntou;

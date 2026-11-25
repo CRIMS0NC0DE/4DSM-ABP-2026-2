@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'core/routes/rotas.dart';
 import 'core/theme/app_theme.dart';
@@ -10,6 +12,14 @@ import 'views/user/login_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // No navegador, o leitor de QR baixaria o ZXing do unpkg.com ao abrir a
+  // câmera; sem internet (rede da sala, roteador do celular sem dados) a
+  // leitura falhava. A cópia em web/vendor/ vem junto com o app.
+  if (kIsWeb) {
+    MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl(
+      'vendor/zxing-library-0.23.0.min.js',
+    );
+  }
   // Quem já entrou e o token ainda vale abre direto na tela do perfil.
   final sessao = await AuthService.instancia.restaurar();
   runApp(PasseApp(usuario: sessao.usuario, aviso: sessao.aviso));

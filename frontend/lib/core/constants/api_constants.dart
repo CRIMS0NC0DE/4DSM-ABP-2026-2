@@ -3,6 +3,8 @@ abstract final class ApiConstants {
   /// Para apontar para outro endereço sem mudar o código:
   /// flutter run --dart-define=API_URL=http://192.168.0.10:3000
   /// (no emulador Android, o "localhost" do computador é http://10.0.2.2:3000)
+  /// No app web servido junto com a API (scripts/app-no-celular.sh), use um
+  /// caminho relativo: --dart-define=API_URL=/api
   static const baseUrl = String.fromEnvironment(
     'API_URL',
     defaultValue: 'http://localhost:3000',

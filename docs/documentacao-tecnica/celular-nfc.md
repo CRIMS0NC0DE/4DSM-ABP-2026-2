@@ -100,7 +100,7 @@ O firmware só faz esse caminho quando o cartão fala ISO 14443-4 (SAK com o bit
 Detalhes de rádio que o firmware trata, porque a biblioteca MFRC522 não trata:
 
 - **Tempo:** o Keystore pode demorar dezenas de milissegundos para assinar. A biblioteca desiste em 36 ms; o `celular.cpp` espera o tempo que o celular informa no ATS (FWI), de 100 ms a 1,5 s.
-- **Pedido de mais tempo (S(WTX)):** o chip NFC do celular pede mais tempo enquanto o app assina, e o firmware responde.
+- **Pedido de mais tempo (S(WTX)):** o chip NFC do celular pede mais tempo enquanto o app assina, e o firmware responde. Na primeira aproximação com o app fechado, o Android sobe o processo antes de responder ao SELECT, e o pedido se repete dezenas de vezes. Por isso o limite é de tempo (3 s por APDU), não de quantidade de pedidos.
 - **Resposta em dois quadros:** os 82 bytes da resposta passam do quadro de 64 bytes do RC522. O celular manda em pedaços e o firmware junta (encadeamento com R(ACK)).
 - **No fim:** o firmware manda DESELECT. O celular só volta a responder quando for afastado e aproximado de novo, o que evita abrir duas vezes com o celular parado no leitor.
 

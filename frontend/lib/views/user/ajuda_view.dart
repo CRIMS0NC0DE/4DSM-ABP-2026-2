@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/configuracoes_controller.dart';
 import '../widgets/tela_base.dart';
 
-/// Ajuda: texto fixo, sem chamar a API.
-class AjudaView extends StatelessWidget {
-  const AjudaView({super.key});
+/// Ajuda: o contato da portaria vem das Configurações (GET /settings). Sem
+/// internet ou com qualquer erro, mostra o contato fixo abaixo: a Ajuda não
+/// pode depender da API.
+class AjudaView extends StatefulWidget {
+  const AjudaView({super.key, this.controller});
 
-  // TROQUE pelos dados reais do prédio.
+  /// null usa a API do app.
+  final ConfiguracoesController? controller;
+
+  @override
+  State<AjudaView> createState() => _AjudaViewState();
+}
+
+class _AjudaViewState extends State<AjudaView> {
+  // Reserva, quando a API não responde. TROQUE pelos dados reais do prédio.
   static const _telefone = '(12) 0000-0000';
   static const _horario = 'Todos os dias, das 06:00 às 22:00';
+
+  /// Nunca falha: sem contato na API, completa com null.
+  late final Future<String?> _contato =
+      (widget.controller ?? ConfiguracoesController()).contatoPortaria();
 
   static const _perguntas = [
     (
@@ -39,20 +54,42 @@ class AjudaView extends StatelessWidget {
       titulo: 'Ajuda',
       subtitulo: 'Contato da portaria',
       filhos: [
-        const Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: Icon(Icons.phone_outlined),
-                title: Text('Telefone'),
-                subtitle: Text(_telefone),
-              ),
-              ListTile(
-                leading: Icon(Icons.schedule),
-                title: Text('Atendimento'),
-                subtitle: Text(_horario),
-              ),
-            ],
+        Card(
+          child: FutureBuilder<String?>(
+            future: _contato,
+            builder: (context, contato) {
+              if (contato.connectionState != ConnectionState.done) {
+                return const ListTile(
+                  leading: SizedBox.square(
+                    dimension: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  title: Text('Buscando o contato da portaria…'),
+                );
+              }
+              final texto = contato.data;
+              if (texto != null) {
+                return ListTile(
+                  leading: const Icon(Icons.phone_outlined),
+                  title: const Text('Portaria'),
+                  subtitle: Text(texto),
+                );
+              }
+              return const Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.phone_outlined),
+                    title: Text('Telefone'),
+                    subtitle: Text(_telefone),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.schedule),
+                    title: Text('Atendimento'),
+                    subtitle: Text(_horario),
+                  ),
+                ],
+              );
+            },
           ),
         ),
         const SizedBox(height: 24),

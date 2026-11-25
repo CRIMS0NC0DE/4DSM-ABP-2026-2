@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:public/controllers/admin_menu_controller.dart';
 import 'package:public/models/opcao_menu.dart';
+import 'package:public/views/shared/comunicados_view.dart';
+import 'package:public/views/teams/configuracoes_view.dart';
 import 'package:public/views/teams/admin/admin_menu_view.dart';
 import 'package:public/views/user/login_view.dart';
 
@@ -54,7 +56,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tocar numa opção chama o controller e avisa', (
+  testWidgets('Comunicados abre a tela de gestão dos avisos', (
     WidgetTester tester,
   ) async {
     final controller = _ControllerEspiao();
@@ -65,10 +67,34 @@ void main() {
     await tester.scrollUntilVisible(find.text('Comunicados'), 200);
     await tester.pump();
     await tester.tap(find.text('Comunicados'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(controller.abertas, ['Comunicados']);
-    expect(find.text('Comunicados: tela em construção.'), findsOneWidget);
+    expect(find.byType(ComunicadosView), findsOneWidget);
+    expect(
+      tester
+          .widget<ComunicadosView>(find.byType(ComunicadosView))
+          .podeGerenciar,
+      isTrue,
+    );
+    expect(find.textContaining('em construção'), findsNothing);
+  });
+
+  testWidgets('Configurações abre a tela das regras do condomínio', (
+    WidgetTester tester,
+  ) async {
+    final controller = _ControllerEspiao();
+    await tester.pumpWidget(
+      MaterialApp(home: AdminMenuView(controller: controller)),
+    );
+
+    await tester.scrollUntilVisible(find.text('Configurações'), 200);
+    await tester.pump();
+    await tester.tap(find.text('Configurações'));
+    await tester.pumpAndSettle();
+
+    expect(controller.abertas, ['Configurações']);
+    expect(find.byType(ConfiguracoesView), findsOneWidget);
   });
 
   testWidgets('Tocar em Sair da conta chama o controller e volta ao login', (

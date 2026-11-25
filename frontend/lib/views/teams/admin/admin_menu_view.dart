@@ -4,8 +4,10 @@ import '../../../controllers/admin_menu_controller.dart';
 import '../../../models/opcao_menu.dart';
 import '../../user/login_view.dart';
 import '../../widgets/tela_carregando.dart';
+import '../../shared/comunicados_view.dart';
 import '../../shared/historico_view.dart';
 import '../autorizacoes_view.dart';
+import '../configuracoes_view.dart';
 import '../painel_view.dart';
 import '../tags_view.dart';
 import '../terminais_view.dart';
@@ -14,7 +16,6 @@ import '../visitantes_view.dart';
 import '../locais_view.dart';
 import '../relatorios_view.dart';
 import '../../widgets/menu_grade.dart';
-
 
 class AdminMenuView extends StatelessWidget {
   final AdminMenuController controller;
@@ -34,6 +35,8 @@ class AdminMenuView extends StatelessWidget {
       'Terminais' => TerminaisView(),
       'Locais' => LocaisView(),
       'Relatórios' => RelatoriosView(),
+      'Comunicados' => ComunicadosView(podeGerenciar: true),
+      'Configurações' => ConfiguracoesView(),
       _ => null,
     };
     if (tela != null) {
@@ -47,7 +50,6 @@ class AdminMenuView extends StatelessWidget {
         SnackBar(content: Text('${opcao.titulo}: tela em construção.')),
       );
   }
-
 
   /// Volta para o login; a tela de carregamento limpa o histórico, para o
   /// Voltar não reabrir o menu.

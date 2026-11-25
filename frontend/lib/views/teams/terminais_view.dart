@@ -98,6 +98,40 @@ class _TerminaisViewState extends State<TerminaisView>
     }
   }
 
+  Future<void> _remover(Terminal terminal) async {
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (contexto) => AlertDialog(
+        title: const Text('Remover o terminal?'),
+        content: Text(
+          '${terminal.nome} para de funcionar na hora. O histórico de acessos '
+          'continua guardado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(contexto).pop(false),
+            child: const Text('Não remover'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(contexto).pop(true),
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
+    );
+    if (confirmou != true) return;
+    try {
+      await controller.remover(terminal.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('${terminal.nome} removido.')));
+      await carregar();
+    } on ApiException catch (e) {
+      if (mounted) await tratarErro(context, e);
+    }
+  }
+
   List<Widget> _lista(DadosTerminais d) {
     if (d.terminais.isEmpty) {
       return const [
@@ -120,6 +154,9 @@ class _TerminaisViewState extends State<TerminaisView>
                 ?.caminho,
             onTrocarChave: controller.podeGerenciar
                 ? () => _trocarChave(terminal)
+                : null,
+            onRemover: controller.podeGerenciar
+                ? () => _remover(terminal)
                 : null,
           ),
         ),
@@ -150,11 +187,13 @@ class _CartaoTerminal extends StatelessWidget {
     required this.terminal,
     required this.caminho,
     required this.onTrocarChave,
+    this.onRemover,
   });
 
   final Terminal terminal;
   final String? caminho;
   final VoidCallback? onTrocarChave;
+  final VoidCallback? onRemover;
 
   @override
   Widget build(BuildContext context) {
@@ -195,13 +234,25 @@ class _CartaoTerminal extends StatelessWidget {
                   : 'Último sinal: ${Formato.data(sinal)} às ${Formato.hora(sinal)}',
               style: textTheme.bodyMedium,
             ),
-            if (onTrocarChave != null)
-              TextButton.icon(
-                onPressed: onTrocarChave,
-                style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                icon: const Icon(Icons.key_outlined),
-                label: const Text('Trocar chave'),
-              ),
+            Wrap(
+              spacing: 16,
+              children: [
+                if (onTrocarChave != null)
+                  TextButton.icon(
+                    onPressed: onTrocarChave,
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    icon: const Icon(Icons.key_outlined),
+                    label: const Text('Trocar chave'),
+                  ),
+                if (onRemover != null)
+                  TextButton.icon(
+                    onPressed: onRemover,
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Remover'),
+                  ),
+              ],
+            ),
           ],
         ),
       ),

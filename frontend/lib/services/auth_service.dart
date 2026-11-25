@@ -59,20 +59,32 @@ class AuthService {
     }
   }
 
-  /// Ainda não existe na API: quem cria conta é a portaria ou o admin
-  /// (POST /users, só para a equipe). Quando o backend ganhar uma rota
-  /// pública de cadastro, a chamada entra aqui. Ver docs/integracao-frontend-backend.md.
-  Future<Usuario> registrar({
+  /// POST /auth/register (pública). O cadastro nasce desativado, como
+  /// condômino: a pessoa só entra depois que a portaria liberar em Usuários
+  /// (antes disso o login responde CADASTRO_DESATIVADO). Não inicia sessão.
+  /// Devolve a mensagem da API para a tela. Lança [ApiException]: 409 com
+  /// e-mail ou CPF já usado, 400 com os erros de cada campo, sem conexão.
+  Future<String> registrar({
     required String nome,
     required String cpf,
     required String email,
     required String senha,
   }) async {
-    throw const ApiException(
-      'O cadastro pelo app ainda não está disponível. '
-      'Peça seu cadastro na portaria.',
-    );
+    final resposta = await _api.post('/auth/register', {
+      'nome': nome,
+      'email': email,
+      'cpf': cpf,
+      'senha': senha,
+    });
+    final mensagem = resposta is Map ? resposta['mensagem'] : null;
+    return mensagem is String && mensagem.isNotEmpty
+        ? mensagem
+        : mensagemCadastroEnviado;
   }
+
+  /// Quando a API não manda a mensagem do cadastro.
+  static const mensagemCadastroEnviado =
+      'Pedido enviado. A portaria vai liberar seu acesso.';
 
   Future<void> sair() => _sessao.encerrar();
 }

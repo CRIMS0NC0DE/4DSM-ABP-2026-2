@@ -57,6 +57,22 @@ export class UsersService {
     return semSenha(user);
   }
 
+  /** Cadastro pelo app (tela Registrar): morador, inativo até a portaria liberar em Usuários. */
+  async solicitarCadastro(dados: Omit<CriarUsuario, 'perfil'>) {
+    const email = dados.email.trim().toLowerCase();
+    const cpf = somenteNumeros(dados.cpf);
+    await this.garantirUnico(email, cpf);
+    const user = await this.users.create({
+      nome: dados.nome.trim(),
+      email,
+      cpf,
+      perfil: 'CONDOMINO',
+      ativo: false,
+      senhaHash: await hashSenha(dados.senha),
+    });
+    return semSenha(user);
+  }
+
   async atualizar(quem: AuthContext, id: string, dados: Partial<CriarUsuario> & { ativo?: boolean }) {
     const atual = await this.users.findById(id);
     if (!atual) throw notFound('Usuário');
